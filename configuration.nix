@@ -75,9 +75,10 @@
   };
   system = {
     autoUpgrade = {
+      allowReboot = true;
       enable = true;
-      flake = "/home/max/nixos-config";
       flags = [ "--no-write-lock-file" ];
+      flake = "git+file:///home/max/nixos-config";
     };
     stateVersion = "24.11";
   };
