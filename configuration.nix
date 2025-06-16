@@ -6,7 +6,13 @@
   fileSystems = {
     "/" = {
       device = "/dev/disk/by-uuid/b10df131-89fd-43bb-9b1a-63d10c95b817";
-      options = [ "user_subvol_rm_allowed" "nosuid" "nodev" ];
+      options = [
+        "user_subvol_rm_allowed"
+        "nosuid"
+        "nodev"
+        "noatime"
+        "compress=zstd"
+      ];
       fsType = "btrfs";
     };
     "/boot" = {
