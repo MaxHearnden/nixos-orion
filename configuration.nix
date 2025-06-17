@@ -232,9 +232,11 @@
         ];
         packages = with pkgs; [
           btop
-          htop
           dig
+          htop
           inputs.nixos-kexec.packages.aarch64-linux.default
+          ldns
+          ldns.examples
         ];
       };
     };
