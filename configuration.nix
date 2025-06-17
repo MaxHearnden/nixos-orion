@@ -13,6 +13,14 @@
       $INCLUDE /var/lib/ddns/zonefile
       $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
     '';
+    "knot/compsoc-dev.com.zone".text = ''
+      $TTL 600
+      @ SOA dns mail 0 600 60 3600 600
+      @ NS dns
+      @ CAA 128 issue ";"
+      $INCLUDE /var/lib/ddns/zonefile
+      $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
+    '';
   };
   fileSystems = {
     "/" = {
@@ -110,6 +118,17 @@
           {
             dnssec-policy = "porkbun";
             dnssec-signing = true;
+            domain = "compsoc-dev.com";
+            file = "/etc/knot/compsoc-dev.com.zone";
+            semantic-checks = true;
+            journal-content = "all";
+            zonefile-load = "difference-no-serial";
+            zonemd-generate = "zonemd-sha512";
+            zonefile-sync = -1;
+          }
+          {
+            dnssec-policy = "porkbun";
+            dnssec-signing = true;
             domain = "zandoodle.me.uk";
             file = "/etc/knot/zandoodle.me.uk.zone";
             semantic-checks = true;
@@ -136,6 +155,11 @@
         stub-zone = [
           {
             name = "zandoodle.me.uk";
+            stub-addr = "127.0.0.1@54";
+            stub-no-cache = true;
+          }
+          {
+            name = "compsoc-dev.com";
             stub-addr = "127.0.0.1@54";
             stub-no-cache = true;
           }
@@ -208,10 +232,10 @@
           fi
 
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address /run/ddns/zonefile /var/lib/ddns/
-          ${lib.getExe' pkgs.knot-dns "knotc"} zone-reload zandoodle.me.uk.
+          ${lib.getExe' pkgs.knot-dns "knotc"} zone-reload zandoodle.me.uk. compsoc-dev.com.
         '';
       };
-      knot.reloadTriggers = [ config.environment.etc."knot/zandoodle.me.uk.zone".source ];
+      knot.reloadTriggers = [ config.environment.etc."knot/zandoodle.me.uk.zone".source config.environment.etc."knot/compsoc-dev.com.zone".source ];
     };
     timers.get-IP-address = {
       timerConfig = {
