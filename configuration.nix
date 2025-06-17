@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }: {
+{ config, inputs, lib, pkgs, ... }: {
   boot = {
     initrd.systemd.enable = true;
     kernelPackages = pkgs.linuxPackages_latest;
@@ -32,7 +32,15 @@
       fsType = "vfat";
     };
   };
-  networking.hostName = "orion";
+  networking = {
+    firewall = {
+      allowedUDPPorts = [ 53 ];
+      allowedTCPPorts = [ 53 ];
+    };
+    hostName = "orion";
+    nftables.enable = true;
+    resolvconf.useLocalResolver = true;
+  };
   nix = {
     gc = {
       automatic = true;
@@ -69,16 +77,37 @@
       defaultEditor = true;
       enable = true;
     };
+    wireshark.enable = true;
   };
   services = {
+    dnsdist = {
+      enable = true;
+      listenPort = 53;
+      extraConfig = ''
+        addLocal("[::]:53")
+        newServer({address = "127.0.0.1:54", name = "knot-dns", pool = "auth"})
+        newServer({address = "127.0.0.1:55", name = "unbound", pool = "iterative"})
+        setACL({"0.0.0.0/0", "::/0"})
+
+        addAction(AndRule({RDRule(), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("iterative"))
+        addAction(AllRule(), PoolAction("auth"))
+      '';
+    };
     knot = {
       enable = true;
       settings = {
+        policy = [
+          {
+            id = "porkbun";
+            single-type-signing = true;
+          }
+        ];
         server = {
-          listen = ["0.0.0.0" "::"];
+          listen = ["0.0.0.0@54" "::@54"];
         };
         zone = [
           {
+            dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
             file = "/etc/knot/zandoodle.me.uk.zone";
@@ -95,7 +124,25 @@
       enable = true;
       settings.PasswordAuthentication = false;
     };
+    unbound = {
+      enable = true;
+      resolveLocalQueries = false;
+      settings = {
+        server = {
+          do-not-query-localhost = false;
+          port = 55;
+        };
+        stub-zone = [
+          {
+            name = "zandoodle.me.uk";
+            stub-addr = "127.0.0.1@54";
+            stub-no-cache = true;
+          }
+        ];
+      };
+    };
     xserver = {
+      autorun = false;
       enable = true;
       desktopManager.gnome.enable = true;
       displayManager.gdm = {
@@ -151,7 +198,7 @@
           ${lib.getExe pkgs.jq} -r .wanIPAddress /run/ddns/login.lp \
             >/run/ddns/IPv4-address
           printf "@ A " | ${lib.getExe' pkgs.coreutils "cat"} - /run/ddns/IPv4-address >/run/ddns/zonefile
-          ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -E A -c /run/ddns/zonefile >/run/ddns/zonefile-canonical
+          ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/zonefile >/run/ddns/zonefile-canonical
           record_count=$(${lib.getExe' pkgs.coreutils "wc"} -l --total=only /run/ddns/zonefile-canonical)
           if [ "$record_count" != 1 ]; then
             echo "Potential attack detected" >&2
@@ -179,7 +226,7 @@
       };
       max = {
         isNormalUser = true;
-        extraGroups = [ "wheel" ];
+        extraGroups = [ "wheel" "wireshark" ];
         openssh.authorizedKeys.keys = [
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILmioGtxIY2vgxZi5czG/tIkSKga/91RDyTsNtc6fU3D max@max-nixos-pc"
         ];
@@ -187,6 +234,7 @@
           btop
           htop
           dig
+          inputs.nixos-kexec.packages.aarch64-linux.default
         ];
       };
     };

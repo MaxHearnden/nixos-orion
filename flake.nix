@@ -1,14 +1,21 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+  inputs = {
+    nixos-kexec = {
+      url = "github:MaxHearnden/nixos-kexec";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+  };
 
-  outputs = { nixpkgs, self }:
+  outputs = { nixpkgs, self, ... }@inputs:
   let inherit (nixpkgs) legacyPackages lib;
   in {
     nixosConfigurations.orion = lib.nixosSystem {
-      system = "aarch64-linux";
       modules = [
         ./configuration.nix
       ];
+      specialArgs = { inherit inputs; };
+      system = "aarch64-linux";
     };
   };
 }
