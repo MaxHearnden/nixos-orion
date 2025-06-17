@@ -167,6 +167,7 @@
       get-IP-address = {
         confinement.enable = true;
         serviceConfig = {
+          BindReadOnlyPaths = [ "-/run/knot/knot.sock" ];
           CapabilityBoundingSet = "";
           Group = "ddns";
           IPAddressAllow = "192.168.1.1";
@@ -182,7 +183,7 @@
           ProtectProc = "invisible";
           ProtectSystem = "strict";
           RemoveIPC = true;
-          RestrictAddressFamilies = "AF_INET";
+          RestrictAddressFamilies = "AF_UNIX AF_INET";
           RestrictRealtime = true;
           RestrictSUIDSGID = true;
           RuntimeDirectory = "ddns";
@@ -207,6 +208,7 @@
           fi
 
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address /run/ddns/zonefile /var/lib/ddns/
+          ${lib.getExe' pkgs.knot-dns "knotc"} zone-reload zandoodle.me.uk.
         '';
       };
       knot.reloadTriggers = [ config.environment.etc."knot/zandoodle.me.uk.zone".source ];
@@ -220,10 +222,12 @@
     shutdownRamfs.enable = false;
   };
   users = {
+    groups.ddns = {};
     users = {
       ddns = {
-        isSystemUser = true;
+        extraGroups = [ "knot" ];
         group = "ddns";
+        isSystemUser = true;
       };
       max = {
         isNormalUser = true;
@@ -241,6 +245,5 @@
         ];
       };
     };
-    groups.ddns = {};
   };
 }
