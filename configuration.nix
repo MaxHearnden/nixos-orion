@@ -56,6 +56,7 @@
       enable = true;
       config = {
         init.defaultBranch = "main";
+        safe.directory = "/home/max/nixos-config";
         user = {
           email = "maxoscarhearnden@gmail.com";
           name = "MaxHearnden";
