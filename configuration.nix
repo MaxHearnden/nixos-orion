@@ -10,6 +10,7 @@
       @ SOA dns mail 0 600 60 3600 600
       @ NS dns
       @ CAA 128 issue ";"
+      @ TXT "v=spf1 -all"
       $INCLUDE /var/lib/ddns/zonefile
       $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
     '';
@@ -18,6 +19,7 @@
       @ SOA dns mail 0 600 60 3600 600
       @ NS dns
       @ CAA 128 issue ";"
+      @ TXT "v=spf1 -all"
       $INCLUDE /var/lib/ddns/zonefile
       $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
     '';
