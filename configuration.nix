@@ -210,6 +210,7 @@
           ProtectSystem = "strict";
           RemoveIPC = true;
           RestrictAddressFamilies = "AF_UNIX AF_INET";
+          RestrictNamespaces = true;
           RestrictRealtime = true;
           RestrictSUIDSGID = true;
           RuntimeDirectory = "ddns";
