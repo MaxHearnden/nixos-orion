@@ -1,5 +1,6 @@
 { lib, ... }: {
   networking.firewall.allowedTCPPorts = [ 80 ];
+  nix.enable = false;
   services.httpd = {
     enable = true;
   };
@@ -11,6 +12,7 @@
   };
   virtualisation.vmVariant.virtualisation = {
     diskImage = null;
+    fileSystems."/".options = [ "noatime" "nodev" "noexec" "nosuid" ];
     graphics = false;
     qemu = {
       consoles = [ "ttyAMA1,115200n8" "ttyAMA0,115200n8" ];
