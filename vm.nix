@@ -5,10 +5,13 @@
     enable = true;
   };
   system.stateVersion = "25.05";
-  users.users.nixos = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" ];
-    password = "nixos";
+  users = {
+    mutableUsers = false;
+    users.nixos = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" ];
+      password = "nixos";
+    };
   };
   virtualisation.vmVariant.virtualisation = {
     diskImage = null;
