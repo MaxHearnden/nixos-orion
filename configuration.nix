@@ -4,25 +4,28 @@
     kernelPackages = pkgs.linuxPackages_latest;
     loader.systemd-boot.enable = true;
   };
-  environment.etc = {
-    "knot/zandoodle.me.uk.zone".text = ''
-      $TTL 600
-      @ SOA dns mail 0 600 60 3600 600
-      @ NS dns
-      @ CAA 128 issue ";"
-      @ TXT "v=spf1 -all"
-      $INCLUDE /var/lib/ddns/zonefile
-      $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
-    '';
-    "knot/compsoc-dev.com.zone".text = ''
-      $TTL 600
-      @ SOA dns mail 0 600 60 3600 600
-      @ NS dns
-      @ CAA 128 issue ";"
-      @ TXT "v=spf1 -all"
-      $INCLUDE /var/lib/ddns/zonefile
-      $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
-    '';
+  environment = {
+    etc = {
+      "knot/zandoodle.me.uk.zone".text = ''
+        $TTL 600
+        @ SOA dns mail 0 600 60 3600 600
+        @ NS dns
+        @ CAA 128 issue ";"
+        @ TXT "v=spf1 -all"
+        $INCLUDE /var/lib/ddns/zonefile
+        $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
+      '';
+      "knot/compsoc-dev.com.zone".text = ''
+        $TTL 600
+        @ SOA dns mail 0 600 60 3600 600
+        @ NS dns
+        @ CAA 128 issue ";"
+        @ TXT "v=spf1 -all"
+        $INCLUDE /var/lib/ddns/zonefile
+        $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
+      '';
+    };
+    shellAliases.sda = "systemd-analyze security --no-pager";
   };
   fileSystems = {
     "/" = {
@@ -45,9 +48,24 @@
   networking = {
     firewall = {
       allowedUDPPorts = [ 53 ];
-      allowedTCPPorts = [ 53 ];
+      allowedTCPPorts = [ 53 80 ];
+      filterForward = true;
+      interfaces.web-vm.allowedUDPPorts = [ 67 ];
     };
     hostName = "orion";
+    nat = {
+      enable = true;
+      externalInterface = "enp49s0";
+      forwardPorts = [
+        {
+          destination = "192.168.2.2:80";
+          proto = "tcp";
+          sourcePort = 80;
+          loopbackIPs = [ "192.168.1.0/24" ];
+        }
+      ];
+      internalInterfaces = [ "web-vm" ];
+    };
     nftables.enable = true;
     resolvconf.useLocalResolver = true;
   };
@@ -111,11 +129,24 @@
           {
             id = "porkbun";
             single-type-signing = true;
+            ksk-submission = "unbound";
+          }
+        ];
+        remote = [
+          {
+            id = "unbound";
+            address = "127.0.0.1@55";
           }
         ];
         server = {
           listen = ["0.0.0.0@54" "::@54"];
         };
+        submission = [
+          {
+            id = "unbound";
+            parent = "unbound";
+          }
+        ];
         zone = [
           {
             dnssec-policy = "porkbun";
@@ -146,6 +177,7 @@
       enable = true;
       settings.PasswordAuthentication = false;
     };
+    resolved.enable = false;
     unbound = {
       enable = true;
       resolveLocalQueries = false;
@@ -189,11 +221,85 @@
     stateVersion = "24.11";
   };
   systemd = {
+    network = {
+      enable = true;
+      netdevs = {
+        # "10-vm-bridge" = {
+        #   netdevConfig = {
+        #     Kind = "bridge";
+        #     Name = "vm-bridge";
+        #   };
+        # };
+        "10-web-vm" = {
+          netdevConfig = {
+            Kind = "tap";
+            Name = "web-vm";
+          };
+          tapConfig = {
+            Group = "web-vm";
+            User = "web-vm";
+          };
+        };
+      };
+      networks = {
+        "10-web-vm" = {
+          matchConfig = {
+            Name = "web-vm";
+          };
+          networkConfig = {
+            Address = "192.168.2.1/30";
+            DHCPServer = true;
+          };
+          dhcpServerConfig = {
+            DNS = "192.168.2.1";
+          };
+          dhcpServerStaticLeases = [
+            {
+              Address = "192.168.2.2";
+              MACAddress = "52:54:00:12:34:56";
+            }
+          ];
+        };
+      };
+      wait-online.enable = false;
+    };
     services = {
-      get-IP-address = {
+      web-vm = {
         confinement.enable = true;
         serviceConfig = {
-          BindReadOnlyPaths = [ "-/run/knot/knot.sock" ];
+          BindReadOnlyPaths = [ "/dev/kvm" "/dev/net/tun" ];
+          CapabilityBoundingSet = "";
+          DeviceAllow = [ "/dev/kvm" "/dev/net/tun" ];
+          ExecStart = "${lib.getExe inputs.self.nixosConfigurations.web-vm.config.system.build.vm}";
+          Group = "web-vm";
+          IPAddressDeny = "any";
+          LockPersonality = true;
+          NoNewPrivileges = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          ProtectSystem = "strict";
+          RemoveIPC = true;
+          RestrictAddressFamilies = "none";
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          RestrictNamespaces = true;
+          RuntimeDirectory = "web-vm";
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          SystemCallErrorNumber = "ENOSYS";
+          Type = "exec";
+          UMask = "077";
+          User = "web-vm";
+        };
+      };
+      get-IP-address = {
+        confinement.enable = true;
+        onSuccess = [ "knot-reload.target" ];
+        serviceConfig = {
           CapabilityBoundingSet = "";
           Group = "ddns";
           IPAddressAllow = "192.168.1.1";
@@ -235,10 +341,50 @@
           fi
 
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address /run/ddns/zonefile /var/lib/ddns/
-          ${lib.getExe' pkgs.knot-dns "knotc"} zone-reload zandoodle.me.uk. compsoc-dev.com.
         '';
       };
-      knot.reloadTriggers = [ config.environment.etc."knot/zandoodle.me.uk.zone".source config.environment.etc."knot/compsoc-dev.com.zone".source ];
+      knot-reload = {
+        after = [ "knot.service" ];
+        confinement.enable = true;
+        requires = [ "knot.service" ];
+        restartTriggers = [ config.environment.etc."knot/zandoodle.me.uk.zone".source config.environment.etc."knot/compsoc-dev.com.zone".source ];
+        serviceConfig = {
+          BindReadOnlyPaths = "/run/knot/knot.sock";
+          CapabilityBoundingSet = "";
+          ExecStart = "${lib.getExe' pkgs.knot-dns "knotc"} zone-reload";
+          Group = "knot";
+          IPAddressDeny = "any";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          NoNewPrivileges = true;
+          PrivateNetwork = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          ProtectSystem = "strict";
+          RemainAfterExit = true;
+          RemoveIPC = true;
+          RestrictAddressFamilies = "AF_UNIX";
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          Type = "oneshot";
+          UMask = "077";
+          User = "knot";
+        };
+        wantedBy = [ "multi-user.target" ];
+      };
+    };
+    targets.knot-reload = {
+      description = "Restart knot-reload service";
+      conflicts = [ "knot-reload.service" ];
+      unitConfig.StopWhenUnneeded = true;
+      onSuccess = [ "knot-reload.service" ];
     };
     timers.get-IP-address = {
       timerConfig = {
@@ -249,10 +395,12 @@
     shutdownRamfs.enable = false;
   };
   users = {
-    groups.ddns = {};
+    groups = {
+      ddns = {};
+      web-vm = {};
+    };
     users = {
       ddns = {
-        extraGroups = [ "knot" ];
         group = "ddns";
         isSystemUser = true;
       };
@@ -269,7 +417,12 @@
           inputs.nixos-kexec.packages.aarch64-linux.default
           ldns
           ldns.examples
+          tio
         ];
+      };
+      web-vm = {
+        group = "web-vm";
+        isSystemUser = true;
       };
     };
   };
