@@ -317,6 +317,12 @@
           ProtectProc = "invisible";
           ProtectSystem = "strict";
           RemoveIPC = true;
+          Restart = "on-failure";
+          RestartMaxDelaySec = "5m";
+          RestartSec = "10s";
+          RestartSteps = "10";
+          StartLimitBurst = "20";
+          StartLimitIntervalSec = "20m";
           RestrictAddressFamilies = "AF_UNIX AF_INET";
           RestrictNamespaces = true;
           RestrictRealtime = true;
@@ -344,6 +350,7 @@
 
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address /run/ddns/zonefile /var/lib/ddns/
         '';
+        wantedBy = ["multi-user.target"];
       };
       knot-reload = {
         after = [ "knot.service" ];
