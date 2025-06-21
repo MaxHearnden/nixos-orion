@@ -61,7 +61,7 @@
           destination = "192.168.2.2:80";
           proto = "tcp";
           sourcePort = 80;
-          loopbackIPs = [ "192.168.1.0/24" ];
+          loopbackIPs = [ "192.168.1.163" ];
         }
       ];
       internalInterfaces = [ "web-vm" ];
