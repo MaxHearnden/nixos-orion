@@ -75,6 +75,7 @@
       options = "--delete-older-than 7d";
     };
     settings = {
+      allowed-users = [ "max" ];
       experimental-features = "nix-command flakes";
       keep-outputs = true;
     };
@@ -119,6 +120,7 @@
         setACL({"0.0.0.0/0", "::/0"})
 
         addAction(AndRule({RDRule(), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("iterative"))
+        addAction(AndRule({TCPRule(false), NotRule(QNameSuffixRule({"zandoodle.me.uk", "compsoc-dev.com"}))}), DropAction())
         addAction(AllRule(), PoolAction("auth"))
       '';
     };
@@ -378,6 +380,49 @@
           User = "knot";
         };
         wantedBy = [ "multi-user.target" ];
+      };
+      nix-daemon = {
+        serviceConfig = {
+          CapabilityBoundingSet = "CAP_CHOWN CAP_SETUID CAP_SETGID CAP_SYS_ADMIN CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_KILL CAP_FOWNER CAP_SYS_PTRACE";
+          ProtectSystem = "strict";
+          BindPaths = "/dev/kvm";
+          DeviceAllow = "/dev/kvm";
+          ReadWritePaths = "/nix /tmp";
+          RestrictAddressFamilies = "AF_NETLINK AF_UNIX AF_INET AF_INET6";
+          SystemCallFilter = [ "@debug @system-service @mount @sandbox sethostname setdomainname" ];
+          SystemCallErrorNumber = "ENOSYS";
+          NoNewPrivileges = true;
+          PrivateDevices = true;
+          ProtectClock = true;
+          ProtectHome = "read-only";
+          ProtectKernelModules = true;
+          ProtectControlGroups = true;
+          ProtectKernelLogs = true;
+          RestrictSUIDSGID = true;
+          RestrictNamespaces = "user net mnt ipc pid uts";
+          RestrictRealtime = true;
+          CacheDirectory = "nix";
+          CacheDirectoryMode = "0700";
+        };
+        environment.XDG_CACHE_HOME = "%C";
+      };
+      nscd.serviceConfig = {
+        CapabilityBoundingSet = "";
+        LockPersonality = true;
+        MemoryDenyWriteExecute = true;
+        ProcSubset = "pid";
+        ProtectClock = true;
+        ProtectControlGroups = true;
+        ProtectHome = lib.mkForce true;
+        ProtectHostname = true;
+        ProtectKernelLogs = true;
+        ProtectKernelModules = true;
+        ProtectKernelTunables = true;
+        ProtectProc = "invisible";
+        RestrictNamespaces = true;
+        RestrictRealtime = true;
+        SystemCallArchitectures = "native";
+        SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
       };
     };
     targets.knot-reload = {
