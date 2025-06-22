@@ -16,8 +16,8 @@
         @ SOA dns mail 0 600 60 3600 600
         @ NS dns
         @ CAA 128 issue ";"
-        dns MX 0 .
         $INCLUDE /etc/knot/no-email.zone.include
+        $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
       '';
@@ -26,8 +26,8 @@
         @ SOA dns mail 0 600 60 3600 600
         @ NS dns
         @ CAA 128 issue ";"
-        dns MX 0 .
         $INCLUDE /etc/knot/no-email.zone.include
+        $INCLUDE /etc/knot/no-email.zone.include dns.compsoc-dev.com.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
       '';
