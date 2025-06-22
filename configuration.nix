@@ -6,6 +6,16 @@
   };
   environment = {
     etc = {
+      "knot/compsoc-dev.com.zone".text = ''
+        $TTL 600
+        @ SOA dns mail 0 600 60 3600 600
+        @ NS dns
+        @ CAA 128 issue ";"
+        $INCLUDE /etc/knot/no-email.zone.include
+        $INCLUDE /etc/knot/no-email.zone.include dns.compsoc-dev.com.
+        $INCLUDE /var/lib/ddns/zonefile
+        $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
+      '';
       "knot/no-email.zone.include".text = ''
         @ TXT "v=spf1 -all"
         @ MX 0 .
@@ -20,16 +30,6 @@
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
-      '';
-      "knot/compsoc-dev.com.zone".text = ''
-        $TTL 600
-        @ SOA dns mail 0 600 60 3600 600
-        @ NS dns
-        @ CAA 128 issue ";"
-        $INCLUDE /etc/knot/no-email.zone.include
-        $INCLUDE /etc/knot/no-email.zone.include dns.compsoc-dev.com.
-        $INCLUDE /var/lib/ddns/zonefile
-        $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
       '';
     };
     shellAliases.sda = "systemd-analyze security --no-pager";
@@ -365,7 +365,11 @@
         after = [ "knot.service" ];
         confinement.enable = true;
         requires = [ "knot.service" ];
-        restartTriggers = [ config.environment.etc."knot/zandoodle.me.uk.zone".source config.environment.etc."knot/compsoc-dev.com.zone".source ];
+        restartTriggers = map (zone: config.environment.etc."knot/${zone}".source) [
+          "compsoc-dev.com.zone"
+          "no-email.zone.include"
+          "zandoodle.me.uk.zone"
+        ];
         serviceConfig = {
           BindReadOnlyPaths = "/run/knot/knot.sock";
           CapabilityBoundingSet = "";
