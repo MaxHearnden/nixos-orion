@@ -117,6 +117,7 @@
     wireshark.enable = true;
   };
   services = {
+    avahi.enable = false;
     dnsdist = {
       enable = true;
       listenPort = 53;
@@ -150,7 +151,7 @@
           }
         ];
         server = {
-          listen = ["0.0.0.0@54" "::@54"];
+          listen = ["127.0.0.1@54" "::1@54"];
         };
         submission = [
           {
@@ -275,38 +276,6 @@
       wait-online.enable = false;
     };
     services = {
-      web-vm = {
-        confinement.enable = true;
-        serviceConfig = {
-          BindReadOnlyPaths = [ "/dev/kvm" "/dev/net/tun" ];
-          CapabilityBoundingSet = "";
-          DeviceAllow = [ "/dev/kvm" "/dev/net/tun" ];
-          ExecStart = "${lib.getExe inputs.self.nixosConfigurations.web-vm.config.system.build.vm}";
-          Group = "web-vm";
-          IPAddressDeny = "any";
-          LockPersonality = true;
-          NoNewPrivileges = true;
-          ProcSubset = "pid";
-          ProtectClock = true;
-          ProtectHome = true;
-          ProtectHostname = true;
-          ProtectKernelLogs = true;
-          ProtectProc = "invisible";
-          ProtectSystem = "strict";
-          RemoveIPC = true;
-          RestrictAddressFamilies = "none";
-          RestrictRealtime = true;
-          RestrictSUIDSGID = true;
-          RestrictNamespaces = true;
-          RuntimeDirectory = "web-vm";
-          SystemCallArchitectures = "native";
-          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
-          SystemCallErrorNumber = "ENOSYS";
-          Type = "exec";
-          UMask = "077";
-          User = "web-vm";
-        };
-      };
       get-IP-address = {
         confinement.enable = true;
         onSuccess = [ "knot-reload.target" ];
@@ -360,6 +329,10 @@
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address /run/ddns/zonefile /var/lib/ddns/
         '';
         wantedBy = ["multi-user.target"];
+      };
+      knot.serviceConfig = {
+        IPAddressDeny = "any";
+        IPAddressAllow = "localhost";
       };
       knot-reload = {
         after = [ "knot.service" ];
@@ -442,6 +415,38 @@
         RestrictRealtime = true;
         SystemCallArchitectures = "native";
         SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+      };
+      web-vm = {
+        confinement.enable = true;
+        serviceConfig = {
+          BindReadOnlyPaths = [ "/dev/kvm" "/dev/net/tun" ];
+          CapabilityBoundingSet = "";
+          DeviceAllow = [ "/dev/kvm" "/dev/net/tun" ];
+          ExecStart = "${lib.getExe inputs.self.nixosConfigurations.web-vm.config.system.build.vm}";
+          Group = "web-vm";
+          IPAddressDeny = "any";
+          LockPersonality = true;
+          NoNewPrivileges = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          ProtectSystem = "strict";
+          RemoveIPC = true;
+          RestrictAddressFamilies = "none";
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          RestrictNamespaces = true;
+          RuntimeDirectory = "web-vm";
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          SystemCallErrorNumber = "ENOSYS";
+          Type = "exec";
+          UMask = "077";
+          User = "web-vm";
+        };
       };
     };
     targets.knot-reload = {
