@@ -417,7 +417,6 @@
           ProtectHome = "read-only";
           ProtectKernelModules = true;
           ProtectControlGroups = true;
-          ProtectKernelLogs = true;
           RestrictSUIDSGID = true;
           RestrictNamespaces = "user net mnt ipc pid uts";
           RestrictRealtime = true;
