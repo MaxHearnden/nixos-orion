@@ -137,8 +137,10 @@
         policy = [
           {
             id = "porkbun";
-            single-type-signing = true;
             ksk-submission = "unbound";
+            rrsig-lifetime = "12h";
+            rrsig-refresh = "4h";
+            single-type-signing = true;
           }
         ];
         remote = [
