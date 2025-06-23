@@ -75,6 +75,7 @@
     };
     nftables.enable = true;
     resolvconf.useLocalResolver = true;
+    useNetworkd = true;
   };
   nix = {
     gc = {
@@ -212,15 +213,15 @@
         ];
       };
     };
-    xserver = {
-      autorun = false;
-      enable = true;
-      desktopManager.gnome.enable = true;
-      displayManager.gdm = {
-        autoSuspend = false;
-        enable = true;
-      };
-    };
+    # xserver = {
+    #   autorun = false;
+    #   enable = true;
+    #   desktopManager.gnome.enable = true;
+    #   displayManager.gdm = {
+    #     autoSuspend = false;
+    #     enable = true;
+    #   };
+    # };
   };
   system = {
     autoUpgrade = {
