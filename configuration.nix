@@ -97,9 +97,10 @@
     settings = {
       allowed-users = [ "max" ];
       build-dir = "/nix/var/nix/builds";
-      use-cgroups = true;
       experimental-features = "cgroups nix-command flakes";
       keep-outputs = true;
+      store = "daemon";
+      use-cgroups = true;
     };
   };
   programs = {
@@ -419,13 +420,17 @@
           CacheDirectoryMode = "0700";
           CapabilityBoundingSet = "CAP_CHOWN CAP_SETUID CAP_SETGID CAP_SYS_ADMIN CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_KILL CAP_FOWNER CAP_SYS_PTRACE";
           DeviceAllow = "/dev/kvm";
+          ExecStart = [
+            ""
+            "@${lib.getExe' config.nix.package "nix-daemon"} nix-daemon --daemon --option store local"
+          ];
           NoNewPrivileges = true;
           PrivateDevices = true;
           ProtectClock = true;
           ProtectHome = "read-only";
           ProtectKernelModules = true;
           ProtectSystem = "strict";
-          ReadWritePaths = "/nix /tmp";
+          ReadWritePaths = "/nix";
           RestrictAddressFamilies = "AF_NETLINK AF_UNIX AF_INET AF_INET6";
           RestrictNamespaces = "cgroup ipc mnt net pid user uts";
           RestrictRealtime = true;
