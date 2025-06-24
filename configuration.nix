@@ -36,12 +36,14 @@
       "knot/zandoodle.me.uk.zone".text = ''
         $TTL 600
         @ SOA dns mail 0 600 60 3600 600
-        @ NS dns
         @ CAA 128 issue ";"
+        @ NS dns
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
       '';
     };
     shellAliases.sda = "systemd-analyze security --no-pager";
