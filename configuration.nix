@@ -105,7 +105,7 @@
   programs = {
     fish = {
       enable = true;
-      interativeShellInit = ''
+      interactiveShellInit = ''
         fish_vi_key_bindings
 
         ${config.systemd.package}/bin/systemctl shutdown --quiet --when=show
