@@ -2,11 +2,15 @@
   boot.initrd.systemd.enable = true;
   networking.firewall.allowedTCPPorts = [ 80 ];
   nix.enable = false;
-  services.httpd = {
-    enable = true;
+  services = {
+    httpd.enable = true;
+    userborn.enable = true;
   };
   system = {
-    etc.overlay.enable = true;
+    etc.overlay = {
+      enable = true;
+      mutable = false;
+    };
     stateVersion = "25.05";
   };
   systemd.shutdownRamfs.enable = false;
