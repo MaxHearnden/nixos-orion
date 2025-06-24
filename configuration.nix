@@ -573,6 +573,7 @@
           dig
           htop
           inputs.nixos-kexec.packages.aarch64-linux.default
+          jq
           ldns
           ldns.examples
           ripgrep
