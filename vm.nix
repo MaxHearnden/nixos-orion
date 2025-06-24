@@ -1,5 +1,9 @@
 { lib, ... }: {
   boot.initrd.systemd.enable = true;
+  environment.etc."resolv.conf".text = ''
+    nameserver 192.168.2.1
+    options trust-ad edns0
+  '';
   networking.firewall.allowedTCPPorts = [ 80 ];
   nix.enable = false;
   services = {
