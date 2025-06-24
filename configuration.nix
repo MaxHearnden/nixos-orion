@@ -511,6 +511,7 @@
           inputs.nixos-kexec.packages.aarch64-linux.default
           ldns
           ldns.examples
+          ripgrep
           tio
         ];
       };
