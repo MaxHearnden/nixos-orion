@@ -45,6 +45,12 @@
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
       '';
+      "resolv.conf".text = ''
+        nameserver 127.0.0.1
+        nameserver ::1
+
+        options trust-ad edns0
+      '';
     };
     shellAliases.sda = "systemd-analyze security --no-pager";
   };
