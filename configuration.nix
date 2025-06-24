@@ -409,7 +409,7 @@
           ProtectHome = "read-only";
           ProtectKernelModules = true;
           RestrictSUIDSGID = true;
-          RestrictNamespaces = "user net mnt ipc pid uts";
+          RestrictNamespaces = "cgroup ipc mnt net pid user uts";
           RestrictRealtime = true;
           CacheDirectory = "nix";
           CacheDirectoryMode = "0700";
