@@ -107,7 +107,10 @@
       enable = true;
       config = {
         init.defaultBranch = "main";
-        safe.directory = "/home/max/nixos-config";
+        safe.directory = [
+          "/home/max/nixos-config"
+          "/home/max/nixos-config/.git"
+        ];
         user = {
           email = "maxoscarhearnden@gmail.com";
           name = "MaxHearnden";
@@ -247,11 +250,6 @@
     # };
   };
   system = {
-    autoUpgrade = {
-      allowReboot = true;
-      enable = true;
-      flake = "git+file:///home/max/nixos-config";
-    };
     etc.overlay.enable = true;
     stateVersion = "24.11";
   };
@@ -420,6 +418,43 @@
           CacheDirectoryMode = "0700";
         };
         environment.XDG_CACHE_HOME = "%C";
+      };
+      nixos-upgrade = {
+        after = [ "network-online.target" ];
+        serviceConfig = {
+          RuntimeDirectory = "nixos-upgrade";
+          Type = "oneshot";
+        };
+        restartIfChanged = false;
+        startAt = "4:40";
+        unitConfig.X-StopOnRemoval = true;
+        script =
+          let
+            git = lib.getExe pkgs.git;
+            nix = lib.getExe config.nix.package;
+            nixos-rebuild = lib.getExe config.system.build.nixos-rebuild;
+          in ''
+            ${git} clone -b main --single-branch /home/max/nixos-config /run/nixos-upgrade/nixos-config
+            cd /run/nixos-upgrade/nixos-config
+            ${git} branch update
+            ${nix} flake update --flake git+file:///run/nixos-upgrade/nixos-config?ref=update --commit-lock-file -v
+            if ${nixos-rebuild} boot --flake .?ref=update; then
+              ${git} merge --ff update
+              ${git} push
+            else
+              ${nixos-rebuild} boot --flake .
+            fi
+
+            booted=$(${lib.getExe' pkgs.coreutils "readlink"} /run/booted-system/{kernel,kernel-modules})
+            built=$(${lib.getExe' pkgs.coreutils "readlink"} /nix/var/nix/profiles/system/{kernel,kernel-modules})
+
+            if [ "$booted" = "$built" ]; then
+              ${nixos-rebuild} test --flake .
+            else
+              ${lib.getExe inputs.nixos-kexec.packages.${config.nixpkgs.system}.default} --when "1 hour left"
+            fi
+          '';
+        wants = [ "network-online.target" ];
       };
       nscd.serviceConfig = {
         CapabilityBoundingSet = "";
