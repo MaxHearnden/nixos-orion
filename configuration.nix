@@ -421,13 +421,8 @@
       };
       nixos-upgrade = {
         after = [ "network-online.target" ];
-        serviceConfig = {
-          RuntimeDirectory = "nixos-upgrade";
-          Type = "oneshot";
-        };
+        path = [ pkgs.gitMinimal ];
         restartIfChanged = false;
-        startAt = "4:40";
-        unitConfig.X-StopOnRemoval = true;
         script =
           let
             git = lib.getExe pkgs.git;
@@ -436,13 +431,17 @@
           in ''
             ${git} clone -b main --single-branch /home/max/nixos-config /run/nixos-upgrade/nixos-config
             cd /run/nixos-upgrade/nixos-config
-            ${git} branch update
-            ${nix} flake update --flake git+file:///run/nixos-upgrade/nixos-config?ref=update --commit-lock-file --refresh
+            ${git} checkout -b update
+            ${nix} flake update  --commit-lock-file --refresh
+            ${git} show update
+            ${git} show main
             if ${nixos-rebuild} boot --flake .?ref=update; then
+              ${git} checkout main
               ${git} merge --ff update
               ${git} push
             else
-              ${nixos-rebuild} boot --flake .
+              ${git} checkout main
+              ${nixos-rebuild} boot --flake .?ref=main
             fi
 
             booted=$(${lib.getExe' pkgs.coreutils "readlink"} /run/booted-system/{kernel,kernel-modules})
@@ -454,6 +453,12 @@
               ${lib.getExe inputs.nixos-kexec.packages.${config.nixpkgs.system}.default} --when "1 hour left"
             fi
           '';
+        serviceConfig = {
+          RuntimeDirectory = "nixos-upgrade";
+          Type = "oneshot";
+        };
+        startAt = "4:40";
+        unitConfig.X-StopOnRemoval = true;
         wants = [ "network-online.target" ];
       };
       nscd.serviceConfig = {
