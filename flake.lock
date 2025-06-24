@@ -1,0 +1,48 @@
+{
+  "nodes": {
+    "nixos-kexec": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1713028336,
+        "narHash": "sha256-TV4DNEnNruInAmmHYHQScPX+q3ZSKRdPFvr7xjl6WSA=",
+        "owner": "MaxHearnden",
+        "repo": "nixos-kexec",
+        "rev": "c09254bcb4419211ce377963aa31fa659acd0fcb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "MaxHearnden",
+        "repo": "nixos-kexec",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1750622754,
+        "narHash": "sha256-kMhs+YzV4vPGfuTpD3mwzibWUE6jotw5Al2wczI0Pv8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "c7ab75210cb8cb16ddd8f290755d9558edde7ee1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-25.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixos-kexec": "nixos-kexec",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
