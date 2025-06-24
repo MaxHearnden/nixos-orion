@@ -437,7 +437,7 @@
             ${git} clone -b main --single-branch /home/max/nixos-config /run/nixos-upgrade/nixos-config
             cd /run/nixos-upgrade/nixos-config
             ${git} branch update
-            ${nix} flake update --flake git+file:///run/nixos-upgrade/nixos-config?ref=update --commit-lock-file -v
+            ${nix} flake update --flake git+file:///run/nixos-upgrade/nixos-config?ref=update --commit-lock-file --refresh
             if ${nixos-rebuild} boot --flake .?ref=update; then
               ${git} merge --ff update
               ${git} push
