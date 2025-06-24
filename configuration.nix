@@ -6,8 +6,11 @@
     loader.systemd-boot.enable = true;
   };
   environment = {
+    sessionVariables.SYSTEMD_EDITOR = "nvim";
     etc = {
       "knot/bogus.zandoodle.me.uk.zone".text = ''
+        ; A zone for testing DNSSEC support.
+        ; This zone is bogus.
         $TTL 0
         @ SOA dns.zandoodle.me.uk. mail.zandoodle.me.uk. 0 0 0 0 0
         @ NS dns.zandoodle.me.uk.
@@ -25,6 +28,7 @@
         $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
       '';
       "knot/no-email.zone.include".text = ''
+        ; Deny sending or receiving emails
         @ TXT "v=spf1 -all"
         @ MX 0 .
         _dmarc TXT "v=DMARC1;p=reject;sp=reject;adkim=s;aspf=s;fo=1"
@@ -126,6 +130,7 @@
     };
     wireshark.enable = true;
   };
+  security.polkit.enable = true;
   services = {
     avahi.enable = false;
     dnsdist = {
