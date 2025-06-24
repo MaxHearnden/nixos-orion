@@ -338,7 +338,6 @@
           RestartSec = "10s";
           RestartSteps = "10";
           StartLimitBurst = "20";
-          StartLimitIntervalSec = "20m";
           RestrictAddressFamilies = "AF_NETLINK AF_INET";
           RestrictNamespaces = true;
           RestrictRealtime = true;
@@ -384,6 +383,7 @@
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
             /run/ddns/zonefile /run/ddns/local-zonefile /var/lib/ddns/
         '';
+        unitConfig.StartLimitIntervalSec = "20m";
         wantedBy = ["multi-user.target"];
       };
       knot.serviceConfig = {
