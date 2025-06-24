@@ -1,6 +1,7 @@
 { config, inputs, lib, pkgs, ... }: {
   boot = {
     initrd.systemd.enable = true;
+    kernel.sysctl."net.ipv4.tcp_ecn" = 1;
     kernelPackages = pkgs.linuxPackages_latest;
     loader.systemd-boot.enable = true;
   };
