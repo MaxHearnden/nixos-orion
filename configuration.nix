@@ -258,6 +258,7 @@
         ];
       };
     };
+    userborn.enable = true;
     # xserver = {
     #   autorun = false;
     #   enable = true;
