@@ -364,14 +364,14 @@
             exit 1
           fi
 
-          ip -json address show dev enp49s0 | jq -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev enp49s0 | ${lib.getExe pkgs.jq} -r \
             '.[].addr_info.[]
               | if .family == "inet" then
                 "@ A " + .local
               else
                 "@ AAAA " + .local
               end' >/run/ddns/local-zonefile
-          ip -json address show dev enp1s0 | jq -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev enp1s0 | ${lib.getExe pkgs.jq} -r \
             '.[].addr_info.[]
               | if .family == "inet" then
                 "@ A " + .local
@@ -379,7 +379,7 @@
                 "@ AAAA " + .local
               end' >>/run/ddns/local-zonefile
 
-          ldns-read-zone -c /run/ddns/local-zonefile
+          ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-zonefile
 
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
             /run/ddns/zonefile /run/ddns/local-zonefile /var/lib/ddns/
