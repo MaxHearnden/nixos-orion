@@ -1,10 +1,15 @@
 { lib, ... }: {
+  boot.initrd.systemd.enable = true;
   networking.firewall.allowedTCPPorts = [ 80 ];
   nix.enable = false;
   services.httpd = {
     enable = true;
   };
-  system.stateVersion = "25.05";
+  system = {
+    etc.overlay.enable = true;
+    stateVersion = "25.05";
+  };
+  systemd.shutdownRamfs.enable = false;
   users = {
     mutableUsers = false;
     users.nixos = {
