@@ -433,8 +433,6 @@
             cd /run/nixos-upgrade/nixos-config
             ${git} checkout -b update
             ${nix} flake update  --commit-lock-file --refresh
-            ${git} show update
-            ${git} show main
             if ${nixos-rebuild} boot --flake .?ref=update; then
               ${git} checkout main
               ${git} merge --ff update
