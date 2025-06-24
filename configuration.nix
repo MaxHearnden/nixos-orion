@@ -437,6 +437,7 @@
           RestrictSUIDSGID = true;
           SystemCallErrorNumber = "ENOSYS";
           SystemCallFilter = [ "@debug @system-service @mount @sandbox sethostname setdomainname" ];
+          UMask = "077";
         };
         environment.XDG_CACHE_HOME = "%C";
       };
