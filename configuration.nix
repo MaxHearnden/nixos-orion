@@ -6,6 +6,13 @@
   };
   environment = {
     etc = {
+      "knot/bogus.zandoodle.me.uk.zone".text = ''
+        $TTL 0
+        @ SOA dns.zandoodle.me.uk. mail.zandoodle.me.uk. 0 0 0 0 0
+        @ NS dns.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include
+        $INCLUDE /var/lib/ddns/zonefile
+      '';
       "knot/compsoc-dev.com.zone".text = ''
         $TTL 600
         @ SOA dns mail 0 600 60 3600 600
@@ -162,6 +169,13 @@
         ];
         zone = [
           {
+            domain = "bogus.zandoodle.me.uk";
+            file = "/etc/knot/bogus.zandoodle.me.uk.zone";
+            journal-content = "all";
+            zonefile-load = "difference-no-serial";
+            zonefile-sync = -1;
+          }
+          {
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "compsoc-dev.com";
@@ -197,6 +211,7 @@
       settings = {
         server = {
           do-not-query-localhost = false;
+          ede = true;
           port = 55;
         };
         stub-zone = [
@@ -340,6 +355,7 @@
         confinement.enable = true;
         requires = [ "knot.service" ];
         restartTriggers = map (zone: config.environment.etc."knot/${zone}".source) [
+          "bogus.zandoodle.me.uk.zone"
           "compsoc-dev.com.zone"
           "no-email.zone.include"
           "zandoodle.me.uk.zone"
