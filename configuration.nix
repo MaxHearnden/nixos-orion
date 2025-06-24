@@ -250,7 +250,6 @@
     autoUpgrade = {
       allowReboot = true;
       enable = true;
-      flags = [ "--no-write-lock-file" ];
       flake = "git+file:///home/max/nixos-config";
     };
     etc.overlay.enable = true;
