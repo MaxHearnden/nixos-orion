@@ -96,6 +96,7 @@
     };
     settings = {
       allowed-users = [ "max" ];
+      build-dir = "/nix/var/nix/builds";
       use-cgroups = true;
       experimental-features = "cgroups nix-command flakes";
       keep-outputs = true;
@@ -486,6 +487,9 @@
       };
       wantedBy = [ "timers.target" ];
     };
+    tmpfiles.rules = [
+      "d /nix/var/nix/builds 755"
+    ];
     shutdownRamfs.enable = false;
   };
   users = {
