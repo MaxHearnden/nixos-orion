@@ -76,7 +76,7 @@
           destination = "192.168.2.2:80";
           proto = "tcp";
           sourcePort = 80;
-          loopbackIPs = [ "192.168.1.163" ];
+          loopbackIPs = [ "192.168.1.167" ];
         }
       ];
       internalInterfaces = [ "web-vm" ];
@@ -92,7 +92,8 @@
     };
     settings = {
       allowed-users = [ "max" ];
-      experimental-features = "nix-command flakes";
+      use-cgroups = true;
+      experimental-features = "cgroups nix-command flakes";
       keep-outputs = true;
     };
   };
@@ -407,7 +408,6 @@
           ProtectClock = true;
           ProtectHome = "read-only";
           ProtectKernelModules = true;
-          ProtectControlGroups = true;
           RestrictSUIDSGID = true;
           RestrictNamespaces = "user net mnt ipc pid uts";
           RestrictRealtime = true;
@@ -466,6 +466,7 @@
           UMask = "077";
           User = "web-vm";
         };
+        wantedBy = [ "multi-user.target" ];
       };
     };
     targets.knot-reload = {
