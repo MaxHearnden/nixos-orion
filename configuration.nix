@@ -488,7 +488,7 @@
       wantedBy = [ "timers.target" ];
     };
     tmpfiles.rules = [
-      "d /nix/var/nix/builds 755"
+      "d /nix/var/nix/builds 755 root root 7d"
     ];
     shutdownRamfs.enable = false;
   };
