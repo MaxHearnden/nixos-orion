@@ -339,7 +339,7 @@
           RestartSteps = "10";
           StartLimitBurst = "20";
           StartLimitIntervalSec = "20m";
-          RestrictAddressFamilies = "AF_UNIX AF_INET";
+          RestrictAddressFamilies = "AF_NETLINK AF_INET";
           RestrictNamespaces = true;
           RestrictRealtime = true;
           RestrictSUIDSGID = true;
@@ -364,7 +364,25 @@
             exit 1
           fi
 
-          ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address /run/ddns/zonefile /var/lib/ddns/
+          ip -json address show dev enp49s0 | jq -r \
+            '.[].addr_info.[]
+              | if .family == "inet" then
+                "@ A " + .local
+              else
+                "@ AAAA " + .local
+              end' >/run/ddns/local-zonefile
+          ip -json address show dev enp1s0 | jq -r \
+            '.[].addr_info.[]
+              | if .family == "inet" then
+                "@ A " + .local
+              else
+                "@ AAAA " + .local
+              end' >>/run/ddns/local-zonefile
+
+          ldns-read-zone -c /run/ddns/local-zonefile
+
+          ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
+            /run/ddns/zonefile /run/ddns/local-zonefile /var/lib/ddns/
         '';
         wantedBy = ["multi-user.target"];
       };
