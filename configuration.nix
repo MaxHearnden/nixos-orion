@@ -414,24 +414,24 @@
       };
       nix-daemon = {
         serviceConfig = {
-          CapabilityBoundingSet = "CAP_CHOWN CAP_SETUID CAP_SETGID CAP_SYS_ADMIN CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_KILL CAP_FOWNER CAP_SYS_PTRACE";
-          ProtectSystem = "strict";
           BindPaths = "/dev/kvm";
+          CacheDirectory = "nix";
+          CacheDirectoryMode = "0700";
+          CapabilityBoundingSet = "CAP_CHOWN CAP_SETUID CAP_SETGID CAP_SYS_ADMIN CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH CAP_KILL CAP_FOWNER CAP_SYS_PTRACE";
           DeviceAllow = "/dev/kvm";
-          ReadWritePaths = "/nix /tmp";
-          RestrictAddressFamilies = "AF_NETLINK AF_UNIX AF_INET AF_INET6";
-          SystemCallFilter = [ "@debug @system-service @mount @sandbox sethostname setdomainname" ];
-          SystemCallErrorNumber = "ENOSYS";
           NoNewPrivileges = true;
           PrivateDevices = true;
           ProtectClock = true;
           ProtectHome = "read-only";
           ProtectKernelModules = true;
-          RestrictSUIDSGID = true;
+          ProtectSystem = "strict";
+          ReadWritePaths = "/nix /tmp";
+          RestrictAddressFamilies = "AF_NETLINK AF_UNIX AF_INET AF_INET6";
           RestrictNamespaces = "cgroup ipc mnt net pid user uts";
           RestrictRealtime = true;
-          CacheDirectory = "nix";
-          CacheDirectoryMode = "0700";
+          RestrictSUIDSGID = true;
+          SystemCallErrorNumber = "ENOSYS";
+          SystemCallFilter = [ "@debug @system-service @mount @sandbox sethostname setdomainname" ];
         };
         environment.XDG_CACHE_HOME = "%C";
       };
