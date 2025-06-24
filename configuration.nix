@@ -417,6 +417,7 @@
         SystemCallArchitectures = "native";
         SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
       };
+      systemd-machined.enable = false;
       web-vm = {
         confinement.enable = true;
         serviceConfig = {
