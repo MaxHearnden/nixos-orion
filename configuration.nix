@@ -103,6 +103,21 @@
     };
   };
   programs = {
+    fish = {
+      enable = true;
+      interativeShellInit = ''
+        fish_vi_key_bindings
+
+        ${config.systemd.package}/bin/systemctl shutdown --quiet --when=show
+
+        begin
+          if ! set -l system_status "$(${config.systemd.package}/bin/systemctl \
+              is-system-running)"
+            echo The system status is currently "$system_status"
+          end
+        end
+      '';
+    };
     git = {
       enable = true;
       config = {
@@ -126,6 +141,7 @@
           inoremap {<CR> {<CR>}<Esc>ko
           inoremap [<CR> [<CR>]<Esc>ko
           inoremap (<CR> (<CR>)<Esc>ko
+          set colorcolumn=80
         '';
         packages.nix.start = with pkgs.vimPlugins; [ vim-nix ];
       };
@@ -530,6 +546,7 @@
     shutdownRamfs.enable = false;
   };
   users = {
+    defaultUserShell = config.programs.fish.package;
     groups = {
       ddns = {};
       web-vm = {};
