@@ -600,6 +600,7 @@
         packages = with pkgs; [
           btop
           dig
+          file
           gcc
           htop
           inputs.nixos-kexec.packages.aarch64-linux.default
