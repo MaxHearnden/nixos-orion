@@ -613,6 +613,7 @@
         packages = with pkgs; [
           btop
           dig
+          dropwatch
           file
           gcc
           htop
