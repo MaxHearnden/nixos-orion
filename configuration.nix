@@ -181,7 +181,7 @@
         setACL({"0.0.0.0/0", "::/0"})
 
         addAction(AndRule({RDRule(), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("iterative"))
-        addAction(AndRule({TCPRule(false), NotRule(QNameSuffixRule({"zandoodle.me.uk", "compsoc-dev.com"}))}), DropAction())
+        addAction(AndRule({TCPRule(false), NotRule(QNameSuffixRule({"zandoodle.me.uk", "compsoc-dev.com"}))}), TCAction())
         addAction(AllRule(), PoolAction("auth"))
       '';
     };
