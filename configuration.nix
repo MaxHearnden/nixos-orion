@@ -48,6 +48,10 @@
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
+        local IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
+        local IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
+        local IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
+        local IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
       '';
       "resolv.conf".text = ''
         nameserver 127.0.0.1
