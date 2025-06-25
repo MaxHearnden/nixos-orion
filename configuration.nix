@@ -171,6 +171,7 @@
   security.polkit.enable = true;
   services = {
     avahi.enable = false;
+    dbus.implementation = "broker";
     dnsdist = {
       enable = true;
       listenPort = 53;
