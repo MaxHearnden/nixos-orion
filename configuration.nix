@@ -459,6 +459,33 @@
         };
         wantedBy = [ "multi-user.target" ];
       };
+      nftables = {
+        confinement = {
+          enable = true;
+          packages = [ pkgs.coreutils ];
+        };
+        serviceConfig = {
+          DynamicUser = true;
+          AmbientCapabilities = "CAP_NET_ADMIN";
+          CapabilityBoundingSet = "CAP_NET_ADMIN";
+          IPAddressDeny = "any";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          RestrictRealtime = true;
+          RestrictAddressFamilies = "AF_NETLINK";
+          RestrictNamespaces = true;
+          MemoryDenyWriteExecute = true;
+          SystemCallArchitectures = "native";
+          ProtectKernelLogs = true;
+          ProtectClock = true;
+          LockPersonality = true;
+          PrivateUsers = false;
+          ProtectHostname = true;
+          ProtectProc = "invisible";
+          ProcSubset = "pid";
+          User = "nft";
+          Group = "nft";
+        };
+      };
       nix-daemon = {
         serviceConfig = {
           BindPaths = "/dev/kvm";
