@@ -278,6 +278,7 @@
     # };
   };
   system = {
+    configurationRevision = inputs.self.rev or "dirty";
     etc.overlay.enable = true;
     stateVersion = "24.11";
   };
