@@ -77,7 +77,10 @@
       allowedUDPPorts = [ 53 ];
       allowedTCPPorts = [ 53 80 ];
       filterForward = true;
-      interfaces.web-vm.allowedUDPPorts = [ 67 ];
+      interfaces = {
+        web-vm.allowedUDPPorts = [ 67 ];
+        enp1s0.allowedUDPPorts = [ 67 ];
+      };
     };
     hostName = "orion";
     nat = {
@@ -91,7 +94,7 @@
           loopbackIPs = [ "192.168.1.167" ];
         }
       ];
-      internalInterfaces = [ "web-vm" ];
+      internalInterfaces = [ "web-vm" "enp1s0" ];
     };
     nftables.enable = true;
     resolvconf.useLocalResolver = true;
@@ -304,6 +307,22 @@
         };
       };
       networks = {
+        "10-enp1s0" = {
+          matchConfig = {
+            Name = "enp1s0";
+          };
+          address = [ "192.168.0.1/24" ];
+          linkConfig = {
+            RequiredForOnline = false;
+          };
+          networkConfig = {
+            ConfigureWithoutCarrier = true;
+            DHCPServer = true;
+          };
+          dhcpServerConfig = {
+            DNS = "192.168.0.1";
+          };
+        };
         "10-web-vm" = {
           matchConfig = {
             Name = "web-vm";
@@ -382,13 +401,6 @@
               else
                 "@ AAAA " + .local
               end' >/run/ddns/local-zonefile
-          ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev enp1s0 | ${lib.getExe pkgs.jq} -r \
-            '.[].addr_info.[]
-              | if .family == "inet" then
-                "@ A " + .local
-              else
-                "@ AAAA " + .local
-              end' >>/run/ddns/local-zonefile
 
           ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-zonefile
 
