@@ -1,10 +1,7 @@
 { config, inputs, lib, pkgs, ... }: {
   boot = {
     binfmt.emulatedSystems = [
-      "armv7l-linux"
       "x86_64-linux"
-      "i386-linux"
-      "riscv32-linux"
       "riscv64-linux"
     ];
     initrd.systemd.enable = true;
