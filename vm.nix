@@ -1,13 +1,14 @@
-{ lib, ... }: {
+{ lib, modulesPath, ... }: {
   boot.initrd.systemd.enable = true;
   environment.etc."resolv.conf".text = ''
     nameserver 192.168.2.1
     options trust-ad edns0
   '';
+  imports = [ "${modulesPath}/profiles/perlless.nix" ];
   networking.firewall.allowedTCPPorts = [ 80 ];
   nix.enable = false;
   services = {
-    httpd.enable = true;
+    nginx.enable = true;
     userborn.enable = true;
   };
   system = {
