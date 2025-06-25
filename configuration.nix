@@ -112,6 +112,7 @@
     };
   };
   programs = {
+    command-not-found.enable = false;
     fish = {
       enable = true;
       interactiveShellInit = ''
@@ -157,6 +158,7 @@
       defaultEditor = true;
       enable = true;
     };
+    nix-index.enable = true;
     wireshark.enable = true;
   };
   security.polkit.enable = true;
@@ -598,6 +600,7 @@
         packages = with pkgs; [
           btop
           dig
+          gcc
           htop
           inputs.nixos-kexec.packages.aarch64-linux.default
           jq
