@@ -171,7 +171,7 @@
     };
     nix-index.enable = true;
     ssh.extraConfig = ''
-      VerifyHostKeyDNS ask
+      VerifyHostKeyDNS yes
     '';
     wireshark.enable = true;
   };
