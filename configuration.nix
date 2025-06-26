@@ -170,6 +170,9 @@
       enable = true;
     };
     nix-index.enable = true;
+    ssh.extraConfig = ''
+      VerifyHostKeyDNS ask
+    '';
     wireshark.enable = true;
   };
   security.polkit.enable = true;
@@ -459,7 +462,6 @@
           SystemCallArchitectures = "native";
           SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
           Type = "oneshot";
-          UMask = "077";
           User = "knot";
         };
         wantedBy = [ "multi-user.target" ];
@@ -488,6 +490,7 @@
           ProtectProc = "invisible";
           ProcSubset = "pid";
           User = "nft";
+          UMask = "077";
           Group = "nft";
         };
       };
