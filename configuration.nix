@@ -214,6 +214,8 @@
         ];
         server = {
           listen = ["127.0.0.1@54" "::1@54"];
+          identity = "dns.zandoodle.me.uk";
+          nsid = "dns.zandoodle.me.uk";
         };
         submission = [
           {
