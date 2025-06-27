@@ -90,6 +90,7 @@
         enp1s0.allowedUDPPorts = [ 67 ];
       };
     };
+    fqdn = "local.zandoodle.me.uk";
     hostName = "orion";
     nat = {
       enable = true;
