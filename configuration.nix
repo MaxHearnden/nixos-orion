@@ -522,7 +522,7 @@
           ProtectHome = "read-only";
           ProtectKernelModules = true;
           ProtectSystem = "strict";
-          ReadWritePaths = "/nix";
+          ReadWritePaths = "/nix /tmp";
           RestrictAddressFamilies = "AF_NETLINK AF_UNIX AF_INET AF_INET6";
           RestrictNamespaces = "cgroup ipc mnt net pid user uts";
           RestrictRealtime = true;
