@@ -116,7 +116,7 @@
       options = "--delete-older-than 7d";
     };
     settings = {
-      allowed-users = [ "max" ];
+      allowed-users = [ "max" "nix-gc" ];
       build-dir = "/nix/var/nix/builds";
       experimental-features = "cgroups nix-command flakes";
       keep-outputs = true;
@@ -533,6 +533,40 @@
         };
         environment.XDG_CACHE_HOME = "%C";
       };
+      nix-gc = {
+        confinement.enable = true;
+        environment.XDG_STATE_HOME = "%S/nix-gc";
+        serviceConfig = {
+          BindPaths = "/nix/var/nix/profiles";
+          BindReadOnlyPaths = "/nix/var/nix/daemon-socket";
+          CapabilityBoundingSet = "";
+          Group = "nix-gc";
+          IPAddressDeny = "any";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          NoNewPrivileges = true;
+          PrivateNetwork = true;
+          PrivateUsers = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          ProtectSystem = "strict";
+          RemoveIPC = true;
+          RestrictAddressFamilies = "AF_UNIX";
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          StateDirectory = "nix-gc";
+          StateDirectoryMode = "0700";
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@resources @privileged" ];
+          UMask = "077";
+          User = "nix-gc";
+        };
+      };
       nixos-upgrade = {
         after = [ "network-online.target" ];
         path = [ pkgs.gitMinimal ];
@@ -640,6 +674,7 @@
     };
     tmpfiles.rules = [
       "d /nix/var/nix/builds 755 root root 7d"
+      "A /nix/var/nix/profiles - - - - u:nix-gc:rwx,d:u:nix-gc:rwx,m::rwx,d:m::rwx,g::rx,d:g::rx"
     ];
     shutdownRamfs.enable = false;
   };
@@ -647,6 +682,7 @@
     defaultUserShell = config.programs.fish.package;
     groups = {
       ddns = {};
+      nix-gc = {};
       web-vm = {};
     };
     users = {
@@ -676,6 +712,10 @@
           ripgrep
           tio
         ];
+      };
+      nix-gc = {
+        isSystemUser = true;
+        group = "nix-gc";
       };
       web-vm = {
         group = "web-vm";
