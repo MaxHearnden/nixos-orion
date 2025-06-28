@@ -43,9 +43,11 @@
         @ CAA 128 issue ";"
         @ NS dns
         $INCLUDE /etc/knot/no-email.zone.include
+        $INCLUDE /etc/knot/no-email.zone.include bogus-exists.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
+        $INCLUDE /var/lib/ddns/zonefile bogus-exists.zandoodle.me.uk
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
         local IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
@@ -226,6 +228,13 @@
         zone = [
           {
             domain = "bogus.zandoodle.me.uk";
+            file = "/etc/knot/bogus.zandoodle.me.uk.zone";
+            journal-content = "all";
+            zonefile-load = "difference-no-serial";
+            zonefile-sync = -1;
+          }
+          {
+            domain = "bogus-exists.zandoodle.me.uk";
             file = "/etc/knot/bogus.zandoodle.me.uk.zone";
             journal-content = "all";
             zonefile-load = "difference-no-serial";
