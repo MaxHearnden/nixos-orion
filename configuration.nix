@@ -309,6 +309,10 @@
     stateVersion = "24.11";
   };
   systemd = {
+    additionalUpstreamSystemUnits = [
+      "soft-reboot.target"
+      "systemd-soft-reboot.service"
+    ];
     network = {
       enable = true;
       netdevs = {
