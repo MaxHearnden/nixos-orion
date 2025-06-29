@@ -646,7 +646,7 @@
             if ${nixos-rebuild} boot --flake .?ref=update; then
               ${git} checkout main
               ${git} merge --ff update
-              ${setpriv} -euid max -egid users --clear-groups ${git} push
+              ${setpriv} --euid max --egid users --clear-groups ${git} push
             else
               ${git} checkout main
               ${nixos-rebuild} boot --flake .?ref=main
