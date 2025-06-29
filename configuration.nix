@@ -637,6 +637,7 @@
             git = lib.getExe pkgs.git;
             nix = lib.getExe config.nix.package;
             nixos-rebuild = lib.getExe config.system.build.nixos-rebuild;
+            setpriv = lib.getExe' pkgs.util-linux "setpriv";
           in ''
             ${git} clone -b main --single-branch /home/max/nixos-config /run/nixos-upgrade/nixos-config
             cd /run/nixos-upgrade/nixos-config
@@ -645,7 +646,7 @@
             if ${nixos-rebuild} boot --flake .?ref=update; then
               ${git} checkout main
               ${git} merge --ff update
-              ${git} push
+              ${setpriv} -euid max -egid users --clear-groups ${git} push
             else
               ${git} checkout main
               ${nixos-rebuild} boot --flake .?ref=main
