@@ -410,6 +410,14 @@
     services = {
       dnsdist = {
         serviceConfig = {
+          ExecStart = [
+            ""
+            "${lib.getExe inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.system}.dnsdist} --supervised --disable-syslog --config /etc/dnsdist/dnsdist.conf"
+          ];
+          ExecStartPre = [
+            ""
+            "${lib.getExe inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.system}.dnsdist} --check-config --config /etc/dnsdist/dnsdist.conf"
+          ];
           User = "dnsdist";
           Group = "dnsdist";
         };
