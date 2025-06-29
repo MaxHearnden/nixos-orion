@@ -174,6 +174,7 @@
         safe.directory = [
           "/home/max/nixos-config"
           "/home/max/nixos-config/.git"
+          "/run/nixos-upgrade/nixos-config"
         ];
         user = {
           email = "maxoscarhearnden@gmail.com";
