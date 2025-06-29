@@ -48,6 +48,8 @@
         @ SOA dns mail 0 600 60 3600 600
         @ NS dns
         @ CAA 128 issue ";"
+        @ CAA 128 issuemail ";"
+        @ CAA 128 issuevmc ";"
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include dns.compsoc-dev.com.
         $INCLUDE /var/lib/ddns/zonefile
@@ -63,6 +65,8 @@
         $TTL 600
         @ SOA dns mail 0 600 60 3600 600
         @ CAA 128 issue ";"
+        @ CAA 128 issuemail ";"
+        @ CAA 128 issuevmc ";"
         @ NS dns
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
