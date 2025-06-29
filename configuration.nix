@@ -13,7 +13,7 @@
     sessionVariables.SYSTEMD_EDITOR = "nvim";
     etc = {
       "dnsdist/dnsdist.conf".text = ''
-        addLocal("127.0.0.1:53")
+        addLocal("0.0.0.0:53")
         addLocal("[::]:53")
         newServer({address = "127.0.0.1:54", name = "knot-dns", pool = "auth"})
         newServer({address = "127.0.0.1:55", name = "unbound", pool = "iterative"})
