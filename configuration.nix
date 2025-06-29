@@ -12,6 +12,28 @@
   environment = {
     sessionVariables.SYSTEMD_EDITOR = "nvim";
     etc = {
+      "dnsdist/dnsdist.conf".text = ''
+        addLocal("127.0.0.1:53")
+        addLocal("[::]:53")
+        newServer({address = "127.0.0.1:54", name = "knot-dns", pool = "auth"})
+        newServer({address = "127.0.0.1:55", name = "unbound", pool = "iterative"})
+        setACL({"0.0.0.0/0", "::/0"})
+
+        addAction(AndRule({RDRule(), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("iterative"))
+        addAction(AllRule(), LogAction("", false, true, true, false, true))
+        addResponseAction(AllRule(), LogResponseAction("", true, true, false, true))
+        addSelfAnsweredResponseAction(AllRule(), LogResponseAction("", true, true, false, true))
+        addAction(
+          AndRule({
+            TCPRule(false),
+            OrRule({
+              NotRule(QNameSuffixRule({"zandoodle.me.uk", "compsoc-dev.com"})),
+              MaxQPSIPRule(5),
+            }),
+          }),
+          TCAction())
+        addAction(AllRule(), PoolAction("auth"))
+      '';
       "knot/bogus.zandoodle.me.uk.zone".text = ''
         ; A zone for testing DNSSEC support.
         ; This zone is bogus.
@@ -182,7 +204,7 @@
     avahi.enable = false;
     dbus.implementation = "broker";
     dnsdist = {
-      enable = true;
+      # enable = true;
       listenPort = 53;
       extraConfig = ''
         addLocal("[::]:53")
@@ -382,7 +404,19 @@
       };
       wait-online.enable = false;
     };
+    packages = [
+      inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.system}.dnsdist
+    ];
     services = {
+      dnsdist = {
+        serviceConfig = {
+          User = "dnsdist";
+          Group = "dnsdist";
+        };
+        restartTriggers = [ config.environment.etc."dnsdist/dnsdist.conf".source ];
+        startLimitIntervalSec = 0;
+        wantedBy = [ "multi-user.target" ];
+      };
       get-IP-address = {
         confinement.enable = true;
         onSuccess = [ "knot-reload.target" ];
@@ -697,12 +731,17 @@
     defaultUserShell = config.programs.fish.package;
     groups = {
       ddns = {};
+      dnsdist = {};
       nix-gc = {};
       web-vm = {};
     };
     users = {
       ddns = {
         group = "ddns";
+        isSystemUser = true;
+      };
+      dnsdist = {
+        group = "dnsdist";
         isSystemUser = true;
       };
       max = {
