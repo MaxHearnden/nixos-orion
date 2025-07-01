@@ -51,6 +51,7 @@
         @ CAA 0 issuewild ";"
         @ CAA 0 issuemail ";"
         @ CAA 0 issuevmc ";"
+        @ HTTPS 1 . alpn=h3,h2
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include dns.compsoc-dev.com.
         $INCLUDE /var/lib/ddns/zonefile
@@ -70,6 +71,8 @@
         @ CAA 0 issuemail ";"
         @ CAA 0 issuevmc ";"
         @ NS dns
+        @ HTTPS 1 . alpn=h3,h2
+        local HTTPS 1 . alpn=h3,h2
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
@@ -207,7 +210,15 @@
           key {file./run/credentials/caddy.service/tsig-secret}
           server "127.0.0.1:54"
         }
+        dns rfc2136 {
+          key_name {file./run/credentials/caddy.service/tsig-id}
+          key_alg {file./run/credentials/caddy.service/tsig-algorithm}
+          key {file./run/credentials/caddy.service/tsig-secret}
+          server "127.0.0.1:54"
+        }
+        ech zandoodle.me.uk
       '';
+      logFormat = "level INFO";
       package = pkgs.caddy.withPlugins {
         plugins = ["github.com/caddy-dns/rfc2136@v1.0.0"];
         hash = "sha256-/7E84gGwJ6LooX0hXKhkhyf9+BrGjnLGLISEW5kJvLA=";
@@ -219,6 +230,11 @@
           '';
         };
         "zandoodle.me.uk" = {
+          extraConfig = ''
+            respond "This is a test of config ${inputs.self}"
+          '';
+        };
+        "local.zandoodle.me.uk" = {
           extraConfig = ''
             respond "This is a test of config ${inputs.self}"
           '';
@@ -272,8 +288,14 @@
             key = ["caddy"];
             update-owner = "name";
             update-owner-match = "equal";
-            update-owner-name = [ "" "local" ];
+            update-owner-name = [ "zandoodle.me.uk." "compsoc-dev.com." "local.zandoodle.me.uk." ];
             update-type = "HTTPS";
+          }
+          {
+            id = "caddy-xfr";
+            address = "127.0.0.1";
+            action = "transfer";
+            key = ["caddy"];
           }
         ];
         policy = [
@@ -318,7 +340,7 @@
             zonefile-sync = -1;
           }
           {
-            acl = [ "caddy-acme" "caddy-https" ];
+            acl = [ "caddy-acme" "caddy-https" "caddy-xfr" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "compsoc-dev.com";
@@ -330,7 +352,7 @@
             zonefile-sync = -1;
           }
           {
-            acl = [ "caddy-acme" "caddy-https" ];
+            acl = [ "caddy-acme" "caddy-https" "caddy-xfr" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
