@@ -239,6 +239,12 @@
         };
         "local.zandoodle.me.uk" = {
           extraConfig = ''
+            @denied not {
+              client_ip private_ranges
+              # For testing
+              not client_ip 192.168.1.165
+            }
+            abort @denied
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
               X-Content-Type-Options nosniff
