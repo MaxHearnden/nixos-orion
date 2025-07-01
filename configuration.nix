@@ -717,7 +717,7 @@
       };
       nixos-upgrade = {
         after = [ "network-online.target" ];
-        path = [ pkgs.gitMinimal ];
+        path = [ pkgs.gitMinimal pkgs.kexec-tools ];
         restartIfChanged = false;
         script =
           let
