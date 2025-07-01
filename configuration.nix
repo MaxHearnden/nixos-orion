@@ -481,8 +481,29 @@
     ];
     services = {
       caddy.serviceConfig = {
-        RuntimeDirectory = "caddy";
+        CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE";
         LoadCredential = map (attr: "tsig-${attr}:/run/keymgr/caddy-${attr}") [ "id" "secret" "algorithm" ];
+        LockPersonality = true;
+        MemoryDenyWriteExecute = true;
+        ProcSubset = "pid";
+        ProtectClock = true;
+        ProtectControlGroups = true;
+        ProtectHome = true;
+        ProtectHostname = true;
+        ProtectKernelLogs = true;
+        ProtectKernelModules = true;
+        ProtectKernelTunables = true;
+        ProtectProc = "invisible";
+        ProtectSystem = "strict";
+        RemoveIPC = true;
+        RestrictAddressFamilies = "AF_INET AF_INET6 AF_NETLINK AF_UNIX";
+        RestrictNamespaces = true;
+        RestrictRealtime = true;
+        RestrictSUIDSGID = true;
+        RuntimeDirectory = "caddy";
+        SystemCallArchitectures = "native";
+        SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+        UMask = "077";
       };
       dnsdist = {
         serviceConfig = {
