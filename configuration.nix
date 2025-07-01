@@ -210,13 +210,6 @@
           key {file./run/credentials/caddy.service/tsig-secret}
           server "127.0.0.1:54"
         }
-        dns rfc2136 {
-          key_name {file./run/credentials/caddy.service/tsig-id}
-          key_alg {file./run/credentials/caddy.service/tsig-algorithm}
-          key {file./run/credentials/caddy.service/tsig-secret}
-          server "127.0.0.1:54"
-        }
-        ech zandoodle.me.uk
       '';
       logFormat = "level INFO";
       package = pkgs.caddy.withPlugins {
@@ -226,16 +219,31 @@
       virtualHosts = {
         "compsoc-dev.com" = {
           extraConfig = ''
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+            };
             respond "This is a test of config ${inputs.self}"
           '';
         };
         "zandoodle.me.uk" = {
           extraConfig = ''
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+            };
             respond "This is a test of config ${inputs.self}"
           '';
         };
         "local.zandoodle.me.uk" = {
           extraConfig = ''
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+            };
             respond "This is a test of config ${inputs.self}"
           '';
         };
@@ -281,22 +289,6 @@
             update-owner-name = [ "_acme-challenge" "_acme-challenge.local" ];
             update-type = "TXT";
           }
-          {
-            id = "caddy-https";
-            address = "127.0.0.1";
-            action = "update";
-            key = ["caddy"];
-            update-owner = "name";
-            update-owner-match = "equal";
-            update-owner-name = [ "zandoodle.me.uk." "compsoc-dev.com." "local.zandoodle.me.uk." ];
-            update-type = "HTTPS";
-          }
-          {
-            id = "caddy-xfr";
-            address = "127.0.0.1";
-            action = "transfer";
-            key = ["caddy"];
-          }
         ];
         policy = [
           {
@@ -340,7 +332,7 @@
             zonefile-sync = -1;
           }
           {
-            acl = [ "caddy-acme" "caddy-https" "caddy-xfr" ];
+            acl = [ "caddy-acme" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "compsoc-dev.com";
@@ -352,7 +344,7 @@
             zonefile-sync = -1;
           }
           {
-            acl = [ "caddy-acme" "caddy-https" "caddy-xfr" ];
+            acl = [ "caddy-acme" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
