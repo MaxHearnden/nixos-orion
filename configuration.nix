@@ -58,10 +58,8 @@
         $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
         $INCLUDE /etc/knot/letsencrypt.zone.include _443._tcp.compsoc-dev.com.
       '';
-      "knot/letsencrypt.zone.include".text = ''
-        @ TLSA 0 1 2 86db73fc5893c3ea76db8e7d72dc8fb568d71ca8d7cbf75ac0660221ff39f8ebf7f8de906a45be19e9b743f24eda845dc3bdf36d095c237400caea9ec0a2f5dd
-        @ TLSA 0 1 2 2be19312b0b05d20d7edccf16eb355a8f6546bf7fa2b164ca0a20092dd542370b5cc1feedf2aa0c14b879cd017f123bb4251346bdbeec2480e19c91bc0488883
-      '';
+      "knot/letsencrypt.zone.include".source =
+        pkgs.callPackage ./gen-TLSA.nix {} [ "ISRG_Root_X1" "ISRG_Root_X2" ];
       "knot/no-email.zone.include".text = ''
         ; Deny sending or receiving emails
         @ TXT "v=spf1 -all"
@@ -601,6 +599,7 @@
           "bogus.zandoodle.me.uk.zone"
           "compsoc-dev.com.zone"
           "no-email.zone.include"
+          "letsencrypt.zone.include"
           "zandoodle.me.uk.zone"
         ];
         serviceConfig = {
