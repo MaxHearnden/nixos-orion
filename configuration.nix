@@ -47,7 +47,8 @@
         $TTL 600
         @ SOA dns mail 0 600 60 3600 600
         @ NS dns
-        @ CAA 128 issue ";"
+        @ CAA 128 issue "letsencrypt.org;validationmethods=dns-01"
+        @ CAA 128 issuewild ";"
         @ CAA 128 issuemail ";"
         @ CAA 128 issuevmc ";"
         $INCLUDE /etc/knot/no-email.zone.include
@@ -64,7 +65,8 @@
       "knot/zandoodle.me.uk.zone".text = ''
         $TTL 600
         @ SOA dns mail 0 600 60 3600 600
-        @ CAA 128 issue ";"
+        @ CAA 128 issue "letsencrypt.org;validationmethods=dns-01"
+        @ CAA 128 issuewild ";"
         @ CAA 128 issuemail ";"
         @ CAA 128 issuevmc ";"
         @ NS dns
@@ -208,6 +210,13 @@
   services = {
     avahi.enable = false;
     dbus.implementation = "broker";
+    caddy = {
+      enable = true;
+      package = pkgs.caddy.withPlugins {
+        plugins = ["github.com/caddy-dns/rfc2136@v1.0.0"];
+        hash = "sha256-/7E84gGwJ6LooX0hXKhkhyf9+BrGjnLGLISEW5kJvLA=";
+      };
+    };
     dnsdist = {
       # enable = true;
       listenPort = 53;
@@ -235,7 +244,20 @@
     };
     knot = {
       enable = true;
+      keyFiles = [ "/run/credentials/knot.service/ACME" ];
       settings = {
+        acl = [
+          {
+            id = "ACME";
+            address = "127.0.0.1";
+            action = "update";
+            key = ["ACME"];
+            update-owner = "name";
+            update-owner-match = "equal";
+            update-owner-name = "_acme-challenge";
+            update-type = ["TXT"];
+          }
+        ];
         policy = [
           {
             id = "porkbun";
@@ -278,6 +300,7 @@
             zonefile-sync = -1;
           }
           {
+            acl = [ "ACME" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "compsoc-dev.com";
@@ -289,6 +312,7 @@
             zonefile-sync = -1;
           }
           {
+            acl = [ "ACME" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
@@ -430,6 +454,27 @@
         startLimitIntervalSec = 0;
         wantedBy = [ "multi-user.target" ];
       };
+      gen-tsig = {
+        before = [ "knot.service" ];
+        requiredBy = [ "knot.service" ];
+        confinement.enable = true;
+        serviceConfig = {
+          DynamicUser = true;
+          User = "keymgr";
+          Group = "keymgr";
+          RuntimeDirectory = "keymgr";
+          RuntimeDirectoryMode = "0700";
+          RuntimeDirectoryPreserve = true;
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        script = ''
+          ${lib.getExe' pkgs.knot-dns "keymgr"} -t ACME >/run/keymgr/ACME
+          for attr in id algorithm secret; do
+            ${lib.getExe pkgs.yq} .key.[]."$attr" </run/keymgr/ACME >/run/keymgr/ACME-"$attr"
+          done
+        ''
+      };
       get-IP-address = {
         confinement.enable = true;
         onSuccess = [ "knot-reload.target" ];
@@ -498,6 +543,7 @@
       knot.serviceConfig = {
         IPAddressDeny = "any";
         IPAddressAllow = "localhost";
+        LoadCredential = "ACME:/run/keymgr/ACME";
       };
       knot-reload = {
         after = [ "knot.service" ];
@@ -773,7 +819,7 @@
           file
           gcc
           htop
-          inputs.nixos-kexec.packages.aarch64-linux.default
+          inputs.nixos-kexec.packages.${config.nixpkgs.system}.default
           jq
           ldns
           ldns.examples
