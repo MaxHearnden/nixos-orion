@@ -56,7 +56,7 @@
         $INCLUDE /etc/knot/no-email.zone.include dns.compsoc-dev.com.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
-        $INCLUDE /etc/knot/letsencrypt.zone.include _443._tcp.compsoc-dev.com.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.compsoc-dev.com.
       '';
       "knot/letsencrypt.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {} [ "ISRG_Root_X1" "ISRG_Root_X2" ];
@@ -82,8 +82,8 @@
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include _443._tcp.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include _443._tcp.local.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.local.zandoodle.me.uk.
         bogus-exists TYPE65534 \# 0
         local IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
         local IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
