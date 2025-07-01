@@ -210,6 +210,7 @@
           key {file./run/credentials/caddy.service/tsig-secret}
           server "127.0.0.1:54"
         }
+        preferred_chains smallest
       '';
       logFormat = "level INFO";
       package = pkgs.caddy.withPlugins {
