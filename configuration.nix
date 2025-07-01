@@ -51,7 +51,6 @@
         @ CAA 0 issuewild ";"
         @ CAA 0 issuemail ";"
         @ CAA 0 issuevmc ";"
-        @ HTTPS 1 . alpn=h3,h2
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include dns.compsoc-dev.com.
         $INCLUDE /var/lib/ddns/zonefile
@@ -74,8 +73,6 @@
         @ CAA 0 issuemail ";"
         @ CAA 0 issuevmc ";"
         @ NS dns
-        @ HTTPS 1 . alpn=h3,h2
-        local HTTPS 1 . alpn=h3,h2
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
