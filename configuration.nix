@@ -202,9 +202,9 @@
         admin "unix//run/caddy/caddy.sock"
         acme_ca "https://acme-v02.api.letsencrypt.org/directory"
         acme_dns rfc2136 {
-          key_name {file./run/credentials/caddy.service/acme-id}
-          key_alg {file./run/credentials/caddy.service/acme-algorithm}
-          key {file./run/credentials/caddy.service/acme-secret}
+          key_name {file./run/credentials/caddy.service/tsig-id}
+          key_alg {file./run/credentials/caddy.service/tsig-algorithm}
+          key {file./run/credentials/caddy.service/tsig-secret}
           server "127.0.0.1:54"
         }
       '';
@@ -252,18 +252,28 @@
     };
     knot = {
       enable = true;
-      keyFiles = [ "/run/credentials/knot.service/acme" ];
+      keyFiles = [ "/run/credentials/knot.service/caddy" ];
       settings = {
         acl = [
           {
-            id = "acme";
+            id = "caddy-acme";
             address = "127.0.0.1";
             action = "update";
-            key = ["acme"];
+            key = ["caddy"];
             update-owner = "name";
             update-owner-match = "equal";
-            update-owner-name = "_acme-challenge";
-            update-type = ["TXT"];
+            update-owner-name = [ "_acme-challenge" "_acme-challenge.local" ];
+            update-type = "TXT";
+          }
+          {
+            id = "caddy-https";
+            address = "127.0.0.1";
+            action = "update";
+            key = ["caddy"];
+            update-owner = "name";
+            update-owner-match = "equal";
+            update-owner-name = [ "" "local" ];
+            update-type = "HTTPS";
           }
         ];
         policy = [
@@ -308,7 +318,7 @@
             zonefile-sync = -1;
           }
           {
-            acl = [ "acme" ];
+            acl = [ "caddy-acme" "caddy-https" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "compsoc-dev.com";
@@ -320,7 +330,7 @@
             zonefile-sync = -1;
           }
           {
-            acl = [ "acme" ];
+            acl = [ "caddy-acme" "caddy-https" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
@@ -447,7 +457,7 @@
     services = {
       caddy.serviceConfig = {
         RuntimeDirectory = "caddy";
-        LoadCredential = map (attr: "acme-${attr}:/run/keymgr/acme-${attr}") [ "id" "secret" "algorithm" ];
+        LoadCredential = map (attr: "tsig-${attr}:/run/keymgr/caddy-${attr}") [ "id" "secret" "algorithm" ];
       };
       dnsdist = {
         serviceConfig = {
@@ -480,9 +490,9 @@
           RemainAfterExit = true;
         };
         script = ''
-          ${lib.getExe' pkgs.knot-dns "keymgr"} -t acme >/run/keymgr/acme
+          ${lib.getExe' pkgs.knot-dns "keymgr"} -t caddy >/run/keymgr/caddy
           for attr in id algorithm secret; do
-            ${lib.getExe pkgs.yq} -r .key.[]."$attr" </run/keymgr/acme >/run/keymgr/acme-"$attr"
+            ${lib.getExe pkgs.yq} -r .key.[]."$attr" </run/keymgr/caddy >/run/keymgr/caddy-"$attr"
           done
         '';
       };
@@ -554,7 +564,7 @@
       knot.serviceConfig = {
         IPAddressDeny = "any";
         IPAddressAllow = "localhost";
-        LoadCredential = "acme:/run/keymgr/acme";
+        LoadCredential = "caddy:/run/keymgr/caddy";
       };
       knot-reload = {
         after = [ "knot.service" ];
