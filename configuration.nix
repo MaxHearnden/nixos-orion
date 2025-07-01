@@ -463,7 +463,6 @@
           User = "keymgr";
           Group = "keymgr";
           RuntimeDirectory = "keymgr";
-          RuntimeDirectoryMode = "0700";
           RuntimeDirectoryPreserve = true;
           Type = "oneshot";
           RemainAfterExit = true;
@@ -471,9 +470,9 @@
         script = ''
           ${lib.getExe' pkgs.knot-dns "keymgr"} -t ACME >/run/keymgr/ACME
           for attr in id algorithm secret; do
-            ${lib.getExe pkgs.yq} .key.[]."$attr" </run/keymgr/ACME >/run/keymgr/ACME-"$attr"
+            ${lib.getExe pkgs.yq} -r .key.[]."$attr" </run/keymgr/ACME >/run/keymgr/ACME-"$attr"
           done
-        ''
+        '';
       };
       get-IP-address = {
         confinement.enable = true;
