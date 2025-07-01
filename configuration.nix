@@ -241,8 +241,7 @@
           extraConfig = ''
             @denied not {
               client_ip private_ranges
-              # For testing
-              not client_ip 192.168.1.165
+              not client_ip 192.168.1.1
             }
             abort @denied
             header {
