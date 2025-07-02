@@ -138,6 +138,7 @@
     };
     settings = {
       allowed-users = [ "max" "nix-gc" ];
+      auto-optimise-store = true;
       build-dir = "/nix/var/nix/builds";
       experimental-features = "cgroups nix-command flakes";
       keep-outputs = true;
