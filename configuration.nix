@@ -42,6 +42,8 @@
         @ NS dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /var/lib/ddns/zonefile
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.bogus.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.bogus-exists.zandoodle.me.uk.
       '';
       "knot/compsoc-dev.com.zone".text = ''
         $TTL 600
