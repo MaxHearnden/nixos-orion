@@ -153,6 +153,8 @@
       interactiveShellInit = ''
         fish_vi_key_bindings
 
+        set fish_color_command blue
+
         ${config.systemd.package}/bin/systemctl shutdown --quiet --when=show
 
         begin
