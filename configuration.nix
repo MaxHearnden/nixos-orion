@@ -167,11 +167,6 @@
       enable = true;
       config = {
         init.defaultBranch = "main";
-        safe.directory = [
-          "/home/max/nixos-config"
-          "/home/max/nixos-config/.git"
-          "/run/nixos-upgrade/nixos-config"
-        ];
         user = {
           email = "maxoscarhearnden@gmail.com";
           name = "MaxHearnden";
@@ -200,7 +195,11 @@
     '';
     wireshark.enable = true;
   };
-  security.polkit.enable = true;
+  security = {
+    doas.enable = true;
+    polkit.enable = true;
+    sudo.enable = false;
+  };
   services = {
     avahi.enable = false;
     dbus.implementation = "broker";
@@ -773,14 +772,14 @@
             nixos-rebuild = lib.getExe config.system.build.nixos-rebuild;
             setpriv = lib.getExe' pkgs.util-linux "setpriv";
           in ''
-            ${git} clone -b main --single-branch /home/max/nixos-config /run/nixos-upgrade/nixos-config
+            ${git} clone -b main --single-branch /etc/nixos /run/nixos-upgrade/nixos-config
             cd /run/nixos-upgrade/nixos-config
             ${git} checkout -b update
             ${nix} flake update  --commit-lock-file --refresh
             if ${nixos-rebuild} boot --flake .?ref=update; then
               ${git} checkout main
               ${git} merge --ff update
-              ${setpriv} --euid max --egid users --clear-groups ${git} push
+              ${git} push
             else
               ${git} checkout main
               ${nixos-rebuild} boot --flake .?ref=main
