@@ -198,7 +198,7 @@
   };
   security = {
     doas.enable = true;
-    pam.services.run0 = {};
+    pam.services.systemd-run0 = {};
     polkit.enable = true;
     sudo.enable = false;
   };
