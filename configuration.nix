@@ -167,6 +167,7 @@
       enable = true;
       config = {
         init.defaultBranch = "main";
+        safe.directory = "/etc/nixos";
         user = {
           email = "maxoscarhearnden@gmail.com";
           name = "MaxHearnden";
