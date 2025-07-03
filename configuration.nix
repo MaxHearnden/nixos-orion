@@ -530,10 +530,29 @@
           DynamicUser = true;
           User = "keymgr";
           Group = "keymgr";
+          IPAddressDeny = "any";
+          ProcSubset = "pid";
+          ProtectProc = "invisible";
+          PrivateNetwork = true;
+          PrivateUsers = true;
+          ProtectHome = true;
+          ProtectSystem = "strict";
+          RestrictRealtime = true;
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          RestrictNamespaces = true;
+          SystemCallArchitectures = "native";
+          CapabilityBoundingSet = "";
+          ProtectClock = true;
+          LockPersonality = true;
+          ProtectHostname = true;
+          RestrictAddressFamilies = true;
           RuntimeDirectory = "keymgr";
           RuntimeDirectoryPreserve = true;
+          MemoryDenyWriteExecute = true;
+          ProtectKernelLogs = true;
           Type = "oneshot";
           RemainAfterExit = true;
+          UMask = "077";
         };
         script = ''
           ${lib.getExe' pkgs.knot-dns "keymgr"} -t caddy >/run/keymgr/caddy
