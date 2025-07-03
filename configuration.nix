@@ -203,6 +203,10 @@
     pam.services.systemd-run0 = {};
     polkit.enable = true;
     sudo.enable = false;
+    wrappers = {
+      mount.enable = false;
+      umount.enable = false;
+    };
   };
   services = {
     avahi.enable = false;
