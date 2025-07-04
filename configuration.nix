@@ -160,9 +160,9 @@
 
           chain dns-rd {
             type nat hook prerouting priority dstnat; policy accept;
-            iifname enp49s0 udp dport 53 @th,87,1 == 1 ip saddr @local_ip redirect to :55 comment "Recursion desired"
-            iifname enp49s0 udp dport 53 @th,87,1 == 1 ip6 saddr @local_ip6 redirect to :55 comment "Recursion desired"
-            iifname enp49s0 udp dport 53 redirect to :54 comment "Recursion not desired"
+            iifname != lo udp dport 53 @th,87,1 == 1 ip saddr @local_ip redirect to :55 comment "Recursion desired"
+            iifname != lo udp dport 53 @th,87,1 == 1 ip6 saddr @local_ip6 redirect to :55 comment "Recursion desired"
+            iifname != lo udp dport 53 redirect to :54 comment "Recursion not desired"
           }
         '';
       };
