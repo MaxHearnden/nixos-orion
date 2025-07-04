@@ -204,6 +204,7 @@
     polkit.enable = true;
     sudo.enable = false;
     wrappers = {
+      chsh.enable = false;
       mount.enable = false;
       umount.enable = false;
     };
