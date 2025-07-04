@@ -118,8 +118,8 @@
   };
   networking = {
     firewall = {
-      allowedUDPPorts = [ 53 443 ];
-      allowedTCPPorts = [ 53 80 443 ];
+      allowedUDPPorts = [ 53 54 55 443 ];
+      allowedTCPPorts = [ 53 54 55 80 443 ];
       filterForward = true;
       interfaces = {
         web-vm.allowedUDPPorts = [ 67 ];
@@ -128,7 +128,45 @@
     };
     fqdn = "local.zandoodle.me.uk";
     hostName = "orion";
-    nftables.enable = true;
+    nat = {
+      enable = true;
+      externalInterface = "enp49s0";
+      internalInterfaces = [ "web-vm" "enp1s0"];
+    };
+    nftables = {
+      enable = true;
+      tables.dns-udp = {
+        family = "inet";
+        content = ''
+          set local_ip {
+            type ipv4_addr; flags constant, interval;
+            elements = {
+              127.0.0.0/8,
+              10.0.0.0/8,
+              100.64.0.0/10,
+              169.254.0.0/16,
+              192.168.0.0/16,
+              172.16.0.0/12,
+            }
+          }
+          set local_ip6 {
+            type ipv6_addr; flags constant, interval;
+            elements = {
+              ::1/128,
+              fc00::/7,
+              fe80::/10,
+            }
+          }
+
+          chain dns-rd {
+            type nat hook prerouting priority dstnat; policy accept;
+            iifname enp49s0 udp dport 53 @th,87,1 == 1 ip saddr @local_ip redirect to :55 comment "Recursion desired"
+            iifname enp49s0 udp dport 53 @th,87,1 == 1 ip6 saddr @local_ip6 redirect to :55 comment "Recursion desired"
+            iifname enp49s0 udp dport 53 redirect to :54 comment "Recursion not desired"
+          }
+        '';
+      };
+    };
     useNetworkd = true;
   };
   nix = {
@@ -325,7 +363,7 @@
           }
         ];
         server = {
-          listen = ["127.0.0.1@54" "::1@54"];
+          listen = ["0.0.0.0@54" "::@54"];
           identity = "dns.zandoodle.me.uk";
           nsid = "dns.zandoodle.me.uk";
         };
@@ -390,6 +428,17 @@
           do-not-query-localhost = false;
           ede = true;
           port = 55;
+          interface = [ "0.0.0.0" "::" ];
+          access-control = [
+            "10.0.0.0/8 allow"
+            "100.64.0.0/10 allow"
+            "169.254.0.0/16 allow"
+            "192.168.0.0/16 allow"
+            "172.16.0.0/12 allow"
+            "::1/128 allow"
+            "fc00::/7 allow"
+            "fe80::/10 allow"
+          ];
         };
         stub-zone = [
           {
@@ -635,8 +684,6 @@
         wantedBy = ["multi-user.target"];
       };
       knot.serviceConfig = {
-        IPAddressDeny = "any";
-        IPAddressAllow = "localhost";
         LoadCredential = "caddy:/run/keymgr/caddy";
       };
       knot-reload = {
