@@ -1,4 +1,4 @@
-{ lib, modulesPath, ... }: {
+{ lib, modulesPath, pkgs, ... }: {
   boot.initrd.systemd.enable = true;
   environment.etc."resolv.conf".text = ''
     nameserver 192.168.2.1
@@ -24,6 +24,9 @@
     users.nixos = {
       isNormalUser = true;
       extraGroups = [ "wheel" ];
+      packages = [
+        pkgs.dig
+      ];
       password = "nixos";
     };
   };
