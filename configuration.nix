@@ -373,6 +373,12 @@
             parent = "unbound";
           }
         ];
+        template = [
+          {
+            id = "default";
+            global-module = ["mod-cookies" "mod-rrl"];
+          }
+        ];
         zone = [
           {
             domain = "bogus.zandoodle.me.uk";
