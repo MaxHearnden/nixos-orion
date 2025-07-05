@@ -5,7 +5,10 @@
       "riscv64-linux"
     ];
     initrd.systemd.enable = true;
-    kernel.sysctl."net.ipv4.tcp_ecn" = 1;
+    kernel.sysctl = {
+      "net.ipv4.tcp_ecn" = 1;
+      "net.ipv4.tcp_fastopen" = 3;
+    };
     kernelPackages = pkgs.linuxPackages_latest;
     loader.systemd-boot.enable = true;
   };
@@ -363,9 +366,11 @@
           }
         ];
         server = {
-          listen = ["0.0.0.0@54" "::@54"];
           identity = "dns.zandoodle.me.uk";
+          listen = ["0.0.0.0@54" "::@54"];
           nsid = "dns.zandoodle.me.uk";
+          tcp-fastopen = true;
+          tcp-reuseport = true;
         };
         submission = [
           {
@@ -431,10 +436,6 @@
       resolveLocalQueries = false;
       settings = {
         server = {
-          do-not-query-localhost = false;
-          ede = true;
-          port = 55;
-          interface = [ "0.0.0.0" "::" ];
           access-control = [
             "10.0.0.0/8 allow"
             "100.64.0.0/10 allow"
@@ -445,6 +446,11 @@
             "fc00::/7 allow"
             "fe80::/10 allow"
           ];
+          do-not-query-localhost = false;
+          ede = true;
+          interface = [ "0.0.0.0" "::" ];
+          num-threads = 12;
+          port = 55;
         };
         stub-zone = [
           {
