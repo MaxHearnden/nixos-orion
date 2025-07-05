@@ -121,8 +121,11 @@
   };
   networking = {
     firewall = {
-      allowedUDPPorts = [ 53 54 55 443 ];
-      allowedTCPPorts = [ 53 54 55 80 443 ];
+      allowedUDPPorts = [ 53 443 ];
+      allowedTCPPorts = [ 53 80 443 ];
+      extraInputRules = ''
+        ct status dnat accept comment "allow redirects"
+      '';
       filterForward = true;
       interfaces = {
         web-vm.allowedUDPPorts = [ 67 ];
@@ -138,7 +141,7 @@
     };
     nftables = {
       enable = true;
-      tables.dns-udp = {
+      tables.dns = {
         family = "inet";
         content = ''
           set local_ip {
@@ -166,6 +169,8 @@
             fib daddr . iif . mark type local udp dport 53 @th,87,1 == 1 ip saddr @local_ip redirect to :55 comment "Recursion desired"
             fib daddr . iif . mark type local udp dport 53 @th,87,1 == 1 ip6 saddr @local_ip6 redirect to :55 comment "Recursion desired"
             fib daddr . iif . mark type local udp dport 53 redirect to :54 comment "Recursion not desired"
+            fib daddr . iif . mark type local tcp dport 53 ip saddr != @local_ip redirect to :54 comment "Tcp recursion not desired"
+            fib daddr . iif . mark type local tcp dport 53 ip6 saddr != @local_ip6 redirect to :54 comment "Tcp recursion not desired"
           }
         '';
       };
