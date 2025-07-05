@@ -172,6 +172,12 @@
             fib daddr . iif . mark type local tcp dport 53 ip saddr != @local_ip redirect to :54 comment "Tcp recursion not desired"
             fib daddr . iif . mark type local tcp dport 53 ip6 saddr != @local_ip6 redirect to :54 comment "Tcp recursion not desired"
           }
+
+          chain dns-rd-output {
+            type nat hook output priority dstnat; policy accept;
+            fib daddr . mark type local udp dport 53 @th,87,1 == 1 redirect to :55 comment "Recursion desired"
+            fib daddr . mark type local udp dport 53 redirect to :54 comment "Recursion not desired"
+          }
         '';
       };
     };
