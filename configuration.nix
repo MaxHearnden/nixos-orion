@@ -124,7 +124,6 @@
       allowedUDPPorts = [ 53 54 443 ];
       allowedTCPPorts = [ 53 54 80 443 ];
       extraInputRules = ''
-        ct status dnat accept comment "allow redirects"
         meta l4proto {udp, tcp} th dport 55 ip saddr @local_ip accept
         meta l4proto {udp, tcp} th dport 55 ip6 saddr @local_ip6 accept
       '';
