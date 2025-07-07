@@ -192,7 +192,7 @@
           }
 
           chain input {
-            type filter hook input priority filter; policy drop;
+            type filter hook input priority filter + 10; policy drop;
             ct state vmap { invalid : drop, established : accept, related : accept }
             tcp dport 22 ip saddr == @local_ip socket cgroupv2 level 2 @sshd accept
             tcp dport 22 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @sshd accept
@@ -214,10 +214,12 @@
       extraDeletions = ''
         table inet services {
           chain input {
-            type filter hook input priority filter; policy accept;
           }
         }
         flush chain inet services input
+        delete chain inet services input
+        destroy set inet services local_ip
+        destroy set inet services local_ip6
       '';
       tables = {
         dns = {
