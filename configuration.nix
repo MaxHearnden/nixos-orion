@@ -433,6 +433,7 @@
             "fe80::/10 allow"
           ];
           do-not-query-localhost = false;
+          domain-insecure = "broadband";
           ede = true;
           interface = [ "0.0.0.0" "::" ];
           num-threads = 12;
@@ -447,6 +448,11 @@
           {
             name = "compsoc-dev.com";
             stub-addr = "127.0.0.1@54";
+            stub-no-cache = true;
+          }
+          {
+            name = "broadband";
+            stub-addr = "192.168.1.1";
             stub-no-cache = true;
           }
         ];
