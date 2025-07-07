@@ -141,7 +141,84 @@
       internalInterfaces = [ "web-vm" "enp1s0"];
     };
     nftables = {
+      checkRuleset = false;
       enable = true;
+      flushRuleset = false;
+      ruleset = ''
+        table inet services {
+          set caddy {
+            type cgroupsv2
+          }
+
+          set dnsdist {
+            type cgroupsv2
+          }
+
+          set knot {
+            type cgroupsv2
+          }
+
+          set sshd {
+            type cgroupsv2
+          }
+
+          set systemd_networkd {
+            type cgroupsv2
+          }
+
+          set unbound {
+            type cgroupsv2
+          }
+
+          set local_ip {
+            type ipv4_addr; flags constant, interval;
+            elements = {
+              127.0.0.0/8,
+              10.0.0.0/8,
+              100.64.0.0/10,
+              169.254.0.0/16,
+              192.168.0.0/16,
+              172.16.0.0/12,
+            }
+          }
+
+          set local_ip6 {
+            type ipv6_addr; flags constant, interval;
+            elements = {
+              ::1/128,
+              fc00::/7,
+              fe80::/10,
+            }
+          }
+
+          chain input {
+            type filter hook input priority filter; policy drop;
+            ct state vmap { invalid : drop, established : accept, related : accept }
+            tcp dport 22 ip saddr == @local_ip socket cgroupv2 level 2 @sshd accept
+            tcp dport 22 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @sshd accept
+            meta l4proto {udp, tcp} th dport 53 socket cgroupv2 level 2 @dnsdist accept
+            meta l4proto {udp, tcp} th dport 54 socket cgroupv2 level 2 @knot accept
+            meta l4proto {udp, tcp} th dport 55 ip saddr == @local_ip socket cgroupv2 level 2 @unbound accept
+            meta l4proto {udp, tcp} th dport 55 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @unbound accept
+            tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
+            udp dport 443 socket cgroupv2 level 2 @caddy accept
+            udp dport 67 iifname { web-vm, enp1s0 } socket cgroupv2 level 2 @systemd_networkd accept
+            udp dport 68 iifname enp49s0 socket cgroupv2 level 2 @systemd_networkd accept
+            icmpv6 type != { nd-redirect, 139 } accept
+            ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
+            icmp type echo-request accept comment "allow ping"
+            log prefix "CGroup Drop "
+          }
+        }
+      '';
+      extraDeletions = ''
+        table inet services {
+          chain input {
+            type filter hook input priority filter; policy accept;
+          }
+        }
+        flush chain inet services input
+      '';
       tables = {
         dns = {
           family = "inet";
@@ -570,6 +647,7 @@
         LoadCredential = map (attr: "tsig-${attr}:/run/keymgr/caddy-${attr}") [ "id" "secret" "algorithm" ];
         LockPersonality = true;
         MemoryDenyWriteExecute = true;
+        NFTSet = "cgroup:inet:services:caddy";
         ProcSubset = "pid";
         ProtectClock = true;
         ProtectControlGroups = true;
@@ -600,6 +678,7 @@
             ""
             "${lib.getExe inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.system}.dnsdist} --check-config --config /etc/dnsdist/dnsdist.conf"
           ];
+          NFTSet = "cgroup:inet:services:dnsdist";
           User = "dnsdist";
           Group = "dnsdist";
         };
@@ -713,6 +792,7 @@
       };
       knot.serviceConfig = {
         LoadCredential = "caddy:/run/keymgr/caddy";
+        NFTSet = "cgroup:inet:services:knot";
       };
       knot-reload = {
         after = [ "knot.service" ];
@@ -904,7 +984,10 @@
         SystemCallArchitectures = "native";
         SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
       };
+      sshd.serviceConfig.NFTSet = "cgroup:inet:services:sshd";
       systemd-machined.enable = false;
+      systemd-networkd.serviceConfig.NFTSet = "cgroup:inet:services:systemd_networkd";
+      unbound.serviceConfig.NFTSet = "cgroup:inet:services:unbound";
       web-vm = {
         confinement.enable = true;
         serviceConfig = {
