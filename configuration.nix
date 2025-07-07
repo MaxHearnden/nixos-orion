@@ -121,10 +121,12 @@
   };
   networking = {
     firewall = {
-      allowedUDPPorts = [ 53 443 ];
-      allowedTCPPorts = [ 53 80 443 ];
+      allowedUDPPorts = [ 53 54 443 ];
+      allowedTCPPorts = [ 53 54 80 443 ];
       extraInputRules = ''
         ct status dnat accept comment "allow redirects"
+        udp dport 55 ip saddr @local_ip accept
+        udp dport 55 ip6 saddr @local_ip6 accept
       '';
       filterForward = true;
       interfaces = {
@@ -141,9 +143,47 @@
     };
     nftables = {
       enable = true;
-      tables.dns = {
-        family = "inet";
-        content = ''
+      tables = {
+        dns = {
+          family = "inet";
+          content = ''
+            set local_ip {
+              type ipv4_addr; flags constant, interval;
+              elements = {
+                127.0.0.0/8,
+                10.0.0.0/8,
+                100.64.0.0/10,
+                169.254.0.0/16,
+                192.168.0.0/16,
+                172.16.0.0/12,
+              }
+            }
+            set local_ip6 {
+              type ipv6_addr; flags constant, interval;
+              elements = {
+                ::1/128,
+                fc00::/7,
+                fe80::/10,
+              }
+            }
+
+            chain dns-rd {
+              type nat hook prerouting priority dstnat; policy accept;
+              fib daddr . mark type local udp dport 53 @th,87,1 == 1 ip saddr @local_ip redirect to :55 comment "Recursion desired"
+              fib daddr . mark type local udp dport 53 @th,87,1 == 1 ip6 saddr @local_ip6 redirect to :55 comment "Recursion desired"
+              fib daddr . mark type local udp dport 53 redirect to :54 comment "Recursion not desired"
+              fib daddr . mark type local tcp dport 53 ip saddr != @local_ip redirect to :54 comment "Tcp recursion not desired"
+              fib daddr . mark type local tcp dport 53 ip6 saddr != @local_ip6 redirect to :54 comment "Tcp recursion not desired"
+            }
+
+            chain dns-rd-output {
+              type nat hook output priority dstnat; policy accept;
+              fib daddr . mark type local udp dport 53 @th,87,1 == 1 redirect to :55 comment "Recursion desired"
+              fib daddr . mark type local udp dport 53 redirect to :54 comment "Recursion not desired"
+            }
+          '';
+        };
+        nixos-fw.content = ''
           set local_ip {
             type ipv4_addr; flags constant, interval;
             elements = {
@@ -162,21 +202,6 @@
               fc00::/7,
               fe80::/10,
             }
-          }
-
-          chain dns-rd {
-            type nat hook prerouting priority dstnat; policy accept;
-            fib daddr . mark type local udp dport 53 @th,87,1 == 1 ip saddr @local_ip redirect to :55 comment "Recursion desired"
-            fib daddr . mark type local udp dport 53 @th,87,1 == 1 ip6 saddr @local_ip6 redirect to :55 comment "Recursion desired"
-            fib daddr . mark type local udp dport 53 redirect to :54 comment "Recursion not desired"
-            fib daddr . mark type local tcp dport 53 ip saddr != @local_ip redirect to :54 comment "Tcp recursion not desired"
-            fib daddr . mark type local tcp dport 53 ip6 saddr != @local_ip6 redirect to :54 comment "Tcp recursion not desired"
-          }
-
-          chain dns-rd-output {
-            type nat hook output priority dstnat; policy accept;
-            fib daddr . mark type local udp dport 53 @th,87,1 == 1 redirect to :55 comment "Recursion desired"
-            fib daddr . mark type local udp dport 53 redirect to :54 comment "Recursion not desired"
           }
         '';
       };
