@@ -670,33 +670,6 @@
         SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
         UMask = "077";
       };
-      dbus-broker.serviceConfig = {
-        CapabilityBoundingSet = "";
-        Group = "messagebus";
-        LockPersonality = true;
-        MemoryDenyWriteExecute = true;
-        NoNewPrivileges = true;
-        ProcSubset = "pid";
-        ProtectClock = true;
-        ProtectControlGroups = true;
-        ProtectHome = true;
-        ProtectHostname = true;
-        ProtectKernelLogs = true;
-        ProtectKernelModules = true;
-        ProtectKernelTunables = true;
-        ProtectProc = "invisible";
-        IPAddressDeny = "any";
-        PrivateNetwork = true;
-        RemoveIPC = true;
-        RestrictAddressFamilies = "AF_UNIX";
-        RestrictNamespaces = true;
-        RestrictRealtime = true;
-        RestrictSUIDSGID = true;
-        SystemCallArchitectures = "native";
-        SystemCallFilter = [ "@system-service" "~@resources" ];
-        UMask = "077";
-        User = "messagebus";
-      };
       dnsdist = {
         serviceConfig = {
           ExecStart = [
