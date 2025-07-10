@@ -295,7 +295,7 @@
       allowed-users = [ "max" "nix-gc" ];
       auto-optimise-store = true;
       build-dir = "/nix/var/nix/builds";
-      experimental-features = "cgroups nix-command flakes";
+      experimental-features = "cgroups nix-command flakes ca-derivations";
       keep-outputs = true;
       store = "daemon";
       use-cgroups = true;
