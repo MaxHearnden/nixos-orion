@@ -673,9 +673,11 @@
       dbus-broker.serviceConfig = {
         CapabilityBoundingSet = "";
         Group = "messagebus";
+        IPAddressDeny = "any";
         LockPersonality = true;
         MemoryDenyWriteExecute = true;
         NoNewPrivileges = true;
+        PrivateNetwork = true;
         ProcSubset = "pid";
         ProtectClock = true;
         ProtectControlGroups = true;
@@ -685,8 +687,6 @@
         ProtectKernelModules = true;
         ProtectKernelTunables = true;
         ProtectProc = "invisible";
-        IPAddressDeny = "any";
-        PrivateNetwork = true;
         RemoveIPC = true;
         RestrictAddressFamilies = "AF_UNIX";
         RestrictNamespaces = true;
