@@ -301,6 +301,7 @@
       use-cgroups = true;
     };
   };
+  nixpkgs.config.contentAddressedByDefault = true;
   programs = {
     command-not-found.enable = false;
     fish = {
