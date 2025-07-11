@@ -1,5 +1,8 @@
 { lib, modulesPath, pkgs, ... }: {
-  boot.initrd.systemd.enable = true;
+  boot = {
+    kernelPackages = pkgs.linuxPackages_latest;
+    initrd.systemd.enable = true;
+  };
   environment.etc."resolv.conf".text = ''
     nameserver 192.168.2.1
     options trust-ad edns0
