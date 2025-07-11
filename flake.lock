@@ -1,11 +1,7 @@
 {
   "nodes": {
     "nixos-kexec": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
+      "flake": false,
       "locked": {
         "lastModified": 1713028336,
         "narHash": "sha256-TV4DNEnNruInAmmHYHQScPX+q3ZSKRdPFvr7xjl6WSA=",
