@@ -1,4 +1,13 @@
-{ config, inputs, lib, pkgs, ... }: {
+{ config, inputs, lib, pkgs, pkgs-unstable, ... }:
+
+let
+  nixos-kexec = pkgs.writeShellApplication {
+    name = "nixos-kexec";
+    text = lib.strings.fileContents "${inputs.nixos-kexec}/nixos-kexec";
+  };
+in
+
+{
   boot = {
     binfmt.emulatedSystems = [
       "x86_64-linux"
@@ -642,7 +651,7 @@
       wait-online.enable = false;
     };
     packages = [
-      inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.system}.dnsdist
+      pkgs-unstable.${config.nixpkgs.system}.dnsdist
     ];
     services = {
       caddy.serviceConfig = {
@@ -675,11 +684,11 @@
         serviceConfig = {
           ExecStart = [
             ""
-            "${lib.getExe inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.system}.dnsdist} --supervised --disable-syslog --config /etc/dnsdist/dnsdist.conf"
+            "${lib.getExe pkgs-unstable.${config.nixpkgs.system}.dnsdist} --supervised --disable-syslog --config /etc/dnsdist/dnsdist.conf"
           ];
           ExecStartPre = [
             ""
-            "${lib.getExe inputs.nixpkgs-unstable.legacyPackages.${config.nixpkgs.system}.dnsdist} --check-config --config /etc/dnsdist/dnsdist.conf"
+            "${lib.getExe pkgs-unstable.${config.nixpkgs.system}.dnsdist} --check-config --config /etc/dnsdist/dnsdist.conf"
           ];
           NFTSet = "cgroup:inet:services:dnsdist";
           User = "dnsdist";
@@ -958,7 +967,7 @@
             if [ "$booted" = "$built" ]; then
               ${nixos-rebuild} test --flake .
             else
-              ${lib.getExe inputs.nixos-kexec.packages.${config.nixpkgs.system}.default} --when "1 hour left"
+              ${lib.getExe nixos-kexec} --when "1 hour left"
             fi
           '';
         serviceConfig = {
@@ -1075,10 +1084,10 @@
           file
           gcc
           htop
-          inputs.nixos-kexec.packages.${config.nixpkgs.system}.default
           jq
           ldns
           ldns.examples
+          nixos-kexec
           ripgrep
           tio
         ];
