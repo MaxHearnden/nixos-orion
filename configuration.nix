@@ -1087,6 +1087,8 @@ in
           jq
           ldns
           ldns.examples
+          lshw
+          lsof
           nixos-kexec
           ripgrep
           tio
