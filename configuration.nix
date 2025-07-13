@@ -140,6 +140,7 @@ in
       interfaces = {
         web-vm.allowedUDPPorts = [ 67 ];
         enp1s0.allowedUDPPorts = [ 67 ];
+        shadow-lan.allowedUDPPorts = [ 67 ];
       };
     };
     fqdn = "local.zandoodle.me.uk";
@@ -147,7 +148,7 @@ in
     nat = {
       enable = true;
       externalInterface = "enp49s0";
-      internalInterfaces = [ "web-vm" "enp1s0"];
+      internalInterfaces = [ "web-vm" "enp1s0" "shadow-lan" ];
     };
     nftables = {
       checkRuleset = false;
@@ -211,7 +212,7 @@ in
             meta l4proto {udp, tcp} th dport 55 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @unbound accept
             tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
             udp dport 443 socket cgroupv2 level 2 @caddy accept
-            udp dport 67 iifname { web-vm, enp1s0 } socket cgroupv2 level 2 @systemd_networkd accept
+            udp dport 67 iifname { web-vm, enp1s0, shadow-lan } socket cgroupv2 level 2 @systemd_networkd accept
             udp dport 68 iifname enp49s0 socket cgroupv2 level 2 @systemd_networkd accept
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
@@ -595,12 +596,13 @@ in
     network = {
       enable = true;
       netdevs = {
-        # "10-vm-bridge" = {
-        #   netdevConfig = {
-        #     Kind = "bridge";
-        #     Name = "vm-bridge";
-        #   };
-        # };
+        "10-shadow-lan" = {
+          netdevConfig = {
+            Kind = "vlan";
+            Name = "shadow-lan";
+          };
+          vlanConfig.Id = 20;
+        };
         "10-web-vm" = {
           netdevConfig = {
             Kind = "tap";
@@ -628,6 +630,19 @@ in
           dhcpServerConfig = {
             DNS = "192.168.0.1";
           };
+        };
+        "10-enp49s0" = {
+          DHCP = "yes";
+          matchConfig.Name = "enp49s0";
+          networkConfig.IPv6PrivacyExtensions = "kernel";
+          vlan = ["shadow-lan"];
+        };
+        "10-shadow-lan" = {
+          address = [ "192.168.4.1/24" ];
+          linkConfig.RequiredForOnline = false;
+          matchConfig.Name = "shadow-lan";
+          networkConfig.DHCPServer = true;
+          dhcpServerConfig.DNS = "_server_address";
         };
         "10-web-vm" = {
           matchConfig = {
