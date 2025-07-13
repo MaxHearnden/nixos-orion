@@ -1102,6 +1102,7 @@ in
           btop
           dig
           dropwatch
+          ethtool
           file
           gcc
           htop
