@@ -5,6 +5,7 @@ let
     name = "nixos-kexec";
     text = lib.strings.fileContents "${inputs.nixos-kexec}/nixos-kexec";
   };
+  web-vm = pkgs.nixos ./vm.nix;
 in
 
 {
@@ -1027,7 +1028,7 @@ in
           BindReadOnlyPaths = [ "/dev/kvm" "/dev/net/tun" ];
           CapabilityBoundingSet = "";
           DeviceAllow = [ "/dev/kvm" "/dev/net/tun" ];
-          ExecStart = "${lib.getExe inputs.self.nixosConfigurations.web-vm.config.system.build.vm}";
+          ExecStart = "${lib.getExe web-vm.config.system.build.vm}";
           Group = "web-vm";
           IPAddressDeny = "any";
           LockPersonality = true;
@@ -1125,5 +1126,10 @@ in
         isSystemUser = true;
       };
     };
+  };
+  virtualisation.vmVariant = {
+    boot.binfmt.emulatedSystems = lib.mkForce [];
+    nixpkgs.config.contentAddressedByDefault =
+      lib.mkForce false;
   };
 }

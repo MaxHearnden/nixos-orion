@@ -36,5 +36,17 @@
         system = "aarch64-linux";
       };
     };
+    packages = lib.genAttrs lib.systems.flakeExposed (system: {
+      default = (lib.nixosSystem {
+        modules = [
+          ./configuration.nix
+        ];
+        specialArgs = {
+          inherit inputs;
+          pkgs-unstable = nixpkgs-unstable.legacyPackages;
+        };
+        inherit system;
+      }).config.system.build.vm;
+    });
   };
 }

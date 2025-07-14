@@ -10,7 +10,6 @@
   imports = [ "${modulesPath}/profiles/perlless.nix" ];
   networking.firewall.allowedTCPPorts = [ 80 ];
   nix.enable = false;
-  nixpkgs.config.contentAddressedByDefault = true;
   services = {
     nginx.enable = true;
     userborn.enable = true;
