@@ -410,7 +410,7 @@ in
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
               X-Content-Type-Options nosniff
-              Content-Security-Policy "default-src 'none'; img-src https://compsoc-dev.com/img/logo/full-transparent.webp https://compsoc-dev.com/img/logo/TPP.png; style-src https://compsoc-dev.com/index_final.css; font-src https://compsoc-dev.com/orbitron/Orbitron%20Light.otf https://compsoc-dev.com/Poppins/Poppins-Light.ttf; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Content-Security-Policy "default-src 'none'; img-src https://compsoc-dev.com/img/logo/full-transparent.webp https://compsoc-dev.com/img/logo/TPP.png; style-src https://compsoc-dev.com/index_final.css https://compsoc-dev.com/about_final.css; font-src https://compsoc-dev.com/orbitron/Orbitron%20Light.otf https://compsoc-dev.com/Poppins/Poppins-Light.ttf; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
             };
             root * ${compsoc-website}
             file_server
