@@ -1,6 +1,7 @@
 { config, inputs, lib, pkgs, pkgs-unstable, ... }:
 
 let
+  compsoc-website = pkgs.callPackage "${inputs.compsoc-website}/package.nix" {};
   nixos-kexec = pkgs.writeShellApplication {
     name = "nixos-kexec";
     text = lib.strings.fileContents "${inputs.nixos-kexec}/nixos-kexec";
@@ -409,9 +410,10 @@ in
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
               X-Content-Type-Options nosniff
-              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Content-Security-Policy "default-src 'none'; img-src https://compsoc-dev.com/img/logo/full-transparent.webp https://compsoc-dev.com/img/logo/TPP.png; style-src https://compsoc-dev.com/index_final.css; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
             };
-            respond "This is a test of config ${inputs.self}"
+            root * ${compsoc-website}
+            file_server
           '';
         };
         "zandoodle.me.uk" = {

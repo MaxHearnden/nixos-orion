@@ -1,5 +1,9 @@
 {
   inputs = {
+    compsoc-website = {
+      flake = false;
+      url = "github:MaxHearnden/Compsoc-Website-cobalt";
+    };
     nixos-kexec = {
       flake = false;
       url = "github:MaxHearnden/nixos-kexec";
