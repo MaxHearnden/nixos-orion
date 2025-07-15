@@ -410,11 +410,17 @@ in
             encode
             header {
               Content-Security-Policy "default-src 'none'; img-src https://compsoc-dev.com/img/logo/full-transparent.webp https://compsoc-dev.com/img/logo/TPP.png https://compsoc-dev.com/img/icon/carbon-arrow-right.svg; style-src https://compsoc-dev.com/index_final.css https://compsoc-dev.com/about_final.css; font-src https://compsoc-dev.com/orbitron.woff2 https://compsoc-dev.com/poppins.woff2; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy: same-origin
               Referrer-Policy no-referrer
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
               X-Content-Type-Options nosniff
             };
             root * ${compsoc-website}
+            respond /.well-known/security.txt <<EOF
+            Contact: https://github.com/MaxHearnden/Compsoc-Website-cobalt/issues
+            Expires: 2026-07-15T20:03:40+01:00
+
+            EOF
             file_server
           '';
         };
