@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "compsoc-website": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1752539371,
+        "narHash": "sha256-xIIfqu4coqg4B+CCvH50yx7OrBLDP5BusjjLnGOrtxI=",
+        "owner": "MaxHearnden",
+        "repo": "Compsoc-Website-cobalt",
+        "rev": "a997c09405774a9aed412e263e20c55109b73b6d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "MaxHearnden",
+        "repo": "Compsoc-Website-cobalt",
+        "type": "github"
+      }
+    },
     "nixos-kexec": {
       "flake": false,
       "locked": {
@@ -50,6 +66,7 @@
     },
     "root": {
       "inputs": {
+        "compsoc-website": "compsoc-website",
         "nixos-kexec": "nixos-kexec",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable"
