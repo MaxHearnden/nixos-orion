@@ -3,11 +3,11 @@
     "compsoc-website": {
       "flake": false,
       "locked": {
-        "lastModified": 1752579208,
-        "narHash": "sha256-OW3QaCXGmT+2pU4w0/akx8ZjdAyOs0zsOwOmnylMWOk=",
+        "lastModified": 1752579973,
+        "narHash": "sha256-YSMu3q+2O7peC31rl3CUrB8eKaRiNDjzI0Q70/9IGmo=",
         "owner": "MaxHearnden",
         "repo": "Compsoc-Website-cobalt",
-        "rev": "36ece5d69bc8342cfebcbda9a66d73ad67000d60",
+        "rev": "fa55f4e3d413c8028ab3c4962a0f09af3aa7bd9e",
         "type": "github"
       },
       "original": {
