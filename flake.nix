@@ -17,13 +17,7 @@
     inherit (nixpkgs) legacyPackages lib;
     libVersionInfoOverlay =
       import "${nixpkgs-unstable}/lib/flake-version-info.nix" nixpkgs-unstable;
-    lib-unstable = nixpkgs-unstable.lib;
-    pkgs-unstable =
-      lib.genAttrs nixpkgs-unstable.lib.systems.flakeExposed (system:
-        (import nixpkgs-unstable { inherit system; }).extend (
-          final: prev: {
-            lib = prev.lib.extend libVersionInfoOverlay;
-          }));
+    pkgs-unstable = nixpkgs-unstable.legacyPackages;
   in {
     nixosConfigurations = {
       orion = lib.nixosSystem {

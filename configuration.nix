@@ -319,7 +319,6 @@ in
       use-cgroups = true;
     };
   };
-  nixpkgs.config.contentAddressedByDefault = true;
   programs = {
     command-not-found.enable = false;
     fish = {
@@ -402,7 +401,7 @@ in
       logFormat = "level INFO";
       package = pkgs.caddy.withPlugins {
         plugins = ["github.com/caddy-dns/rfc2136@v1.0.0"];
-        hash = "sha256-/7E84gGwJ6LooX0hXKhkhyf9+BrGjnLGLISEW5kJvLA=";
+        hash = "sha256-vvaCVxDMeu80v8zQY+x3ghdCRMi4Y0BE1lECUECxL+I=";
       };
       virtualHosts = {
         "compsoc-dev.com" = {
@@ -1137,9 +1136,5 @@ in
       };
     };
   };
-  virtualisation.vmVariant = {
-    boot.binfmt.emulatedSystems = lib.mkForce [];
-    nixpkgs.config.contentAddressedByDefault =
-      lib.mkForce false;
-  };
+  virtualisation.vmVariant.boot.binfmt.emulatedSystems = lib.mkForce [];
 }
