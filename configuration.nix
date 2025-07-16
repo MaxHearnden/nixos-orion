@@ -408,7 +408,7 @@ in
           extraConfig = ''
             encode
             header {
-              Content-Security-Policy "default-src 'none'; img-src https://compsoc-dev.com/img/logo/full-transparent.webp https://compsoc-dev.com/img/logo/TPP.png; style-src https://compsoc-dev.com/index_final.css https://compsoc-dev.com/about_final.css; font-src https://compsoc-dev.com/orbitron.woff2 https://compsoc-dev.com/poppins.woff2; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Content-Security-Policy "default-src 'none'; img-src https://compsoc-dev.com/img/logo/full-transparent.webp https://compsoc-dev.com/img/logo/TPP.png; style-src https://compsoc-dev.com/index_final.css https://compsoc-dev.com/about_final.css; font-src https://compsoc-dev.com/orbitron.woff2 https://compsoc-dev.com/poppins.woff2 https://compsoc-dev.com/poppins-light.woff2; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
               Cross-Origin-Resource-Policy: same-origin
               Referrer-Policy no-referrer
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
