@@ -305,6 +305,8 @@ in
     useNetworkd = true;
   };
   nix = {
+    daemonIOSchedClass = "idle";
+    daemonCPUSchedPolicy = "idle";
     gc = {
       automatic = true;
       options = "--delete-older-than 7d";
