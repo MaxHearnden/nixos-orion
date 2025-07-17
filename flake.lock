@@ -3,11 +3,11 @@
     "compsoc-website": {
       "flake": false,
       "locked": {
-        "lastModified": 1752623535,
-        "narHash": "sha256-mVIGqLljt2Ct99c5Mni0/DphK2/Cn/YU+zpasBV6OCs=",
+        "lastModified": 1752705269,
+        "narHash": "sha256-JwRwNhQ8a6PW8K9lpKlJll4+M5PmtPb9AcQAuOyrhd4=",
         "owner": "MaxHearnden",
         "repo": "Compsoc-Website-cobalt",
-        "rev": "cc746e56a2c3b18afc293826c56f8639eed931b5",
+        "rev": "aa5e4dfdd291501686d6a18730f07fff302403b7",
         "type": "github"
       },
       "original": {
@@ -34,11 +34,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1752436162,
-        "narHash": "sha256-Kt1UIPi7kZqkSc5HVj6UY5YLHHEzPBkgpNUByuyxtlw=",
+        "lastModified": 1752620740,
+        "narHash": "sha256-f3pO+9lg66mV7IMmmIqG4PL3223TYMlnlw+pnpelbss=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "dfcd5b901dbab46c9c6e80b265648481aafb01f8",
+        "rev": "32a4e87942101f1c9f9865e04dc3ddb175f5f32e",
         "type": "github"
       },
       "original": {
