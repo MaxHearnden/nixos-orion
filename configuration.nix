@@ -90,13 +90,19 @@ in
         @ CAA 0 issuevmc ";"
         @ NS dns
         $INCLUDE /etc/knot/no-email.zone.include
+        $INCLUDE /etc/knot/no-email.zone.include cardgames.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
+        $INCLUDE /var/lib/ddns/zonefile cardgames.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/zonefile wss.cardgames.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.cardgames.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.wss.cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.local.zandoodle.me.uk.
         bogus-exists TYPE65534 \# 0
         local IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
@@ -435,6 +441,26 @@ in
             respond "This is a test of config ${inputs.self}"
           '';
         };
+        "wss.cardgames.zandoodle.me.uk" = {
+          extraConfig = ''
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+            };
+            respond "This is a test of config ${inputs.self}"
+          '';
+        };
+        "cardgames.zandoodle.me.uk" = {
+          extraConfig = ''
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+            };
+            respond "This is a test of config ${inputs.self}"
+          '';
+        };
         "local.zandoodle.me.uk" = {
           extraConfig = ''
             @denied not {
@@ -464,7 +490,12 @@ in
             key = ["caddy"];
             update-owner = "name";
             update-owner-match = "equal";
-            update-owner-name = [ "_acme-challenge" "_acme-challenge.local" ];
+            update-owner-name = [
+              "_acme-challenge"
+              "_acme-challenge.wss.cardgames"
+              "_acme-challenge.cardgames"
+              "_acme-challenge.local"
+            ];
             update-type = "TXT";
           }
         ];
