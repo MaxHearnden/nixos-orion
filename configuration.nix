@@ -498,6 +498,21 @@ in
             ];
             update-type = "TXT";
           }
+          {
+            id = "transfer";
+            address = [
+              "10.0.0.0/8"
+              "100.64.0.0/10"
+              "127.0.0.0/8"
+              "169.254.0.0/16"
+              "192.168.0.0/16"
+              "172.16.0.0/12"
+              "::1/128"
+              "fc00::/7"
+              "fe80::/10"
+            ];
+            action = "transfer";
+          }
         ];
         policy = [
           {
@@ -535,6 +550,7 @@ in
         ];
         zone = [
           {
+            acl = [ "transfer" ];
             domain = "bogus.zandoodle.me.uk";
             file = "/etc/knot/bogus.zandoodle.me.uk.zone";
             journal-content = "all";
@@ -542,6 +558,7 @@ in
             zonefile-sync = -1;
           }
           {
+            acl = [ "transfer" ];
             domain = "bogus-exists.zandoodle.me.uk";
             file = "/etc/knot/bogus.zandoodle.me.uk.zone";
             journal-content = "all";
@@ -549,7 +566,7 @@ in
             zonefile-sync = -1;
           }
           {
-            acl = [ "caddy-acme" ];
+            acl = [ "caddy-acme" "transfer" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "compsoc-dev.com";
@@ -561,7 +578,7 @@ in
             zonefile-sync = -1;
           }
           {
-            acl = [ "caddy-acme" ];
+            acl = [ "caddy-acme" "transfer" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
