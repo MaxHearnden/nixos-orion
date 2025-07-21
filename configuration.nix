@@ -7,6 +7,25 @@ let
     text = lib.strings.fileContents "${inputs.nixos-kexec}/nixos-kexec";
   };
   web-vm = pkgs.nixos ./vm.nix;
+  cardgames =
+    if builtins.pathExists "${inputs.cardgames}/cardgames" then
+      pkgs.nix-gitignore.gitignoreSourcePure [
+        ".git*"
+        "Cpp"
+        "dominion/img/domonion-parts.png"
+        "LICENSE"
+      ] inputs.cardgames
+    else
+      pkgs.emptyDirectory;
+
+  gen-csp = source: pkgs.runCommandNoCC "gen-csp" {} ''
+    ${lib.getExe inputs.cspc.packages.${config.nixpkgs.system}.default} ${
+      if builtins.isPath source then
+        source
+      else
+        pkgs.writeText "CSP.yaml" source
+    } $out
+  '';
 in
 
 {
@@ -421,21 +440,25 @@ in
               Referrer-Policy no-referrer
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
               X-Content-Type-Options nosniff
+              X-Frame-Options DENY
             };
             root * ${compsoc-website}
             respond /.well-known/security.txt <<EOF
-            Contact: https://github.com/MaxHearnden/Compsoc-Website-cobalt/issues
-            Expires: 2026-07-15T20:03:40+01:00
+              Contact: https://github.com/MaxHearnden/Compsoc-Website-cobalt/issues
+              Expires: 2026-07-15T20:03:40+01:00
 
-            EOF
+              EOF
             file_server
           '';
         };
         "zandoodle.me.uk" = {
           extraConfig = ''
             header {
+              Cross-Origin-Resource-Policy same-origin
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
               X-Content-Type-Options nosniff
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
               Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
             };
             respond "This is a test of config ${inputs.self}"
@@ -444,21 +467,118 @@ in
         "wss.cardgames.zandoodle.me.uk" = {
           extraConfig = ''
             header {
+              Cross-Origin-Resource-Policy same-origin
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
               X-Content-Type-Options nosniff
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
               Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
             };
-            respond "This is a test of config ${inputs.self}"
+            reverse_proxy 192.168.2.2:80
           '';
         };
         "cardgames.zandoodle.me.uk" = {
           extraConfig = ''
+            encode
             header {
+              Cross-Origin-Resource-Policy same-origin
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
               X-Content-Type-Options nosniff
-              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-            };
-            respond "This is a test of config ${inputs.self}"
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            }
+            route {
+              header Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              header /dalmuti/ Content-Security-Policy {file.${gen-csp ''
+                default-src: null
+                script-src:
+                  "": "'sha256-srkrqNQxQ5PTxynPlMErZaHbKkH7Z2slLwYPjq/dLv0='"
+                  https://cardgames.zandoodle.me.uk/:
+                    library/:
+                      - jquery-3.6.0.min.js
+                      - jquery-ui.min.js
+                    cardgames/:
+                      - config.js
+                      - background.js
+                      - cards.js
+                      - cardutils.js
+                      - dalmutistate.js
+                      - mcts.js
+                      - AIBot.js
+                      - simplebot.js
+                      - gameengine.js
+                      - bot.js
+                      - superbot.js
+                    dalmuti/dalmuti:
+                      - card.js
+                      - .js
+                style-src: https://cardgames.zandoodle.me.uk/dalmuti/dalmuti.css
+                img-src:
+                  https://cardgames.zandoodle.me.uk/dalmuti/img/:
+                    - dalmuti3.png
+                    - speaker.png
+                    - dalmuti-thumb.png
+                media-src:
+                  https://cardgames.zandoodle.me.uk/dalmuti/sound/chord.mp3
+                connect-src:
+                  wss://wss.cardgames.zandoodle.me.uk/hello
+                base-uri: null
+                frame-ancestors: null
+                form-action: null
+              ''}}
+              header /dominion/ Content-Security-Policy {file.${gen-csp ''
+                default-src: null
+                script-src:
+                  # digest of https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
+                  "": "'sha256-srkrqNQxQ5PTxynPlMErZaHbKkH7Z2slLwYPjq/dLv0='"
+
+                  https://cardgames.zandoodle.me.uk/:
+                    library/:
+                      - jquery-1.7.min.js
+                      - jquery-ui.min.js
+                    cardgames/:
+                      - config.js
+                      - background.js
+                      - cards.js
+                      - cardutils.js
+                      - dalmutistate.js
+                      - mcts.js
+                      - AIBot.js
+                      - simplebot.js
+                      - gameengine.js
+                      - bot.js
+                      - superbot.js
+                  #   dalmuti/dalmuti:
+                  #     - card.js
+                  #     - .js
+                style-src: https://cardgames.zandoodle.me.uk/dominion/dominion.css
+                img-src:
+                  https://cardgames.zandoodle.me.uk/:
+                    img/speaker.png: ""
+                    dominion/img/:
+                      - dominion.jpg
+                      - dominion-parts.png
+                connect-src:
+                  wss://wss.cardgames.zandoodle.me.uk/hello
+                base-uri: null
+                frame-ancestors: null
+                form-action: null
+              ''}}
+            }
+            header /cardgames/config.js content-type "text/javascript; charset=utf-8"
+            redir / /dalmuti/
+            root * ${cardgames}
+            respond /cardgames/config.js <<EOF
+              // Config shim for cardgames.zandoodle.me.uk
+              var config = {
+                server: "wss://wss.cardgames.zandoodle.me.uk/hello",
+              }
+
+              if (typeof module !== 'undefined') {
+                module.exports = config
+              }
+              EOF
+            file_server
           '';
         };
         "local.zandoodle.me.uk" = {
@@ -472,6 +592,9 @@ in
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
               X-Content-Type-Options nosniff
               Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
             };
             respond "This is a test of config ${inputs.self}"
           '';
@@ -1020,7 +1143,7 @@ in
       };
       nixos-upgrade = {
         after = [ "network-online.target" ];
-        path = [ pkgs.gitMinimal pkgs.kexec-tools ];
+        path = [ pkgs.gitMinimal pkgs.kexec-tools pkgs.openssh ];
         restartIfChanged = false;
         script =
           let

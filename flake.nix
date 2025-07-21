@@ -1,8 +1,16 @@
 {
   inputs = {
+    cardgames = {
+      flake = false;
+      url = "git+ssh://github.com/MaxHearnden/cardgen.js";
+    };
     compsoc-website = {
       flake = false;
       url = "github:MaxHearnden/Compsoc-Website-cobalt";
+    };
+    cspc = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:MaxHearnden/cspc";
     };
     nixos-kexec = {
       flake = false;

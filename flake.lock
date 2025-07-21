@@ -16,6 +16,26 @@
         "type": "github"
       }
     },
+    "cspc": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1753109260,
+        "narHash": "sha256-w+RCQEB3MnW6EsPDLkcX1d/q75u9Q1AdOHwgBV6kxLA=",
+        "owner": "MaxHearnden",
+        "repo": "cspc",
+        "rev": "34a45b7290cbca9306e50b50560de2dae0a83f90",
+        "type": "github"
+      },
+      "original": {
+        "owner": "MaxHearnden",
+        "repo": "cspc",
+        "type": "github"
+      }
+    },
     "nixos-kexec": {
       "flake": false,
       "locked": {
@@ -67,6 +87,7 @@
     "root": {
       "inputs": {
         "compsoc-website": "compsoc-website",
+        "cspc": "cspc",
         "nixos-kexec": "nixos-kexec",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable"

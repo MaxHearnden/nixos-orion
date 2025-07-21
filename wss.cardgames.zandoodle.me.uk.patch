@@ -1,0 +1,30 @@
+diff --git a/cardgames/config.js b/cardgames/config.js
+index 084b431..6724fbe 100644
+--- a/cardgames/config.js
++++ b/cardgames/config.js
+@@ -3,10 +3,10 @@
+ var config = (function() {
+ 	//The global options
+ 	// let serverUrl = "wss://wss.hearnden.org.uk/hello";
+-	let serverUrl = "wss://wss.hearnden.org.uk/hello";
++	let serverUrl = "wss://wss.cardgames.zandoodle.me.uk/hello";
+ 	return {
+ 		server: serverUrl,
+-		encrypted : true,
++		encrypted : false,
+ 	};
+ })();
+ 
+diff --git a/cardgames/ws_server.js b/cardgames/ws_server.js
+index a4d5d5f..37b5459 100644
+--- a/cardgames/ws_server.js
++++ b/cardgames/ws_server.js
+@@ -21,7 +21,7 @@ background.init({slowTime: 2000})
+ 
+ let wss
+ if (config.encrypted == false ) {
+-    wss = new WebSocket.Server({ port: 8080 });
++    wss = new WebSocket.Server({ port: 80 });
+ } else {
+     const https = require('https');
+     fs = require('fs');
