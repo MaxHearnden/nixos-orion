@@ -6,7 +6,7 @@ let
     name = "nixos-kexec";
     text = lib.strings.fileContents "${inputs.nixos-kexec}/nixos-kexec";
   };
-  web-vm = pkgs.nixos ./vm.nix;
+  web-vm = pkgs.nixos [ ./vm.nix { _module.args.inputs = inputs; } ];
   cardgames =
     if builtins.pathExists "${inputs.cardgames}/cardgames" then
       pkgs.nix-gitignore.gitignoreSourcePure [

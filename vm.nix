@@ -1,4 +1,4 @@
-{ lib, modulesPath, pkgs, ... }:
+{ inputs, lib, modulesPath, pkgs, ... }:
 
 let
   cardgames = pkgs.buildNpmPackage {

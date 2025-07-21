@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "cardgames": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1753120394,
+        "narHash": "sha256-NoPReyvSZw2kZ6yZCt4W5p8GAzrkCUl5UhWIYY7l124=",
+        "ref": "refs/heads/master",
+        "rev": "5e0d717b9a286cc694c09534f316d43d221c1481",
+        "revCount": 285,
+        "type": "git",
+        "url": "ssh://git@github.com/MaxHearnden/cardgen.js"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/MaxHearnden/cardgen.js"
+      }
+    },
     "compsoc-website": {
       "flake": false,
       "locked": {
@@ -86,6 +102,7 @@
     },
     "root": {
       "inputs": {
+        "cardgames": "cardgames",
         "compsoc-website": "compsoc-website",
         "cspc": "cspc",
         "nixos-kexec": "nixos-kexec",
