@@ -597,6 +597,55 @@ in
                 frame-ancestors: null
                 form-action: null
               ''}}
+              header /quacks/ Content-Security-Policy {file.${gen-csp ''
+                default-src: null
+                script-src:
+                  # digest of https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
+                  "": "'sha256-srkrqNQxQ5PTxynPlMErZaHbKkH7Z2slLwYPjq/dLv0='"
+
+                  https://cardgames.zandoodle.me.uk/:
+                    library/:
+                      - jquery-3.6.0.min.js
+                      - jquery-ui.min.js
+                    cardgames/:
+                      - config.js
+                      - background.js
+                      - tokens.js
+                      - cardutils.js
+                      - mcts.js
+                      - AIBot.js
+                      - simplebot.js
+                      - gameengine.js
+                      - bot.js
+                      - superbot.js
+                      - quackspotinfo.js
+                      - quacksstate.js
+                    quacks/quacks.js: ""
+                style-src:
+                  https://cardgames.zandoodle.me.uk/:
+                    - library/jquery-ui.min.css
+                    - quacks/quacks.css
+                img-src:
+                  https://cardgames.zandoodle.me.uk/:
+                    library/images/ui-icons_:
+                      - 444444_256x240.png
+                      - 555555_256x240.png
+                      - 777620_256x240.png
+                      - 777777_256x240.png
+                      - cc0000_256x240.png
+                      - ffffff_256x240.png
+                    quacks/img/:
+                      - Pot.jpg
+                      - book-thumb300.png
+                      - book-thumb500.png
+                      - tokens-thumb47.png
+                      - tokens.png
+                connect-src:
+                  wss://wss.cardgames.zandoodle.me.uk/hello
+                base-uri: null
+                frame-ancestors: null
+                form-action: null
+              ''}}
             }
             header /cardgames/config.js content-type "text/javascript; charset=utf-8"
             redir / /dalmuti/
