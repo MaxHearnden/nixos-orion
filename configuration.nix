@@ -548,9 +548,6 @@ in
                       - gameengine.js
                       - bot.js
                       - superbot.js
-                  #   dalmuti/dalmuti:
-                  #     - card.js
-                  #     - .js
                 style-src: https://cardgames.zandoodle.me.uk/dominion/dominion.css
                 img-src:
                   https://cardgames.zandoodle.me.uk/:
@@ -558,6 +555,42 @@ in
                     dominion/img/:
                       - dominion.jpg
                       - dominion-parts.png
+                connect-src:
+                  wss://wss.cardgames.zandoodle.me.uk/hello
+                base-uri: null
+                frame-ancestors: null
+                form-action: null
+              ''}}
+              header /hearts/ Content-Security-Policy {file.${gen-csp ''
+                default-src: null
+                script-src:
+                  # digest of https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
+                  "": "'sha256-srkrqNQxQ5PTxynPlMErZaHbKkH7Z2slLwYPjq/dLv0='"
+
+                  https://cardgames.zandoodle.me.uk/:
+                    library/:
+                      - jquery-3.6.0.min.js
+                      - jquery-ui.min.js
+                    cardgames/:
+                      - config.js
+                      - background.js
+                      - cards.js
+                      - cardutils.js
+                      - heartsstate.js
+                      - mcts.js
+                      - AIBot.js
+                      - simplebot.js
+                      - gameengine.js
+                      - bot.js
+                      - superbot.js
+                    hearts/hearts.js: ""
+                img-src:
+                  https://cardgames.zandoodle.me.uk/img/:
+                    - cards.png
+                    - cards-thumb.png
+                    - speaker.png
+                media-src: https://cardgames.zandoodle.me.uk/hearts/sound/chord.mp3
+                style-src: https://cardgames.zandoodle.me.uk/hearts/hearts.css
                 connect-src:
                   wss://wss.cardgames.zandoodle.me.uk/hello
                 base-uri: null
