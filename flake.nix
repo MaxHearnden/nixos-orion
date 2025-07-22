@@ -39,6 +39,7 @@
         modules = [
           ./vm.nix
         ];
+        specialArgs = { inherit inputs; };
         system = "aarch64-linux";
       };
     };
