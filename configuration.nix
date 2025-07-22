@@ -526,6 +526,25 @@ in
                 frame-ancestors: null
                 form-action: null
               ''}}
+              header /diplomacy/ Content-Security-Policy {file.${gen-csp ''
+                default-src: null
+                script-src:
+                  # digest of https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
+                  "": "'sha256-srkrqNQxQ5PTxynPlMErZaHbKkH7Z2slLwYPjq/dLv0='"
+
+                  https://cardgames.zandoodle.me.uk/:
+                    library/:
+                      - jquery-1.7.min.js
+                      - jquery-ui.min.js
+                    cardgames/:
+                      - config.js
+                      - background.js
+                      - cardutils.js
+                    diplomacy/diplomacy.js: ""
+                style-src:
+                  https://cardgames.zandoodle.me.uk/:
+                    - diplomacy/diplomacy.css
+              ''}}
               header /dominion/ Content-Security-Policy {file.${gen-csp ''
                 default-src: null
                 script-src:
@@ -645,6 +664,42 @@ in
                 base-uri: null
                 frame-ancestors: null
                 form-action: null
+              ''}}
+              header /sheriff/ Content-Security-Policy {file.${gen-csp ''
+                base-uri: null
+                connect-src: wss://wss.cardgames.zandoodle.me.uk/hello
+                default-src: null
+                form-action: null
+                frame-ancestors: null
+                img-src:
+                  https://cardgames.zandoodle.me.uk/:
+                    - sheriff/img/sheriff_cards.png
+                    - img/speaker.png
+                script-src:
+                  # digest of https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
+                  "": "'sha256-srkrqNQxQ5PTxynPlMErZaHbKkH7Z2slLwYPjq/dLv0='"
+
+                  https://cardgames.zandoodle.me.uk/:
+                    library/:
+                      - jquery-1.7.min.js
+                      - jquery-ui.min.js
+
+                    cardgames/:
+                      - config.js
+                      - cards.js
+                      - cardutils.js
+                      - mcts.js
+                      - AIBot.js
+                      - simplebot.js
+                      - gameengine.js
+                      - bot.js
+                      - superbot.js
+                      - sheriffstate.js
+                    sheriff/:
+                      - sheriffcard.js
+                      - sheriff.js
+                style-src:
+                  https://cardgames.zandoodle.me.uk/sheriff/sheriff.css
               ''}}
             }
             header /cardgames/config.js content-type "text/javascript; charset=utf-8"
