@@ -3,11 +3,11 @@
     "cardgames": {
       "flake": false,
       "locked": {
-        "lastModified": 1753227951,
-        "narHash": "sha256-T/rFppG0vMlqBSrYOXm+CiC1m5rUxAq5Qk/XesWB4Vo=",
+        "lastModified": 1753264706,
+        "narHash": "sha256-CiLAwLL/aWK6EnvIkP23HJs/Zr+qKFIszZb1OPZRRhc=",
         "ref": "refs/heads/master",
-        "rev": "357b433ac08faf69102b231d523a9ba4d7ed8c32",
-        "revCount": 291,
+        "rev": "e75b29b685643189664bea976a2649589249e9a5",
+        "revCount": 292,
         "type": "git",
         "url": "ssh://git@github.com/MaxHearnden/cardgen.js"
       },
