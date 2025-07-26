@@ -72,26 +72,26 @@ in
         ; This zone is bogus.
         $TTL 0
         @ SOA dns.zandoodle.me.uk. mail.zandoodle.me.uk. 0 0 0 0 0
-        @ NS dns.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.bogus-exists.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.bogus.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /var/lib/ddns/zonefile
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.bogus.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.bogus-exists.zandoodle.me.uk.
+        @ NS dns.zandoodle.me.uk.
       '';
       "knot/compsoc-dev.com.zone".text = ''
         $TTL 600
         @ SOA dns mail 0 600 60 3600 600
-        @ NS dns
-        @ CAA 128 issue "letsencrypt.org;validationmethods=dns-01"
-        @ CAA 0 issuewild ";"
-        @ CAA 0 issuemail ";"
-        @ CAA 0 issuevmc ";"
-        @ HTTPS 1 . alpn=h3,h2
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.compsoc-dev.com.
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include dns.compsoc-dev.com.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.compsoc-dev.com.
+        @ CAA 0 issuemail ";"
+        @ CAA 0 issuevmc ";"
+        @ CAA 0 issuewild ";"
+        @ CAA 128 issue "letsencrypt.org;validationmethods=dns-01"
+        @ HTTPS 1 . alpn=h3,h2
+        @ NS dns
       '';
       "knot/letsencrypt.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {} [ "ISRG_Root_X1" "ISRG_Root_X2" ];
@@ -104,40 +104,40 @@ in
       "knot/zandoodle.me.uk.zone".text = ''
         $TTL 600
         @ SOA dns mail 0 600 60 3600 600
-        @ CAA 128 issue "letsencrypt.org;validationmethods=dns-01"
-        @ CAA 0 issuewild ";"
-        @ CAA 0 issuemail ";"
-        @ CAA 0 issuevmc ";"
-        @ NS dns
-        @ HTTPS 1 . alpn=h3,h2
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.cardgames.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.local.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.wss.cardgames.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include cardgames.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile cardgames.zandoodle.me.uk.
-        $INCLUDE /var/lib/ddns/zonefile wss.cardgames.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
-        $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.cardgames.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.wss.cardgames.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.local.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/zonefile wss.cardgames.zandoodle.me.uk.
+        @ CAA 0 issuemail ";"
+        @ CAA 0 issuevmc ";"
+        @ CAA 0 issuewild ";"
+        @ CAA 128 issue "letsencrypt.org;validationmethods=dns-01"
+        @ HTTPS 1 . alpn=h3,h2
+        @ NS dns
         bogus-exists TYPE65534 \# 0
+        cardgames HTTPS 1 . alpn=h3,h2
         local HTTPS 1 . alpn=h3,h2
         local IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
         local IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
         local IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
         local IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
-        cardgames HTTPS 1 . alpn=h3,h2
-        wss.cardgames HTTPS 1 . alpn=h3,h2
-        local-shadow a 192.168.4.1
         local-shadow IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
         local-shadow IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
         local-shadow IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
         local-shadow IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
+        local-shadow A 192.168.4.1
+        wss.cardgames HTTPS 1 . alpn=h3,h2
       '';
       "resolv.conf".text = ''
         nameserver 127.0.0.1
