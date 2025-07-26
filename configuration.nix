@@ -54,6 +54,7 @@ in
 
         addAction(AndRule({RDRule(), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("iterative"))
         addAction(AllRule(), LogAction("", false, true, true, false, true))
+        addAction(AndRule({OrRule({QTypeRule(DNSQType.AXFR), QTypeRule(DNSQType.IXFR)}), NotRule(NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"}))}), DropAction())
         addResponseAction(AllRule(), LogResponseAction("", true, true, false, true))
         addSelfAnsweredResponseAction(AllRule(), LogResponseAction("", true, true, false, true))
         addAction(
