@@ -1167,8 +1167,10 @@ in
             '.[].addr_info.[]
               | if .family == "inet" then
                 "@ A " + .local
-              else
+              elif (.family == "inet6") and (.scope != "link") then
                 "@ AAAA " + .local
+              else
+                empty
               end' >/run/ddns/local-zonefile
 
           ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-zonefile
