@@ -86,6 +86,7 @@ in
         @ CAA 0 issuewild ";"
         @ CAA 0 issuemail ";"
         @ CAA 0 issuevmc ";"
+        @ HTTPS 1 . alpn=h3,h2
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include dns.compsoc-dev.com.
         $INCLUDE /var/lib/ddns/zonefile
@@ -108,6 +109,7 @@ in
         @ CAA 0 issuemail ";"
         @ CAA 0 issuevmc ";"
         @ NS dns
+        @ HTTPS 1 . alpn=h3,h2
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
@@ -124,10 +126,13 @@ in
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.wss.cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.local.zandoodle.me.uk.
         bogus-exists TYPE65534 \# 0
+        local HTTPS 1 . alpn=h3,h2
         local IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
         local IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
         local IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
         local IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
+        cardgames HTTPS 1 . alpn=h3,h2
+        wss.cardgames HTTPS 1 . alpn=h3,h2
         local-shadow a 192.168.4.1
         local-shadow IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
         local-shadow IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
