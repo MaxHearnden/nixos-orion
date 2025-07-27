@@ -30,11 +30,17 @@ in
   networking.firewall.allowedTCPPorts = [ 80 ];
   nix.enable = false;
   security = {
-    doas.enable = true;
+    doas = {
+      enable = true;
+      wheelNeedsPassword = false;
+    };
     polkit.enable = true;
     sudo.enable = false;
   };
-  services.userborn.enable = true;
+  services = {
+    getty.autologinUser = "nixos";
+    userborn.enable = true;
+  };
   system = {
     etc.overlay = {
       enable = true;
@@ -91,7 +97,6 @@ in
         packages = [
           pkgs.dig
         ];
-        password = "nixos";
       };
     };
   };
