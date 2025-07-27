@@ -84,6 +84,7 @@ in
     shutdownRamfs.enable = false;
   };
   users = {
+    allowNoPasswordLogin = true;
     groups.cardgames = {};
     mutableUsers = false;
     users = {
