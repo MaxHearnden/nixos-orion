@@ -1206,6 +1206,7 @@ in
       };
       knot.serviceConfig = {
         LoadCredential = "caddy:/run/keymgr/caddy";
+        LimitNOFILE = "infinity";
         NFTSet = "cgroup:inet:services:knot";
       };
       knot-reload = {
