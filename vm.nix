@@ -36,8 +36,21 @@ in
     };
     polkit.enable = true;
     sudo.enable = false;
+    wrappers = {
+      chsh.enable = false;
+      fusermount.enable = false;
+      fusermount3.enable = false;
+      mount.enable = false;
+      newgidmap.enable = false;
+      newgrp.enable = false;
+      newuidmap.enable = false;
+      sg.enable = false;
+      su.enable = false;
+      umount.enable = false;
+    };
   };
   services = {
+    dbus.implementation = "broker";
     getty.autologinUser = "nixos";
     userborn.enable = true;
   };
@@ -49,37 +62,58 @@ in
     stateVersion = "25.05";
   };
   systemd = {
-    services.cardgames = lib.mkIf (builtins.pathExists "${inputs.cardgames}/cardgames") {
-      confinement.enable = true;
-      serviceConfig = {
-        AmbientCapabilities = "CAP_NET_BIND_SERVICE";
-        CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
-        ExecStart = lib.getExe cardgames;
-        Group = "cardgames";
-        IPAddressAllow = "192.168.2.0/30";
-        IPAddressDeny = "any";
+    enableEmergencyMode = false;
+    services = {
+      cardgames = lib.mkIf (builtins.pathExists "${inputs.cardgames}/cardgames") {
+        confinement.enable = true;
+        serviceConfig = {
+          AmbientCapabilities = "CAP_NET_BIND_SERVICE";
+          CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
+          ExecStart = lib.getExe cardgames;
+          Group = "cardgames";
+          IPAddressAllow = "192.168.2.0/30";
+          IPAddressDeny = "any";
+          LockPersonality = true;
+          NoNewPrivileges = true;
+          PrivateMounts = true;
+          PrivateUsers = lib.mkForce false;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          ProtectSystem = "strict";
+          RemoveIPC = true;
+          RestrictAddressFamilies = "AF_INET";
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          UMask = "077";
+          User = "cardgames";
+        };
+        wantedBy = [ "multi-user.target" ];
+      };
+      nscd.serviceConfig = {
+        CapabilityBoundingSet = "";
         LockPersonality = true;
-        NoNewPrivileges = true;
-        PrivateMounts = true;
-        PrivateUsers = lib.mkForce false;
+        MemoryDenyWriteExecute = true;
         ProcSubset = "pid";
         ProtectClock = true;
-        ProtectHome = true;
+        ProtectControlGroups = true;
+        ProtectHome = lib.mkForce true;
         ProtectHostname = true;
         ProtectKernelLogs = true;
+        ProtectKernelModules = true;
+        ProtectKernelTunables = true;
         ProtectProc = "invisible";
-        ProtectSystem = "strict";
-        RemoveIPC = true;
-        RestrictAddressFamilies = "AF_INET";
         RestrictNamespaces = true;
         RestrictRealtime = true;
-        RestrictSUIDSGID = true;
         SystemCallArchitectures = "native";
         SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
-        UMask = "077";
-        User = "cardgames";
       };
-      wantedBy = [ "multi-user.target" ];
     };
     shutdownRamfs.enable = false;
   };
