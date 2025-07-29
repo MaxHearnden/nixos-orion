@@ -146,6 +146,14 @@ in
 
         options trust-ad edns0
       '';
+      "tayga/tayga.conf".text = ''
+        tun-device tayga
+        ipv4-addr 192.168.6.1
+        ipv6-addr fd80:2::1
+        prefix 64:ff9b::/96
+        dynamic-pool 192.168.7.0/24
+        data-dir /var/lib/tayga
+      '';
     };
     shellAliases.sda = "systemd-analyze security --no-pager";
   };
@@ -171,6 +179,9 @@ in
     firewall = {
       allowedUDPPorts = [ 53 54 443 ];
       allowedTCPPorts = [ 53 54 80 443 ];
+      extraForwardRules = ''
+        iifname "shadow-lan" oifname "tayga" accept
+      '';
       extraInputRules = ''
         meta l4proto {udp, tcp} th dport 55 ip saddr @local_ip accept
         meta l4proto {udp, tcp} th dport 55 ip6 saddr @local_ip6 accept
@@ -187,7 +198,7 @@ in
     nat = {
       enable = true;
       externalInterface = "enp49s0";
-      internalInterfaces = [ "web-vm" "enp1s0" "shadow-lan" ];
+      internalInterfaces = [ "web-vm" "enp1s0" "shadow-lan" "tayga" ];
     };
     nftables = {
       checkRuleset = false;
@@ -988,6 +999,16 @@ in
           };
           vlanConfig.Id = 20;
         };
+        "10-tayga" = {
+          netdevConfig = {
+            Kind = "tun";
+            Name = "tayga";
+          };
+          tapConfig = {
+            User = "tayga";
+            Group = "tayga";
+          };
+        };
         "10-web-vm" = {
           netdevConfig = {
             Kind = "tap";
@@ -1028,6 +1049,18 @@ in
           matchConfig.Name = "shadow-lan";
           networkConfig.DHCPServer = true;
           dhcpServerConfig.DNS = "_server_address";
+        };
+        "10-tayga" = {
+          address = [ "192.168.6.0/31" "fd80:2::0/127" ];
+          matchConfig.Name = "tayga";
+          routes = [
+            {
+              Destination = "64:ff9b::/96";
+            }
+            {
+              Destination = "192.168.7.0/24";
+            }
+          ];
         };
         "10-web-vm" = {
           matchConfig = {
@@ -1121,7 +1154,7 @@ in
           ProtectClock = true;
           LockPersonality = true;
           ProtectHostname = true;
-          RestrictAddressFamilies = true;
+          RestrictAddressFamilies = "none";
           RuntimeDirectory = "keymgr";
           RuntimeDirectoryPreserve = true;
           MemoryDenyWriteExecute = true;
@@ -1402,6 +1435,44 @@ in
       sshd.serviceConfig.NFTSet = "cgroup:inet:services:sshd";
       systemd-machined.enable = false;
       systemd-networkd.serviceConfig.NFTSet = "cgroup:inet:services:systemd_networkd";
+      tayga = {
+        confinement.enable = true;
+        restartTriggers = [ config.environment.etc."tayga/tayga.conf".source ];
+        serviceConfig = {
+          BindReadOnlyPaths = [
+            "${config.environment.etc."tayga/tayga.conf".source}:/etc/tayga/tayga.conf"
+            "/dev/net/tun"
+          ];
+          CapabilityBoundingSet = "";
+          DeviceAllow = "/dev/net/tun";
+          ExecStart = "${lib.getExe pkgs.tayga} -d -c /etc/tayga/tayga.conf";
+          Group = "tayga";
+          IPAddressDeny = "any";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          NoNewPrivileges = true;
+          PrivateTmp = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          ProtectSystem = "strict";
+          RemoveIPC = true;
+          Restart = "on-failure";
+          RestrictAddressFamilies = "AF_INET";
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          StateDirectory = "tayga";
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          UMask = "077";
+          User = "tayga";
+        };
+        wantedBy = [ "multi-user.target" ];
+      };
       unbound.serviceConfig.NFTSet = "cgroup:inet:services:unbound";
       web-vm = {
         confinement.enable = true;
@@ -1461,6 +1532,7 @@ in
       ddns = {};
       dnsdist = {};
       nix-gc = {};
+      tayga = {};
       web-vm = {};
     };
     users = {
@@ -1501,6 +1573,10 @@ in
       nix-gc = {
         isSystemUser = true;
         group = "nix-gc";
+      };
+      tayga = {
+        isSystemUser = true;
+        group = "tayga";
       };
       web-vm = {
         group = "web-vm";
