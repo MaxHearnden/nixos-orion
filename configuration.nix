@@ -1076,6 +1076,7 @@ in
         };
         "10-tayga" = {
           address = [ "192.168.6.0/31" "fd80:2::0/127" ];
+          linkConfig.RequiredForOnline = false;
           matchConfig.Name = "tayga";
           routes = [
             {
@@ -1460,6 +1461,7 @@ in
       systemd-machined.enable = false;
       systemd-networkd.serviceConfig.NFTSet = "cgroup:inet:services:systemd_networkd";
       tayga = {
+        after = [ "sys-subsystem-net-devices-tayga.device" ];
         confinement.enable = true;
         restartTriggers = [ config.environment.etc."tayga/tayga.conf".source ];
         serviceConfig = {
@@ -1496,6 +1498,7 @@ in
           User = "tayga";
         };
         wantedBy = [ "multi-user.target" ];
+        wants = [ "sys-subsystem-net-devices-tayga.device" ];
       };
       unbound.serviceConfig.NFTSet = "cgroup:inet:services:unbound";
       web-vm = {
