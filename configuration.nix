@@ -38,6 +38,7 @@ in
     kernel.sysctl = {
       "net.ipv4.tcp_ecn" = 1;
       "net.ipv4.tcp_fastopen" = 3;
+      "net.ipv6.conf.all.forwarding" = 1;
     };
     kernelPackages = pkgs.linuxPackages_latest;
     loader.systemd-boot.enable = true;
@@ -1044,10 +1045,33 @@ in
           vlan = ["shadow-lan"];
         };
         "10-shadow-lan" = {
-          address = [ "192.168.4.1/24" ];
+          address = [ "192.168.4.1/24" "fd80:1::1/64" ];
+          ipv6Prefixes = [
+            {
+              Prefix = "fd80:1::/64";
+            }
+          ];
+          ipv6RoutePrefixes = [
+            {
+              Route = "64:ff9b::/96";
+            }
+          ];
+          ipv6SendRAConfig = {
+            DNS = "_link_local";
+            EmitDNS = true;
+            RouterLifetimeSec = 0;
+          };
+          ipv6PREF64Prefixes = [
+            {
+              Prefix = "64:ff9b::/96";
+            }
+          ];
           linkConfig.RequiredForOnline = false;
           matchConfig.Name = "shadow-lan";
-          networkConfig.DHCPServer = true;
+          networkConfig = {
+            DHCPServer = true;
+            IPv6SendRA = true;
+          };
           dhcpServerConfig.DNS = "_server_address";
         };
         "10-tayga" = {
