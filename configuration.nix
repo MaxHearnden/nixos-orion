@@ -1056,6 +1056,9 @@ in
             {
               Route = "64:ff9b::/96";
             }
+            {
+              Route = "fd80:2::/127";
+            }
           ];
           ipv6SendRAConfig = {
             DNS = "_link_local";
