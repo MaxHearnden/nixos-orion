@@ -1046,10 +1046,13 @@ in
           vlan = ["shadow-lan"];
         };
         "10-shadow-lan" = {
-          address = [ "192.168.4.1/24" "fd80:1::1/64" ];
+          address = [ "192.168.4.1/24" "fd80:1::1/64" "fd09:a389:7c1e:1::1/64" ];
           ipv6Prefixes = [
             {
               Prefix = "fd80:1::/64";
+            }
+            {
+              Prefix = "fd09:a389:7c1e:1::/64";
             }
           ];
           ipv6RoutePrefixes = [
@@ -1058,6 +1061,9 @@ in
             }
             {
               Route = "fd80:2::/127";
+            }
+            {
+              Route = "fd09:a389:7c1e::/48";
             }
           ];
           ipv6SendRAConfig = {
