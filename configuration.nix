@@ -961,6 +961,7 @@ in
             "zandoodle.me.uk"
             "broadband"
           ];
+          serve-expired = true;
         };
         stub-zone = [
           {
