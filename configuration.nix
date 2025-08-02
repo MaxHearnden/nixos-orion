@@ -157,6 +157,14 @@ in
         dynamic-pool 192.168.7.0/24
         data-dir /var/lib/tayga
       '';
+      "tayga/plat.conf".text = ''
+        tun-device plat
+        ipv4-addr 192.168.8.1
+        ipv6-addr fd09:a389:7c1e:2::1
+        prefix fd09:a389:7c1e:3::/64
+        dynamic-pool 192.168.9.0/24
+        data-dir /var/lib/tayga/plat
+      '';
     };
     shellAliases.sda = "systemd-analyze security --no-pager";
   };
@@ -184,6 +192,7 @@ in
       allowedTCPPorts = [ 53 54 80 443 ];
       extraForwardRules = ''
         iifname "shadow-lan" oifname "tayga" accept
+        iifname "shadow-lan" oifname "plat" accept
       '';
       extraInputRules = ''
         meta l4proto {udp, tcp} th dport 55 ip saddr @local_ip accept
@@ -201,7 +210,7 @@ in
     nat = {
       enable = true;
       externalInterface = "enp49s0";
-      internalInterfaces = [ "web-vm" "enp1s0" "shadow-lan" "tayga" ];
+      internalInterfaces = [ "web-vm" "enp1s0" "shadow-lan" "tayga" "plat" ];
     };
     nftables = {
       checkRuleset = false;
@@ -995,6 +1004,16 @@ in
     network = {
       enable = true;
       netdevs = {
+        "10-plat" = {
+          netdevConfig = {
+            Kind = "tun";
+            Name = "plat";
+          };
+          tapConfig = {
+            User = "tayga";
+            Group = "tayga";
+          };
+        };
         "10-shadow-lan" = {
           netdevConfig = {
             Kind = "vlan";
@@ -1045,6 +1064,19 @@ in
           matchConfig.Name = "enp49s0";
           networkConfig.IPv6PrivacyExtensions = "kernel";
           vlan = ["shadow-lan"];
+        };
+        "10-plat" = {
+          address = [ "192.168.8.0/31" "fd09:a389:7c1e:2::/127" ];
+          linkConfig.RequiredForOnline = false;
+          matchConfig.Name = "plat";
+          routes = [
+            {
+              Destination = "fd09:a389:7c1e:3::/64";
+            }
+            {
+              Destination = "192.168.9.0/24";
+            }
+          ];
         };
         "10-shadow-lan" = {
           address = [ "192.168.4.1/24" "fd80:1::1/64" "fd09:a389:7c1e:1::1/64" ];
@@ -1467,6 +1499,46 @@ in
         RestrictRealtime = true;
         SystemCallArchitectures = "native";
         SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+      };
+      plat = {
+        after = [ "sys-subsystem-net-devices-plat.device" ];
+        confinement.enable = true;
+        restartTriggers = [ config.environment.etc."tayga/tayga.conf".source ];
+        serviceConfig = {
+          BindReadOnlyPaths = [
+            "${config.environment.etc."tayga/plat.conf".source}:/etc/tayga/plat.conf"
+            "/dev/net/tun"
+          ];
+          CapabilityBoundingSet = "";
+          DeviceAllow = "/dev/net/tun";
+          ExecStart = "${lib.getExe pkgs.tayga} -d -c /etc/tayga/plat.conf";
+          Group = "tayga";
+          IPAddressDeny = "any";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          NoNewPrivileges = true;
+          PrivateTmp = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          ProtectSystem = "strict";
+          RemoveIPC = true;
+          Restart = "on-failure";
+          RestrictAddressFamilies = "AF_INET";
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          StateDirectory = "tayga/plat";
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          UMask = "077";
+          User = "tayga";
+        };
+        wantedBy = [ "multi-user.target" ];
+        wants = [ "sys-subsystem-net-devices-plat.device" ];
       };
       sshd.serviceConfig.NFTSet = "cgroup:inet:services:sshd";
       systemd-machined.enable = false;
