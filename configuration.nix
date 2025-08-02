@@ -163,7 +163,6 @@ in
         prefix fd09:a389:7c1e:3::/64
         dynamic-pool 192.168.9.0/24
         data-dir /var/lib/tayga/plat
-        strict-frag-hdr true
       '';
     };
     shellAliases.sda = "systemd-analyze security --no-pager";
