@@ -1106,7 +1106,7 @@ in
           };
           ipv6PREF64Prefixes = [
             {
-              Prefix = "64:ff9b::/96";
+              Prefix = "fd09:a389:7c1e:3::/64";
             }
           ];
           linkConfig.RequiredForOnline = false;
