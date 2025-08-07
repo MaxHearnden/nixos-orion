@@ -49,8 +49,8 @@ in
       "dnsdist/dnsdist.conf".text = ''
         addLocal("0.0.0.0:53")
         addLocal("[::]:53")
-        newServer({address = "127.0.0.1:54", name = "knot-dns", pool = "auth"})
-        newServer({address = "127.0.0.1:55", name = "unbound", pool = "iterative"})
+        newServer({address = "127.0.0.1:54", name = "knot-dns", pool = "auth", healthCheckMode = "lazy"})
+        newServer({address = "127.0.0.1:55", name = "unbound", pool = "iterative", healthCheckMode = "lazy"})
         setACL({"0.0.0.0/0", "::/0"})
 
         addAction(AndRule({RDRule(), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("iterative"))
