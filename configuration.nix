@@ -1021,6 +1021,17 @@ in
           };
           vlanConfig.Id = 20;
         };
+        "10-2-shadow-2-lan" = {
+          extraConfig = ''
+            [VLAN]
+            Id=20
+            Protocol=802.1ad
+          '';
+          netdevConfig = {
+            Kind = "vlan";
+            Name = "2-shadow-2-lan";
+          };
+        };
         "10-tayga" = {
           netdevConfig = {
             Kind = "tun";
@@ -1063,7 +1074,7 @@ in
           DHCP = "yes";
           matchConfig.Name = "enp49s0";
           networkConfig.IPv6PrivacyExtensions = "kernel";
-          vlan = ["shadow-lan"];
+          vlan = ["shadow-lan" "2-shadow-2-lan"];
         };
         "10-plat" = {
           address = [ "192.168.8.0/31" "fd09:a389:7c1e:2::/127" ];
@@ -1112,6 +1123,36 @@ in
           ];
           linkConfig.RequiredForOnline = false;
           matchConfig.Name = "shadow-lan";
+          networkConfig = {
+            DHCPServer = true;
+            IPv6SendRA = true;
+          };
+          dhcpServerConfig.DNS = "_server_address";
+        };
+        "10-2-shadow-2-lan" = {
+          address = [ "fd09:a389:7c1e:4::1/64" ];
+          ipv6Prefixes = [
+            {
+              Prefix = "fd09:a389:7c1e:4::/64";
+            }
+          ];
+          ipv6RoutePrefixes = [
+            {
+              Route = "fd09:a389:7c1e::/48";
+            }
+          ];
+          ipv6SendRAConfig = {
+            DNS = "_link_local";
+            EmitDNS = true;
+            RouterLifetimeSec = 0;
+          };
+          ipv6PREF64Prefixes = [
+            {
+              Prefix = "fd09:a389:7c1e:3::/64";
+            }
+          ];
+          linkConfig.RequiredForOnline = false;
+          matchConfig.Name = "2-shadow-2-lan";
           networkConfig = {
             DHCPServer = true;
             IPv6SendRA = true;
