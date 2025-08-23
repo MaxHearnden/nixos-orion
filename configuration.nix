@@ -935,7 +935,7 @@ in
           do-not-query-localhost = false;
           domain-insecure = "broadband";
           ede = true;
-          interface = [ "0.0.0.0" "::" ];
+          interface-automatic = true;
           num-threads = 12;
           port = 55;
           private-address = [
