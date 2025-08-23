@@ -190,8 +190,8 @@ in
       allowedUDPPorts = [ 53 54 443 ];
       allowedTCPPorts = [ 53 54 80 443 ];
       extraForwardRules = ''
-        iifname "shadow-lan" oifname "tayga" accept
-        iifname "shadow-lan" oifname "plat" accept
+        iifname {"shadow-lan", "2-shadow-2-lan"} oifname "tayga" accept
+        iifname {"shadow-lan", "2-shadow-2-lan"} oifname "plat" accept
       '';
       extraInputRules = ''
         meta l4proto {udp, tcp} th dport 55 ip saddr @local_ip accept
@@ -202,6 +202,7 @@ in
         web-vm.allowedUDPPorts = [ 67 ];
         enp1s0.allowedUDPPorts = [ 67 ];
         shadow-lan.allowedUDPPorts = [ 67 ];
+        "\"2-shadow-2-lan\"".allowedUDPPorts = [ 67 ];
       };
     };
     fqdn = "local.zandoodle.me.uk";
@@ -209,7 +210,7 @@ in
     nat = {
       enable = true;
       externalInterface = "enp49s0";
-      internalInterfaces = [ "web-vm" "enp1s0" "shadow-lan" "tayga" "plat" ];
+      internalInterfaces = [ "web-vm" "enp1s0" "shadow-lan" "2-shadow-2-lan" "tayga" "plat" ];
     };
     nftables = {
       checkRuleset = false;
@@ -273,7 +274,7 @@ in
             meta l4proto {udp, tcp} th dport 55 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @unbound accept
             tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
             udp dport 443 socket cgroupv2 level 2 @caddy accept
-            udp dport 67 iifname { web-vm, enp1s0, shadow-lan } socket cgroupv2 level 2 @systemd_networkd accept
+            udp dport 67 iifname { web-vm, enp1s0, shadow-lan, "2-shadow-2-lan" } socket cgroupv2 level 2 @systemd_networkd accept
             udp dport 68 iifname enp49s0 socket cgroupv2 level 2 @systemd_networkd accept
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
