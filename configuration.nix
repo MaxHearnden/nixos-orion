@@ -914,7 +914,10 @@ in
     };
     openssh = {
       enable = true;
-      settings.PasswordAuthentication = false;
+      settings = {
+        KbdInteractiveAuthentication = false;
+        PasswordAuthentication = false;
+      };
     };
     resolved.enable = false;
     unbound = {
