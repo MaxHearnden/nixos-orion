@@ -1345,6 +1345,10 @@ in
 
           ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-zonefile
 
+          if ! ${lib.getExe' pkgs.diffutils "diff"} /run/ddns/zonefile /var/lib/ddns/zonefile; then
+            cp --backup=numbered /run/ddns/zonefile "/var/lib/ddns/zonefile-$(date --iso-8601=seconds)"
+          fi
+
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
             /run/ddns/zonefile /run/ddns/local-zonefile /var/lib/ddns/
         '';
