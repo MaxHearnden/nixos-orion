@@ -457,7 +457,7 @@ in
       logFormat = "level INFO";
       package = pkgs.caddy.withPlugins {
         plugins = ["github.com/caddy-dns/rfc2136@v1.0.0"];
-        hash = "sha256-vvaCVxDMeu80v8zQY+x3ghdCRMi4Y0BE1lECUECxL+I=";
+        hash = "sha256-OuZeeKsAItmWtKwDYDnh+zZv/ZjiIFHRdAFhMDBFnqI=";
       };
       virtualHosts = {
         "compsoc-dev.com" = {
