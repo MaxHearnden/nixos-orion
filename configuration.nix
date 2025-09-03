@@ -1075,6 +1075,7 @@ in
           };
         };
         "10-enp49s0" = {
+          address = [ "192.168.1.201" ];
           DHCP = "yes";
           matchConfig.Name = "enp49s0";
           networkConfig.IPv6PrivacyExtensions = "kernel";
