@@ -115,6 +115,7 @@ in
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include ttl-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
@@ -140,6 +141,7 @@ in
         local-shadow IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
         local-shadow A 192.168.4.1
         local-shadow AAAA fd09:a389:7c1e:1::1
+        ttl-check 0 txt ttl\ check
         wss.cardgames HTTPS 1 . alpn=h3,h2
       '';
       "resolv.conf".text = ''
