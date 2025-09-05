@@ -1077,7 +1077,16 @@ in
           };
         };
         "10-enp49s0" = {
-          address = [ "192.168.1.201" ];
+          addresses = [
+            {
+              Address = "192.168.1.201";
+              Label = "Public services";
+            }
+            {
+              Address = "192.168.1.202";
+              Label = "Home services";
+            }
+          ];
           DHCP = "yes";
           matchConfig.Name = "enp49s0";
           networkConfig.IPv6PrivacyExtensions = "kernel";
