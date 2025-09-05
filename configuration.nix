@@ -1087,6 +1087,7 @@ in
               Label = "Home services";
             }
           ];
+          dhcpV4Config.Label = "DHCP assigned";
           DHCP = "yes";
           matchConfig.Name = "enp49s0";
           networkConfig.IPv6PrivacyExtensions = "kernel";
