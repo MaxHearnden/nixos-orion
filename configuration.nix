@@ -817,15 +817,18 @@ in
       settings = {
         auth-server = "local.zandoodle.me.uk";
         auth-zone = "home.arpa";
-        dhcp-option = [ "option:router,192.168.1.1" "option:dns-server,192.168.1.202" ];
+        bind-dynamic = true;
+        dhcp-host = "d4:35:1d:11:20:2e,192.168.1.1,vodafone";
+        dhcp-option = [
+          "option:router,192.168.1.1"
+          "option:dns-server,192.168.1.201"
+        ];
+        dhcp-range = "192.168.1.2,192.168.1.199,10m";
         domain = "home.arpa";
         interface = "enp49s0";
-        bind-dynamic = true;
         log-debug = true;
         log-queries = true;
         port = 56;
-        dhcp-range = "192.168.1.2,192.168.1.199,10m";
-        dhcp-host = "d4:35:1d:11:20:2e,192.168.1.1,vodafone";
       };
     };
     knot = {
@@ -1112,27 +1115,14 @@ in
           };
         };
         "10-enp49s0" = {
-          addresses = [
-            {
-              Address = "192.168.1.201";
-              # Label = "Public services";
-            }
-            {
-              Address = "192.168.1.202";
-              # Label = "Home services";
-            }
-            {
-              Address = "192.168.1.203/24";
-              # Label = "Local";
-            }
-          ];
+          address = [ "192.168.1.201/24" ];
           # dhcpV4Config.Label = "DHCP assigned";
           matchConfig.Name = "enp49s0";
           networkConfig.IPv6PrivacyExtensions = "kernel";
           routes = [
             {
               Gateway = "192.168.1.1";
-              PreferredSource = "192.168.1.203";
+              PreferredSource = "192.168.1.201";
             }
           ];
           vlan = ["shadow-lan" "2-shadow-2-lan"];
