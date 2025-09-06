@@ -51,10 +51,12 @@ in
         addLocal("[::]:53")
         newServer({address = "127.0.0.1:54", name = "knot-dns", pool = "auth", healthCheckMode = "lazy"})
         newServer({address = "127.0.0.1:55", name = "unbound", pool = "iterative", healthCheckMode = "lazy"})
+        newServer({address = "127.0.0.1:56", name = "dnsmasq", pool = "dnsmasq", healthCheckMode = "lazy"})
         setACL({"0.0.0.0/0", "::/0"})
 
         addAction(AndRule({RDRule(), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("iterative"))
         addAction(AllRule(), LogAction("", false, true, true, false, true))
+        addAction(AndRule({QNameSuffixRule({"home.arpa"}), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("dnsmasq"))
         addAction(AndRule({OrRule({QTypeRule(DNSQType.AXFR), QTypeRule(DNSQType.IXFR)}), NotRule(NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"}))}), DropAction())
         addResponseAction(AllRule(), LogResponseAction("", true, true, false, true))
         addSelfAnsweredResponseAction(AllRule(), LogResponseAction("", true, true, false, true))
@@ -203,6 +205,7 @@ in
       interfaces = {
         web-vm.allowedUDPPorts = [ 67 ];
         enp1s0.allowedUDPPorts = [ 67 ];
+        enp49s0.allowedUDPPorts = [ 67 ];
         shadow-lan.allowedUDPPorts = [ 67 ];
         "\"2-shadow-2-lan\"".allowedUDPPorts = [ 67 ];
       };
@@ -225,6 +228,10 @@ in
           }
 
           set dnsdist {
+            type cgroupsv2
+          }
+
+          set dnsmasq {
             type cgroupsv2
           }
 
@@ -274,9 +281,12 @@ in
             meta l4proto {udp, tcp} th dport 54 socket cgroupv2 level 2 @knot accept
             meta l4proto {udp, tcp} th dport 55 ip saddr == @local_ip socket cgroupv2 level 2 @unbound accept
             meta l4proto {udp, tcp} th dport 55 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @unbound accept
+            meta l4proto {udp, tcp} th dport 56 ip saddr == @local_ip socket cgroupv2 level 2 @dnsmasq accept
+            meta l4proto {udp, tcp} th dport 56 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @dnsmasq accept
             tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
             udp dport 443 socket cgroupv2 level 2 @caddy accept
-            udp dport 67 iifname { web-vm, enp1s0, shadow-lan, "2-shadow-2-lan" } socket cgroupv2 level 2 @systemd_networkd accept
+            udp dport 67 iifname { web-vm, enp1s0, shadow-lan } socket cgroupv2 level 2 @systemd_networkd accept
+            udp dport 67 iifname { "2-shadow-2-lan", enp49s0 } socket cgroupv2 level 2 @dnsmasq accept
             udp dport 68 iifname enp49s0 socket cgroupv2 level 2 @systemd_networkd accept
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
@@ -323,7 +333,8 @@ in
               type nat hook prerouting priority dstnat; policy accept;
               fib daddr . mark type local udp dport 53 @th,87,1 == 1 ip saddr @local_ip redirect to :55 comment "Recursion desired"
               fib daddr . mark type local udp dport 53 @th,87,1 == 1 ip6 saddr @local_ip6 redirect to :55 comment "Recursion desired"
-              fib daddr . mark type local udp dport 53 redirect to :54 comment "Recursion not desired"
+              fib daddr . mark type local udp dport 53 ip saddr != @local_ip redirect to :54 comment "Recursion not desired"
+              fib daddr . mark type local udp dport 53 ip6 saddr != @local_ip6 redirect to :54 comment "Recursion not desired"
               fib daddr . mark type local tcp dport 53 ip saddr != @local_ip redirect to :54 comment "Tcp recursion not desired"
               fib daddr . mark type local tcp dport 53 ip6 saddr != @local_ip6 redirect to :54 comment "Tcp recursion not desired"
             }
@@ -442,7 +453,6 @@ in
   };
   services = {
     avahi.enable = false;
-    dbus.implementation = "broker";
     caddy = {
       enable = true;
       globalConfig = ''
@@ -800,6 +810,24 @@ in
         };
       };
     };
+    dbus.implementation = "broker";
+    dnsmasq = {
+      enable = true;
+      resolveLocalQueries = false;
+      settings = {
+        auth-server = "local.zandoodle.me.uk";
+        auth-zone = "home.arpa";
+        dhcp-option = [ "option:router,192.168.1.1" "option:dns-server,192.168.1.202" ];
+        domain = "home.arpa";
+        interface = "enp49s0";
+        bind-dynamic = true;
+        log-debug = true;
+        log-queries = true;
+        port = 56;
+        dhcp-range = "192.168.1.2,192.168.1.199,10m";
+        dhcp-host = "d4:35:1d:11:20:2e,192.168.1.1,vodafone";
+      };
+    };
     knot = {
       enable = true;
       keyFiles = [ "/run/credentials/knot.service/caddy" ];
@@ -938,9 +966,10 @@ in
             "fe80::/10 allow"
           ];
           do-not-query-localhost = false;
-          domain-insecure = "broadband";
+          domain-insecure = [ "broadband" "home.arpa" ];
           ede = true;
           interface-automatic = true;
+          local-zone = "home.arpa. nodefault";
           num-threads = 12;
           port = 55;
           private-address = [
@@ -964,6 +993,7 @@ in
             "compsoc-dev.com"
             "zandoodle.me.uk"
             "broadband"
+            "home.arpa"
           ];
           serve-expired = true;
         };
@@ -981,6 +1011,11 @@ in
           {
             name = "broadband";
             stub-addr = "192.168.1.1";
+            stub-no-cache = true;
+          }
+          {
+            name = "home.arpa";
+            stub-addr = "127.0.0.1@56";
             stub-no-cache = true;
           }
         ];
@@ -1080,17 +1115,26 @@ in
           addresses = [
             {
               Address = "192.168.1.201";
-              Label = "Public services";
+              # Label = "Public services";
             }
             {
               Address = "192.168.1.202";
-              Label = "Home services";
+              # Label = "Home services";
+            }
+            {
+              Address = "192.168.1.203/24";
+              # Label = "Local";
             }
           ];
-          dhcpV4Config.Label = "DHCP assigned";
-          DHCP = "yes";
+          # dhcpV4Config.Label = "DHCP assigned";
           matchConfig.Name = "enp49s0";
           networkConfig.IPv6PrivacyExtensions = "kernel";
+          routes = [
+            {
+              Gateway = "192.168.1.1";
+              PreferredSource = "192.168.1.203";
+            }
+          ];
           vlan = ["shadow-lan" "2-shadow-2-lan"];
         };
         "10-plat" = {
@@ -1147,7 +1191,7 @@ in
           dhcpServerConfig.DNS = "_server_address";
         };
         "10-2-shadow-2-lan" = {
-          address = [ "fd09:a389:7c1e:4::1/64" ];
+          address = [ "fd09:a389:7c1e:4::1/64" "192.168.10.1/24" ];
           ipv6Prefixes = [
             {
               Prefix = "fd09:a389:7c1e:4::/64";
@@ -1171,7 +1215,6 @@ in
           linkConfig.RequiredForOnline = false;
           matchConfig.Name = "2-shadow-2-lan";
           networkConfig = {
-            DHCPServer = true;
             IPv6SendRA = true;
           };
           dhcpServerConfig.DNS = "_server_address";
@@ -1258,6 +1301,7 @@ in
         startLimitIntervalSec = 0;
         wantedBy = [ "multi-user.target" ];
       };
+      dnsmasq.serviceConfig.NFTSet = "cgroup:inet:services:dnsmasq";
       gen-tsig = {
         before = [ "knot.service" "caddy.service" ];
         requiredBy = [ "knot.service" "caddy.service" ];
