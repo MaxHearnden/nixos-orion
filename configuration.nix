@@ -56,7 +56,7 @@ in
 
         addAction(AndRule({RDRule(), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("iterative"))
         addAction(AllRule(), LogAction("", false, true, true, false, true))
-        addAction(AndRule({QNameSuffixRule({"home.arpa"}), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("dnsmasq"))
+        addAction(AndRule({QNameSuffixRule({"home.arpa", "168.192.in-addr.arpa", "d.f.ip6.arpa"}), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("dnsmasq"))
         addAction(AndRule({OrRule({QTypeRule(DNSQType.AXFR), QTypeRule(DNSQType.IXFR)}), NotRule(NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"}))}), DropAction())
         addResponseAction(AllRule(), LogResponseAction("", true, true, false, true))
         addSelfAnsweredResponseAction(AllRule(), LogResponseAction("", true, true, false, true))
@@ -804,8 +804,8 @@ in
       enable = true;
       resolveLocalQueries = false;
       settings = {
-        auth-server = "local.zandoodle.me.uk";
-        auth-zone = "home.arpa";
+        auth-server = "local.zandoodle.me.uk,192.168.1.201,::1,127.0.0.1";
+        auth-zone = "home.arpa,192.168.0.0/16,fd00::/8";
         bind-dynamic = true;
         dhcp-authoritative = true;
         dhcp-host = "d4:35:1d:11:20:2e,192.168.1.1,vodafone";
@@ -964,10 +964,20 @@ in
             "fe80::/10 allow"
           ];
           do-not-query-localhost = false;
-          domain-insecure = [ "broadband" "home.arpa" ];
+          domain-insecure = [
+            "broadband"
+            "home.arpa"
+            "168.192.in-addr.arpa."
+            "d.f.ip6.arpa"
+          ];
           ede = true;
           interface-automatic = true;
-          local-zone = "home.arpa. nodefault";
+          local-zone = [
+            "home.arpa. nodefault"
+            "168.192.in-addr.arpa. nodefault"
+            "d.f.ip6.arpa. nodefault"
+          ];
+          nsid = "ascii_recursive.dns.zandoodle.me.uk";
           num-threads = 12;
           port = 55;
           private-address = [
@@ -1013,6 +1023,16 @@ in
           }
           {
             name = "home.arpa";
+            stub-addr = "127.0.0.1@56";
+            stub-no-cache = true;
+          }
+          {
+            name = "168.192.in-addr.arpa";
+            stub-addr = "127.0.0.1@56";
+            stub-no-cache = true;
+          }
+          {
+            name = "d.f.ip6.arpa";
             stub-addr = "127.0.0.1@56";
             stub-no-cache = true;
           }
