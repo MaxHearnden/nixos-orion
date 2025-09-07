@@ -825,6 +825,7 @@ in
           "option:dns-server,192.168.1.201"
         ];
         dhcp-range = "192.168.1.2,192.168.1.199,10m";
+        dhcp-rapid-commit = true;
         domain = "home.arpa";
         interface = "enp49s0";
         log-debug = true;
