@@ -831,8 +831,6 @@ in
         dhcp-rapid-commit = true;
         domain = "home.arpa";
         interface = "enp49s0";
-        log-debug = true;
-        log-queries = true;
         port = 56;
         txt-record = "max.home.arpa,placeholder";
       };
