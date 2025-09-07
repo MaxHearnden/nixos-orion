@@ -804,6 +804,7 @@ in
       enable = true;
       resolveLocalQueries = false;
       settings = {
+        auth-peer = "127.0.0.1,::1";
         auth-server = "local.zandoodle.me.uk,192.168.1.201,::1,127.0.0.1";
         auth-zone = "home.arpa,192.168.0.0/16,fd00::/8";
         bind-dynamic = true;
