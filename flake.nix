@@ -54,6 +54,28 @@
         };
         inherit system;
       }).config.system.build.vm;
+      networking =
+        let
+          nixos-system = (lib.nixosSystem {
+            modules = [
+              ./configuration.nix
+              {
+                boot.binfmt.emulatedSystems = lib.mkForce [];
+              }
+            ];
+            specialArgs = {
+              inherit inputs;
+              pkgs-unstable = nixpkgs-unstable.legacyPackages;
+            };
+            inherit system;
+          });
+        in nixos-system.pkgs.runCommandNoCC "network-config" {} ''
+          mkdir $out
+          cp ${nixos-system.config.environment.etc."unbound/unbound.conf".source} $out
+          cp ${nixos-system.config.environment.etc."dnsdist/dnsdist.conf".source} $out
+          cp ${lib.lists.last (lib.strings.splitString " " nixos-system.config.systemd.services.dnsmasq.serviceConfig.ExecStart)} $out
+          cp ${lib.escapeShellArgs nixos-system.config.systemd.services.nftables.serviceConfig.ExecStart} $out
+        '';
     });
   };
 }
