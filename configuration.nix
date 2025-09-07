@@ -198,8 +198,8 @@ in
         iifname {"shadow-lan", "2-shadow-2-lan"} oifname "plat" accept
       '';
       extraInputRules = ''
-        meta l4proto {udp, tcp} th dport 55 ip saddr @local_ip accept
-        meta l4proto {udp, tcp} th dport 55 ip6 saddr @local_ip6 accept
+        meta l4proto {udp, tcp} th dport {55, 56} ip saddr @local_ip accept
+        meta l4proto {udp, tcp} th dport {55, 56} ip6 saddr @local_ip6 accept
       '';
       filterForward = true;
       interfaces = {
