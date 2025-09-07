@@ -141,8 +141,8 @@ in
         local-shadow IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
         local-shadow IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
         local-shadow IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
-        local-shadow A 192.168.4.1
-        local-shadow AAAA fd09:a389:7c1e:1::1
+        local-shadow A 192.168.10.1
+        local-shadow AAAA fd09:a389:7c1e:4::1
         ttl-check 0 txt ttl\ check
         wss.cardgames HTTPS 1 . alpn=h3,h2
       '';
@@ -151,14 +151,6 @@ in
         nameserver ::1
 
         options trust-ad edns0
-      '';
-      "tayga/tayga.conf".text = ''
-        tun-device tayga
-        ipv4-addr 192.168.6.1
-        ipv6-addr fd80:2::1
-        prefix 64:ff9b::/96
-        dynamic-pool 192.168.7.0/24
-        data-dir /var/lib/tayga
       '';
       "tayga/plat.conf".text = ''
         tun-device plat
@@ -194,8 +186,7 @@ in
       allowedUDPPorts = [ 53 54 443 ];
       allowedTCPPorts = [ 53 54 80 443 ];
       extraForwardRules = ''
-        iifname {"shadow-lan", "2-shadow-2-lan"} oifname "tayga" accept
-        iifname {"shadow-lan", "2-shadow-2-lan"} oifname "plat" accept
+        iifname "2-shadow-2-lan" oifname "plat" accept
       '';
       extraInputRules = ''
         meta l4proto {udp, tcp} th dport {55, 56} ip saddr @local_ip accept
@@ -206,7 +197,6 @@ in
         web-vm.allowedUDPPorts = [ 67 ];
         enp1s0.allowedUDPPorts = [ 67 ];
         enp49s0.allowedUDPPorts = [ 67 547 ];
-        shadow-lan.allowedUDPPorts = [ 67 ];
         "\"2-shadow-2-lan\"".allowedUDPPorts = [ 67 ];
       };
     };
@@ -215,7 +205,7 @@ in
     nat = {
       enable = true;
       externalInterface = "enp49s0";
-      internalInterfaces = [ "web-vm" "enp1s0" "shadow-lan" "2-shadow-2-lan" "tayga" "plat" ];
+      internalInterfaces = [ "web-vm" "enp1s0" "2-shadow-2-lan" "plat" ];
     };
     nftables = {
       checkRuleset = false;
@@ -285,7 +275,7 @@ in
             meta l4proto {udp, tcp} th dport 56 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @dnsmasq accept
             tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
             udp dport 443 socket cgroupv2 level 2 @caddy accept
-            udp dport 67 iifname { web-vm, enp1s0, shadow-lan } socket cgroupv2 level 2 @systemd_networkd accept
+            udp dport 67 iifname { web-vm, enp1s0 } socket cgroupv2 level 2 @systemd_networkd accept
             udp dport 67 iifname enp49s0 socket cgroupv2 level 2 @dnsmasq accept
             udp dport 547 iifname enp49s0 socket cgroupv2 level 2 @dnsmasq accept
             icmpv6 type != { nd-redirect, 139 } accept
@@ -1063,13 +1053,6 @@ in
             Group = "tayga";
           };
         };
-        "10-shadow-lan" = {
-          netdevConfig = {
-            Kind = "vlan";
-            Name = "shadow-lan";
-          };
-          vlanConfig.Id = 20;
-        };
         "10-2-shadow-2-lan" = {
           extraConfig = ''
             [VLAN]
@@ -1079,16 +1062,6 @@ in
           netdevConfig = {
             Kind = "vlan";
             Name = "2-shadow-2-lan";
-          };
-        };
-        "10-tayga" = {
-          netdevConfig = {
-            Kind = "tun";
-            Name = "tayga";
-          };
-          tapConfig = {
-            User = "tayga";
-            Group = "tayga";
           };
         };
         "10-web-vm" = {
@@ -1147,7 +1120,7 @@ in
               PreferredSource = "192.168.1.201";
             }
           ];
-          vlan = ["shadow-lan" "2-shadow-2-lan"];
+          vlan = [ "2-shadow-2-lan"];
         };
         "10-plat" = {
           address = [ "192.168.8.0/31" "fd09:a389:7c1e:2::/127" ];
@@ -1162,45 +1135,6 @@ in
               MTUBytes = 1480;
             }
           ];
-        };
-        "10-shadow-lan" = {
-          address = [ "192.168.4.1/24" "fd80:1::1/64" "fd09:a389:7c1e:1::1/64" ];
-          ipv6Prefixes = [
-            {
-              Prefix = "fd80:1::/64";
-            }
-            {
-              Prefix = "fd09:a389:7c1e:1::/64";
-            }
-          ];
-          ipv6RoutePrefixes = [
-            {
-              Route = "64:ff9b::/96";
-            }
-            {
-              Route = "fd80:2::/127";
-            }
-            {
-              Route = "fd09:a389:7c1e::/48";
-            }
-          ];
-          ipv6SendRAConfig = {
-            DNS = "_link_local";
-            EmitDNS = true;
-            RouterLifetimeSec = 0;
-          };
-          ipv6PREF64Prefixes = [
-            {
-              Prefix = "fd09:a389:7c1e:3::/64";
-            }
-          ];
-          linkConfig.RequiredForOnline = false;
-          matchConfig.Name = "shadow-lan";
-          networkConfig = {
-            DHCPServer = true;
-            IPv6SendRA = true;
-          };
-          dhcpServerConfig.DNS = "_server_address";
         };
         "10-2-shadow-2-lan" = {
           address = [ "fd09:a389:7c1e:4::1/64" "192.168.10.1/24" ];
@@ -1230,19 +1164,6 @@ in
             IPv6SendRA = true;
           };
           dhcpServerConfig.DNS = "_server_address";
-        };
-        "10-tayga" = {
-          address = [ "192.168.6.0/31" "fd80:2::0/127" ];
-          linkConfig.RequiredForOnline = false;
-          matchConfig.Name = "tayga";
-          routes = [
-            {
-              Destination = "64:ff9b::/96";
-            }
-            {
-              Destination = "192.168.7.0/24";
-            }
-          ];
         };
         "10-web-vm" = {
           matchConfig = {
@@ -1622,7 +1543,7 @@ in
       plat = {
         after = [ "sys-subsystem-net-devices-plat.device" ];
         confinement.enable = true;
-        restartTriggers = [ config.environment.etc."tayga/tayga.conf".source ];
+        restartTriggers = [ config.environment.etc."tayga/plat.conf".source ];
         serviceConfig = {
           BindReadOnlyPaths = [
             "${config.environment.etc."tayga/plat.conf".source}:/etc/tayga/plat.conf"
@@ -1662,46 +1583,6 @@ in
       sshd.serviceConfig.NFTSet = "cgroup:inet:services:sshd";
       systemd-machined.enable = false;
       systemd-networkd.serviceConfig.NFTSet = "cgroup:inet:services:systemd_networkd";
-      tayga = {
-        after = [ "sys-subsystem-net-devices-tayga.device" ];
-        confinement.enable = true;
-        restartTriggers = [ config.environment.etc."tayga/tayga.conf".source ];
-        serviceConfig = {
-          BindReadOnlyPaths = [
-            "${config.environment.etc."tayga/tayga.conf".source}:/etc/tayga/tayga.conf"
-            "/dev/net/tun"
-          ];
-          CapabilityBoundingSet = "";
-          DeviceAllow = "/dev/net/tun";
-          ExecStart = "${lib.getExe pkgs.tayga} -d -c /etc/tayga/tayga.conf";
-          Group = "tayga";
-          IPAddressDeny = "any";
-          LockPersonality = true;
-          MemoryDenyWriteExecute = true;
-          NoNewPrivileges = true;
-          PrivateTmp = true;
-          ProcSubset = "pid";
-          ProtectClock = true;
-          ProtectHome = true;
-          ProtectHostname = true;
-          ProtectKernelLogs = true;
-          ProtectProc = "invisible";
-          ProtectSystem = "strict";
-          RemoveIPC = true;
-          Restart = "on-failure";
-          RestrictAddressFamilies = "AF_INET";
-          RestrictNamespaces = true;
-          RestrictRealtime = true;
-          RestrictSUIDSGID = true;
-          StateDirectory = "tayga";
-          SystemCallArchitectures = "native";
-          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
-          UMask = "077";
-          User = "tayga";
-        };
-        wantedBy = [ "multi-user.target" ];
-        wants = [ "sys-subsystem-net-devices-tayga.device" ];
-      };
       unbound.serviceConfig.NFTSet = "cgroup:inet:services:unbound";
       web-vm = {
         confinement.enable = true;
