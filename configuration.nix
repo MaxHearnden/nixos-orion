@@ -956,6 +956,7 @@ in
     resolved.enable = false;
     unbound = {
       enable = true;
+      localControlSocketPath = "/run/unbound/unbound.ctl";
       resolveLocalQueries = false;
       settings = {
         server = {
