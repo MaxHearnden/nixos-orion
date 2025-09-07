@@ -809,7 +809,11 @@ in
         auth-zone = "home.arpa,192.168.0.0/16,fd00::/8";
         bind-dynamic = true;
         dhcp-authoritative = true;
-        dhcp-host = "d4:35:1d:11:20:2e,192.168.1.1,vodafone";
+        dhcp-host = [
+          "d4:da:cd:d6:3c:93,sky"
+          "08:c2:24:54:e2:ea,alexa"
+          "70:9e:29:c7:b9:99,ps4"
+        ];
         dhcp-option = [
           "option:router,192.168.1.1"
           "option:dns-server,192.168.1.201"
