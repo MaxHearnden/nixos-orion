@@ -822,6 +822,7 @@ in
         domain = "home.arpa";
         host-record = "vodafone.home.arpa,192.168.1.1";
         interface = "enp49s0";
+        interface-name = "orion.home.arpa,enp49s0";
         port = 56;
         txt-record = "max.home.arpa,placeholder";
       };
