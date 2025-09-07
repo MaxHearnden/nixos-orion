@@ -818,6 +818,7 @@ in
         auth-server = "local.zandoodle.me.uk";
         auth-zone = "home.arpa";
         bind-dynamic = true;
+        dhcp-authoritative = true;
         dhcp-host = "d4:35:1d:11:20:2e,192.168.1.1,vodafone";
         dhcp-option = [
           "option:router,192.168.1.1"
