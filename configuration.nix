@@ -831,6 +831,7 @@ in
         log-debug = true;
         log-queries = true;
         port = 56;
+        txt-record = "max.home.arpa,placeholder";
       };
     };
     knot = {
