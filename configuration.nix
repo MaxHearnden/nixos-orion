@@ -813,6 +813,7 @@ in
           "d4:da:cd:d6:3c:93,sky"
           "08:c2:24:54:e2:ea,alexa"
           "70:9e:29:c7:b9:99,ps4"
+          "80:99:e7:9e:b0:3b,sony-tv"
         ];
         dhcp-option = [
           "option:router,192.168.1.1"
