@@ -75,6 +75,7 @@
           cp ${nixos-system.config.environment.etc."dnsdist/dnsdist.conf".source} $out
           cp ${lib.lists.last (lib.strings.splitString " " nixos-system.config.systemd.services.dnsmasq.serviceConfig.ExecStart)} $out
           cp ${lib.escapeShellArgs nixos-system.config.systemd.services.nftables.serviceConfig.ExecStart} $out
+          cp ${nixos-system.config.systemd.network.units."10-enp49s0.network".unit}/* $out
         '';
     });
   };
