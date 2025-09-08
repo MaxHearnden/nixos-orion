@@ -1071,6 +1071,17 @@ in
     network = {
       enable = true;
       netdevs = {
+        "10-experimental" = {
+          extraConfig = ''
+            [VLAN]
+            Id=10
+            Protocol=802.1ad
+          '';
+          netdevConfig = {
+            Kind = "vlan";
+            Name = "experimental";
+          };
+        };
         "10-plat" = {
           netdevConfig = {
             Kind = "tun";
@@ -1148,7 +1159,22 @@ in
               PreferredSource = "192.168.1.201";
             }
           ];
-          vlan = [ "2-shadow-2-lan"];
+          vlan = [ "2-shadow-2-lan" "experimental" ];
+        };
+        "10-experimental" = {
+          address = [ "192.168.11.1/24" ];
+          ipv6Prefixes = [
+            {
+              Assign = true;
+              Prefix = "fd09:a389:7c1e:6::/64";
+            }
+          ];
+          ipv6SendRAConfig = {
+            Managed = true;
+            RouterLifetimeSec = 0;
+          };
+          name = "experimental";
+          networkConfig.IPv6SendRA = true;
         };
         "10-plat" = {
           address = [ "192.168.8.0/31" "fd09:a389:7c1e:2::/127" ];
