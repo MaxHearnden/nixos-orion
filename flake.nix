@@ -71,16 +71,16 @@
           });
         in nixos-system.pkgs.runCommandNoCC "network-config" {} ''
           mkdir $out
-          cp ${nixos-system.config.environment.etc."unbound/unbound.conf".source} $out
-          cp ${nixos-system.config.environment.etc."dnsdist/dnsdist.conf".source} $out
-          cp ${lib.lists.last (lib.strings.splitString " " nixos-system.config.systemd.services.dnsmasq.serviceConfig.ExecStart)} $out
-          cp ${lib.escapeShellArgs nixos-system.config.systemd.services.nftables.serviceConfig.ExecStart} $out
-          cp ${nixos-system.config.systemd.network.units."10-enp49s0.network".unit}/* $out
-          cp ${nixos-system.config.systemd.units."unbound.service".unit}/* $out
-          cp ${nixos-system.config.systemd.units."dnsmasq.service".unit}/* $out
-          cp ${nixos-system.config.systemd.units."dnsdist.service".unit}/* $out
-          tar -acf archive.tar.xz $out
-          cp archive.tar.xz $out
+          cp ${nixos-system.config.environment.etc."unbound/unbound.conf".source} $out/unbound.conf
+          cp ${nixos-system.config.environment.etc."dnsdist/dnsdist.conf".source} $out/dnsdist.conf
+          cp ${lib.lists.last (lib.strings.splitString " " nixos-system.config.systemd.services.dnsmasq.serviceConfig.ExecStart)} $out/dnsmasq.conf
+          cp ${lib.lists.last nixos-system.config.systemd.services.nftables.serviceConfig.ExecStart} $out/nftables
+          cp ${nixos-system.config.systemd.network.units."10-enp49s0.network".unit}/* $out/enp49s0.network
+          cp ${nixos-system.config.systemd.units."unbound.service".unit}/* $out/unbound.service
+          cp ${nixos-system.config.systemd.units."dnsmasq.service".unit}/* $out/dnsmasq.service
+          cp ${nixos-system.config.systemd.units."dnsdist.service".unit}/* $out/dnsdist.service
+          tar -acf network-archive.tar.xz -C $out .
+          cp network-archive.tar.xz $out
         '';
     });
   };
