@@ -196,7 +196,7 @@ in
       interfaces = {
         web-vm.allowedUDPPorts = [ 67 ];
         enp1s0.allowedUDPPorts = [ 67 ];
-        enp49s0.allowedUDPPorts = [ 67 547 ];
+        # enp49s0.allowedUDPPorts = [ 67 547 ];
         "\"2-shadow-2-lan\"".allowedUDPPorts = [ 67 ];
       };
     };
@@ -276,8 +276,7 @@ in
             tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
             udp dport 443 socket cgroupv2 level 2 @caddy accept
             udp dport 67 iifname { web-vm, enp1s0 } socket cgroupv2 level 2 @systemd_networkd accept
-            udp dport 67 iifname enp49s0 socket cgroupv2 level 2 @dnsmasq accept
-            udp dport 547 iifname enp49s0 socket cgroupv2 level 2 @dnsmasq accept
+            udp dport {547} iifname "enp49s0" socket cgroupv2 level 2 @dnsmasq accept
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
             icmp type echo-request accept comment "allow ping"
@@ -813,15 +812,17 @@ in
           "d4:da:cd:d6:3c:93,sky"
           "08:c2:24:54:e2:ea,alexa"
           "70:9e:29:c7:b9:99,ps4"
+          "5c:96:66:b5:0f:e8,ps5-wifi"
           "80:99:e7:9e:b0:3b,sony-tv"
         ];
         dhcp-option = [
           "option:router,192.168.1.1"
+          "option:ntp-server,192.168.1.1"
           "option:dns-server,192.168.1.201"
         ];
         dhcp-range = [
-          "192.168.1.2,192.168.1.199,10m"
-          "fd09:a389:7c1e:5::,fd09:a389:7c1e:5:ffff:ffff:ffff:ffff,64,10m"
+          # "192.168.1.2,192.168.1.199,10m"
+          # "fd09:a389:7c1e:5::,fd09:a389:7c1e:5:ffff:ffff:ffff:ffff,64,10m"
         ];
         dhcp-rapid-commit = true;
         domain = "home.arpa";
@@ -1135,9 +1136,9 @@ in
           address = [ "192.168.1.201/24" ];
           # dhcpV4Config.Label = "DHCP assigned";
           ipv6SendRAConfig = {
-            DNS = "_link_local";
-            EmitDNS = true;
-            Managed = true;
+            # DNS = "_link_local";
+            # EmitDNS = true;
+            # Managed = true;
             RouterLifetimeSec = 0;
           };
           matchConfig.Name = "enp49s0";
@@ -1148,7 +1149,6 @@ in
           };
           ipv6Prefixes = [
             {
-              AddressAutoconfiguration = false;
               Assign = true;
               Prefix = "fd09:a389:7c1e:5::/64";
             }
