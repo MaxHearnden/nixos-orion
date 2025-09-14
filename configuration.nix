@@ -117,9 +117,11 @@ in
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include ttl-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/local-guest-zonefile local-guest.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile cardgames.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
@@ -137,6 +139,10 @@ in
         local IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
         local IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
         local IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
+        local-guest IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
+        local-guest IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
+        local-guest IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
+        local-guest IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
         local-shadow IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
         local-shadow IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
         local-shadow IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
@@ -196,6 +202,7 @@ in
       interfaces = {
         web-vm.allowedUDPPorts = [ 67 ];
         enp1s0.allowedUDPPorts = [ 67 ];
+        guest.allowedUDPPorts = [ 67 ];
         # enp49s0.allowedUDPPorts = [ 67 547 ];
         "\"2-shadow-2-lan\"".allowedUDPPorts = [ 67 ];
       };
@@ -275,8 +282,8 @@ in
             meta l4proto {udp, tcp} th dport 56 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @dnsmasq accept
             tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
             udp dport 443 socket cgroupv2 level 2 @caddy accept
-            udp dport 67 iifname { web-vm, enp1s0 } socket cgroupv2 level 2 @systemd_networkd accept
-            udp dport {547} iifname "enp49s0" socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 67 iifname {enp1s0, web-vm} socket cgroupv2 level 2 @systemd_networkd accept
+            udp dport {67, 547} iifname guest socket cgroupv2 level 2 @dnsmasq accept
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
             icmp type echo-request accept comment "allow ping"
@@ -808,6 +815,7 @@ in
         auth-zone = "home.arpa,192.168.0.0/16,fd00::/8";
         bind-dynamic = true;
         dhcp-authoritative = true;
+        dhcp-generate-names = true;
         dhcp-host = [
           "d4:da:cd:d6:3c:93,sky"
           "08:c2:24:54:e2:ea,alexa"
@@ -816,19 +824,25 @@ in
           "80:99:e7:9e:b0:3b,sony-tv"
         ];
         dhcp-option = [
-          "option:router,192.168.1.1"
-          "option:ntp-server,192.168.1.1"
-          "option:dns-server,192.168.1.201"
+          "option:router,192.168.5.1"
+          "option:ntp-server,192.168.5.1"
+          "option:dns-server,192.168.5.201"
         ];
         dhcp-range = [
-          # "192.168.1.2,192.168.1.199,10m"
-          # "fd09:a389:7c1e:5::,fd09:a389:7c1e:5:ffff:ffff:ffff:ffff,64,10m"
+          "192.168.5.2,192.168.5.199,10m"
+          # "fd09:a389:7c1e:7::,fd09:a389:7c1e:7:ffff:ffff:ffff:ffff,64,10m"
         ];
         dhcp-rapid-commit = true;
         domain = "home.arpa";
-        host-record = "vodafone.home.arpa,192.168.1.1";
-        interface = "enp49s0";
-        interface-name = "orion.home.arpa,enp49s0";
+        host-record = [
+          "vodafone.home.arpa,192.168.1.1"
+          "vodafone-guest.home.arpa,192.168.5.1"
+        ];
+        interface = "guest";
+        interface-name = [
+          "orion.home.arpa,enp49s0"
+          "orion-guest.home.arpa,guest"
+        ];
         port = 56;
         txt-record = "max.home.arpa,placeholder";
       };
@@ -1072,6 +1086,15 @@ in
     network = {
       enable = true;
       netdevs = {
+        "10-guest" = {
+          netdevConfig = {
+            Kind = "vlan";
+            Name = "guest";
+          };
+          vlanConfig = {
+            Id = 10;
+          };
+        };
         "10-experimental" = {
           extraConfig = ''
             [VLAN]
@@ -1116,6 +1139,12 @@ in
         };
       };
       networks = {
+        "10-guest" = {
+          address = [ "192.168.5.201/24" ];
+          linkConfig.RequiredForOnline = false;
+          name = "guest";
+          networkConfig.IPv6AcceptRA = false;
+        };
         "10-enp1s0" = {
           matchConfig = {
             Name = "enp1s0";
@@ -1159,7 +1188,7 @@ in
               PreferredSource = "192.168.1.201";
             }
           ];
-          vlan = [ "2-shadow-2-lan" "experimental" ];
+          vlan = [ "2-shadow-2-lan" "experimental" "guest" ];
         };
         "10-experimental" = {
           address = [ "192.168.11.1/24" ];
@@ -1389,12 +1418,24 @@ in
 
           ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-zonefile
 
+          ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev guest | ${lib.getExe pkgs.jq} -r \
+            '.[].addr_info.[]
+              | if .family == "inet" then
+                "@ A " + .local
+              elif (.family == "inet6") and (.scope != "link") then
+                "@ AAAA " + .local
+              else
+                empty
+              end' >/run/ddns/local-guest-zonefile
+
+          ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-guest-zonefile
+
           if ! ${lib.getExe' pkgs.diffutils "diff"} /run/ddns/zonefile /var/lib/ddns/zonefile; then
             cp --backup=numbered /run/ddns/zonefile "/var/lib/ddns/zonefile-$(date --iso-8601=seconds)"
           fi
 
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
-            /run/ddns/zonefile /run/ddns/local-zonefile /var/lib/ddns/
+            /run/ddns/zonefile /run/ddns/local-zonefile /run/ddns/local-guest-zonefile /var/lib/ddns/
         '';
         unitConfig.StartLimitIntervalSec = "20m";
         wantedBy = ["multi-user.target"];
