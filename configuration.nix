@@ -299,10 +299,9 @@ in
       interfaces = {
         # Allow DHCP from managed networks
         web-vm.allowedUDPPorts = [ 67 ];
-        enp1s0.allowedUDPPorts = [ 67 ];
+        enp1s0.allowedUDPPorts = [ 67 547 ];
         guest.allowedUDPPorts = [ 67 ];
         # enp49s0.allowedUDPPorts = [ 67 547 ];
-        "\"2-shadow-2-lan\"".allowedUDPPorts = [ 67 ];
       };
     };
     fqdn = "local.zandoodle.me.uk";
@@ -392,9 +391,11 @@ in
             udp dport 443 socket cgroupv2 level 2 @caddy accept
 
             # Allow DHCP handled by systemd-networkd
-            udp dport 67 iifname {enp1s0, web-vm} socket cgroupv2 level 2 @systemd_networkd accept
+            udp dport 67 iifname web-vm socket cgroupv2 level 2 @systemd_networkd accept
             # Allow DHCP handled by dnsmasq
-            udp dport {67, 547} iifname guest socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 67 iifname guest socket cgroupv2 level 2 @dnsmasq accept
+            udp dport { 67, 547 } iifname enp1s0 socket cgroupv2 level 2 @dnsmasq accept
+
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
             icmp type echo-request accept comment "allow ping"
@@ -1062,14 +1063,18 @@ in
 
         # Set the router, ntp server and DNS server addresses.
         dhcp-option = [
-          "option:router,192.168.5.1"
-          "option:ntp-server,192.168.5.1"
-          "option:dns-server,192.168.5.201"
+          "tag:guest,option:router,192.168.5.1"
+          "tag:guest,option:ntp-server,192.168.5.1"
+          "tag:guest,option:dns-server,192.168.5.201"
+          "tag:private,option:router,192.168.0.1"
+          "tag:private,option:ntp-server,192.168.1.1"
+          "tag:private,option:dns-server,192.168.0.1"
         ];
         # Enable DHCP and allocate from a suitable IP address range
         dhcp-range = [
-          "192.168.5.2,192.168.5.199,10m"
-          # "fd09:a389:7c1e:7::,fd09:a389:7c1e:7:ffff:ffff:ffff:ffff,64,10m"
+          "set:guest,192.168.5.2,192.168.5.199,10m"
+          "set:private,192.168.0.2,192.168.0.199,10m"
+          "set:private,fd09:a389:7c1e:7::,fd09:a389:7c1e:7:ffff:ffff:ffff:ffff,64,10m"
         ];
         # Enable DHCP rapid commit (allows for a two message DHCP exchange)
         dhcp-rapid-commit = true;
@@ -1084,12 +1089,13 @@ in
         ];
 
         # Enable DHCP operation on C-VLAN 10
-        interface = "guest";
+        interface = [ "guest" "enp1s0" ];
 
         # Add a DNS entry for ourselves
         interface-name = [
           "orion.home.arpa,enp49s0"
           "orion-guest.home.arpa,guest"
+          "orion-private.home.arpa,enp1s0"
         ];
 
         # Operate on port 56
@@ -1475,16 +1481,25 @@ in
             Name = "enp1s0";
           };
           address = [ "192.168.0.1/24" ];
+          ipv6Prefixes = [
+            {
+              Assign = true;
+              Prefix = "fd09:a389:7c1e:7::/64";
+            }
+          ];
+          ipv6SendRAConfig = {
+            DNS = "_link_local";
+            EmitDNS = true;
+            Managed = true;
+            RouterLifetimeSec = 0;
+          };
           linkConfig = {
             RequiredForOnline = false;
           };
           networkConfig = {
             # Configure the interface before the interface is connected
             ConfigureWithoutCarrier = true;
-            DHCPServer = true;
-          };
-          dhcpServerConfig = {
-            DNS = "192.168.0.1";
+            IPv6SendRA = true;
           };
         };
         "10-enp49s0" = {
