@@ -59,28 +59,28 @@ in
     etc = {
       # Configuration for the dnsdist DNS load balancer
       "dnsdist/dnsdist.conf".text = ''
-        # listen on all IPv4 and IPv6 addresses
+        -- listen on all IPv4 and IPv6 addresses
         addLocal("0.0.0.0:53")
         addLocal("[::]:53")
 
-        # Add local DNS servers
+        -- Add local DNS servers
         newServer({address = "127.0.0.1:54", name = "knot-dns", pool = "auth", healthCheckMode = "lazy"})
         newServer({address = "127.0.0.1:55", name = "unbound", pool = "iterative", healthCheckMode = "lazy"})
         newServer({address = "127.0.0.1:56", name = "dnsmasq", pool = "dnsmasq", healthCheckMode = "lazy"})
 
-        # Allow connections from all IP addresses
+        -- Allow connections from all IP addresses
         setACL({"0.0.0.0/0", "::/0"})
 
-        # Forward recursive queries to the recursive resolver (unbound)
+        -- Forward recursive queries to the recursive resolver (unbound)
         addAction(AndRule({RDRule(), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("iterative"))
 
-        # Forward local queries for home.arpa and associated rDNS domains to dnsmasq
+        -- Forward local queries for home.arpa and associated rDNS domains to dnsmasq
         addAction(AndRule({QNameSuffixRule({"home.arpa", "168.192.in-addr.arpa", "d.f.ip6.arpa"}), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("dnsmasq"))
 
-        # Filter out non-local zone transfers
+        -- Filter out non-local zone transfers
         addAction(AndRule({OrRule({QTypeRule(DNSQType.AXFR), QTypeRule(DNSQType.IXFR)}), NotRule(NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"}))}), DropAction())
 
-        # Provide some rate limiting
+        -- Provide some rate limiting
         addAction(
           AndRule({
             TCPRule(false),
@@ -91,7 +91,7 @@ in
           }),
           TCAction())
 
-        # Forward all remaining queries to the authoritative DNS server (knot)
+        -- Forward all remaining queries to the authoritative DNS server (knot)
         addAction(AllRule(), PoolAction("auth"))
       '';
       "knot/bogus.zandoodle.me.uk.zone".text = ''
@@ -556,21 +556,16 @@ in
     neovim = {
       configure = {
         customRC = ''
-          # Enable mouse interaction
           set mouse=a
 
-          # Set the shift (tab) width to 2
           set shiftwidth=2
 
-          # Don't use tabs and expand them to spaces instead
           set expandtab
 
-          # make bracket + enter automatically close the bracket and add a new line
           inoremap {<CR> {<CR>}<Esc>ko
           inoremap [<CR> [<CR>]<Esc>ko
           inoremap (<CR> (<CR>)<Esc>ko
 
-          # Mark 80 columns
           set colorcolumn=80
         '';
 
