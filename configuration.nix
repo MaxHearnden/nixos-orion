@@ -299,7 +299,7 @@ in
       interfaces = {
         # Allow DHCP from managed networks
         web-vm.allowedUDPPorts = [ 67 ];
-        enp1s0.allowedUDPPorts = [ 67 547 ];
+        # enp1s0.allowedUDPPorts = [ 67 547 ];
         guest.allowedUDPPorts = [ 67 ];
         # enp49s0.allowedUDPPorts = [ 67 547 ];
       };
@@ -309,8 +309,8 @@ in
     nat = {
       # Translate network addresses from local interfaces to the internet
       enable = true;
-      externalInterface = "enp49s0";
-      internalInterfaces = [ "web-vm" "enp1s0" "2-shadow-2-lan" "plat" ];
+      externalInterface = "bridge";
+      internalInterfaces = [ "web-vm" "2-shadow-2-lan" "plat" ];
     };
     nftables = {
       # Disable checking the ruleset using lkl as cgroups are not enabled in lkl
@@ -394,7 +394,7 @@ in
             udp dport 67 iifname web-vm socket cgroupv2 level 2 @systemd_networkd accept
             # Allow DHCP handled by dnsmasq
             udp dport 67 iifname guest socket cgroupv2 level 2 @dnsmasq accept
-            udp dport { 67, 547 } iifname enp1s0 socket cgroupv2 level 2 @dnsmasq accept
+            # udp dport { 67, 547 } iifname enp1s0 socket cgroupv2 level 2 @dnsmasq accept
 
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
@@ -1084,13 +1084,14 @@ in
         ];
 
         # Enable DHCP operation on C-VLAN 10
-        interface = [ "guest" "enp1s0" ];
+        interface = [ "guest" ];
 
         # Add a DNS entry for ourselves
         interface-name = [
           "orion.home.arpa,enp49s0"
           "orion-guest.home.arpa,guest"
           "orion-private.home.arpa,enp1s0"
+          "orion-bridge.home.arpa,bridge"
         ];
 
         # Operate on port 56
@@ -1397,6 +1398,14 @@ in
       # Enable systemd-networkd
       enable = true;
       netdevs = {
+        # Configure a bridge
+        "10-bridge" = {
+          netdevConfig = {
+            Kind = "bridge";
+            Name = "bridge";
+          };
+        };
+
         # Configure an interface to manage C-VLAN 10 (guest Wi-Fi)
         "10-guest" = {
           netdevConfig = {
@@ -1462,49 +1471,14 @@ in
         };
       };
       networks = {
-        # configure the guest interface
-        "10-guest" = {
-          address = [ "192.168.5.201/24" ];
-
-          # Don't wait for this interface to be configured
-          linkConfig.RequiredForOnline = false;
-          name = "guest";
-          networkConfig.IPv6AcceptRA = false;
-        };
-        "10-enp1s0" = {
-          matchConfig = {
-            Name = "enp1s0";
-          };
-          address = [ "192.168.0.1/24" ];
-          ipv6Prefixes = [
-            {
-              Assign = true;
-              Prefix = "fd09:a389:7c1e:7::/64";
-            }
-          ];
-          ipv6SendRAConfig = {
-            DNS = "_link_local";
-            EmitDNS = true;
-            Managed = true;
-            RouterLifetimeSec = 0;
-          };
-          linkConfig = {
-            RequiredForOnline = false;
-          };
-          networkConfig = {
-            # Configure the interface before the interface is connected
-            ConfigureWithoutCarrier = true;
-            IPv6SendRA = true;
-          };
-        };
-        "10-enp49s0" = {
+        "10-bridge" = {
           address = [ "192.168.1.201/24" ];
-          # dhcpV4Config.Label = "DHCP assigned";
           ipv6SendRAConfig = {
             # Don't advertise ourselves as a router to the internet
             RouterLifetimeSec = 0;
           };
-          name = "enp49s0";
+          linkConfig.RequiredForOnline = false;
+          name = "bridge";
           networkConfig = {
             IPv6AcceptRA = true;
             IPv6PrivacyExtensions = "kernel";
@@ -1525,9 +1499,48 @@ in
               PreferredSource = "192.168.1.201";
             }
           ];
-
           # Create VLANs and bind them to this interface
           vlan = [ "2-shadow-2-lan" "experimental" "guest" ];
+        };
+        # configure the guest interface
+        "10-guest" = {
+          address = [ "192.168.5.201/24" ];
+
+          # Don't wait for this interface to be configured
+          linkConfig.RequiredForOnline = false;
+          name = "guest";
+          networkConfig.IPv6AcceptRA = false;
+        };
+        "10-enp1s0" = {
+          bridge = [ "bridge" ];
+          matchConfig = {
+            Name = "enp1s0";
+          };
+          # address = [ "192.168.0.1/24" ];
+          # ipv6Prefixes = [
+          #   {
+          #     Assign = true;
+          #     Prefix = "fd09:a389:7c1e:7::/64";
+          #   }
+          # ];
+          # ipv6SendRAConfig = {
+          #   DNS = "_link_local";
+          #   EmitDNS = true;
+          #   Managed = true;
+          #   RouterLifetimeSec = 0;
+          # };
+          linkConfig = {
+            RequiredForOnline = false;
+          };
+          networkConfig = {
+            # Configure the interface before the interface is connected
+            ConfigureWithoutCarrier = true;
+            # IPv6SendRA = true;
+          };
+        };
+        "10-enp49s0" = {
+          bridge = [ "bridge" ];
+          name = "enp49s0";
         };
 
         # Configure S-VLAN 10 (unused)
@@ -1946,7 +1959,7 @@ in
           fi
 
           # Get the IP address for enp49s0
-          ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev enp49s0 | ${lib.getExe pkgs.jq} -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev bridge | ${lib.getExe pkgs.jq} -r \
             '.[].addr_info.[]
               | if .family == "inet" then
                 "@ A " + .local
