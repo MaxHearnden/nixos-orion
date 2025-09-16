@@ -120,11 +120,9 @@ in
 
         ; Setup DMARC and SPF for this domain
         $INCLUDE /etc/knot/no-email.zone.include
-        $INCLUDE /etc/knot/no-email.zone.include dns.compsoc-dev.com.
 
         ; Advertise our public IP address as the IP address for compsoc-dev.com and dns.compsoc-dev.com
         $INCLUDE /var/lib/ddns/zonefile
-        $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
 
         ; Setup certificate authority restrictions
         @ CAA 0 issuemail ";"
@@ -135,7 +133,9 @@ in
 
         ; Advertise HTTP/2 and HTTP/3 support
         @ HTTPS 1 . alpn=h3,h2
-        @ NS dns
+
+        ; Advertise the authoritative nameserver
+        @ NS dns.zandoodle.me.uk.
       '';
       "knot/letsencrypt.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {} [ "ISRG_Root_X1" "ISRG_Root_X2" ];
