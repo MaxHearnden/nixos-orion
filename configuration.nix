@@ -293,6 +293,7 @@ in
         # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
         meta l4proto {udp, tcp} th dport {55, 56} ip saddr @local_ip accept
         meta l4proto {udp, tcp} th dport {55, 56} ip6 saddr @local_ip6 accept
+        tcp dport 853 reject
       '';
       # Filter packets that would have been forwarded
       filterForward = true;
@@ -301,7 +302,7 @@ in
         web-vm.allowedUDPPorts = [ 67 ];
         # enp1s0.allowedUDPPorts = [ 67 547 ];
         guest.allowedUDPPorts = [ 67 ];
-        # enp49s0.allowedUDPPorts = [ 67 547 ];
+        "\"bridge\"".allowedUDPPorts = [ 67 ];
       };
     };
     fqdn = "local.zandoodle.me.uk";
@@ -393,7 +394,7 @@ in
             # Allow DHCP handled by systemd-networkd
             udp dport 67 iifname web-vm socket cgroupv2 level 2 @systemd_networkd accept
             # Allow DHCP handled by dnsmasq
-            udp dport 67 iifname guest socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 67 iifname { "bridge", guest } socket cgroupv2 level 2 @dnsmasq accept
             # udp dport { 67, 547 } iifname enp1s0 socket cgroupv2 level 2 @dnsmasq accept
 
             icmpv6 type != { nd-redirect, 139 } accept
@@ -1044,7 +1045,9 @@ in
         # Respect any DHCP lease (Allows clients to change DHCP server after T2 rather than lease expirey)
         dhcp-authoritative = true;
 
-        # Generate hostnames for hosts which don't provice one
+        # dhcp-broadcast = "tag:r8000p";
+
+        # Generate hostnames for hosts which don't provide one
         dhcp-generate-names = true;
 
         # Add hostnames for known hosts
@@ -1054,6 +1057,7 @@ in
           "70:9e:29:c7:b9:99,ps4"
           "5c:96:66:b5:0f:e8,ps5-wifi"
           "80:99:e7:9e:b0:3b,sony-tv"
+          "R8000P,set:r8000p,1h"
         ];
 
         # Set the router, ntp server and DNS server addresses.
@@ -1061,6 +1065,9 @@ in
           "tag:guest,option:router,192.168.5.1"
           "tag:guest,option:ntp-server,192.168.5.1"
           "tag:guest,option:dns-server,192.168.5.201"
+          "tag:home,option:router,192.168.1.1"
+          "tag:home,option:ntp-server,192.168.1.1"
+          "tag:home,option:dns-server,192.168.1.201"
           "tag:private,option:router,192.168.0.1"
           "tag:private,option:ntp-server,192.168.1.1"
           "tag:private,option:dns-server,192.168.0.1"
@@ -1068,6 +1075,7 @@ in
         # Enable DHCP and allocate from a suitable IP address range
         dhcp-range = [
           "set:guest,192.168.5.2,192.168.5.199,10m"
+          "set:home,192.168.1.2,192.168.1.199,10m"
           "set:private,192.168.0.2,192.168.0.199,10m"
           "set:private,fd09:a389:7c1e:7::,fd09:a389:7c1e:7:ffff:ffff:ffff:ffff,64,10m"
         ];
@@ -1084,7 +1092,10 @@ in
         ];
 
         # Enable DHCP operation on C-VLAN 10
-        interface = [ "guest" ];
+        interface = [
+          "guest"
+          "bridge"
+        ];
 
         # Add a DNS entry for ourselves
         interface-name = [
@@ -1297,7 +1308,7 @@ in
           private-address = [
             "10.0.0.0/8"
             "100.64.0.0/10"
-            "127.0.0.0/8"
+            # "127.0.0.0/8"
             "169.254.0.0/16"
             "172.16.0.0/12"
             "192.168.0.0/16"
