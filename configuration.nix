@@ -1311,6 +1311,8 @@ in
           num-threads = 12;
           port = 55;
 
+          prefetch = true;
+
           # Don't allow these addresses in a response by default
           private-address = [
             "10.0.0.0/8"
