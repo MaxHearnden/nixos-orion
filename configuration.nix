@@ -300,9 +300,8 @@ in
       interfaces = {
         # Allow DHCP from managed networks
         web-vm.allowedUDPPorts = [ 67 ];
-        # enp1s0.allowedUDPPorts = [ 67 547 ];
         guest.allowedUDPPorts = [ 67 ];
-        "\"bridge\"".allowedUDPPorts = [ 67 ];
+        "\"bridge\"".allowedUDPPorts = [ 67 547 ];
       };
     };
     fqdn = "local.zandoodle.me.uk";
@@ -391,11 +390,9 @@ in
             tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
             udp dport 443 socket cgroupv2 level 2 @caddy accept
 
-            # Allow DHCP handled by systemd-networkd
-            udp dport 67 iifname web-vm socket cgroupv2 level 2 @systemd_networkd accept
             # Allow DHCP handled by dnsmasq
             udp dport 67 iifname { "bridge", guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
-            # udp dport { 67, 547 } iifname enp1s0 socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 547 iifname "bridge" socket cgroupv2 level 2 @dnsmasq accept
 
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
@@ -1081,8 +1078,7 @@ in
         dhcp-range = [
           "set:guest,192.168.5.2,192.168.5.199,10m"
           "set:home,192.168.1.2,192.168.1.199,10m"
-          "set:private,192.168.0.2,192.168.0.199,10m"
-          "set:private,fd09:a389:7c1e:7::,fd09:a389:7c1e:7:ffff:ffff:ffff:ffff,64,10m"
+          "set:home,fd09:a389:7c1e:5::,fd09:a389:7c1e:5:ffff:ffff:ffff:ffff,64,10m"
           "set:web-vm,192.168.2.2,static"
         ];
         # Enable DHCP rapid commit (allows for a two message DHCP exchange)
@@ -1502,6 +1498,13 @@ in
         "10-bridge" = {
           address = [ "192.168.1.201/24" ];
           ipv6SendRAConfig = {
+            # Advertise DNS
+            DNS = "_link_local";
+            EmitDNS = true;
+
+            # Advertise DHCPv6
+            Managed = true;
+
             # Don't advertise ourselves as a router to the internet
             RouterLifetimeSec = 0;
           };
