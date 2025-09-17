@@ -1305,6 +1305,8 @@ in
             "d.f.ip6.arpa. nodefault"
           ];
 
+          log-servfail = true;
+
           # Set the nsid
           nsid = "ascii_recursive.dns.zandoodle.me.uk";
 
@@ -1313,6 +1315,8 @@ in
           port = 55;
 
           prefetch = true;
+
+          prefetch-key = true;
 
           # Don't allow these addresses in a response by default
           private-address = [
@@ -1346,6 +1350,9 @@ in
 
           # Serve expired records if a new answer can't be found
           serve-expired = true;
+
+          # Report validator failures
+          val-log-level = 2;
         };
         stub-zone = [
           {
