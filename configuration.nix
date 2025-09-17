@@ -1836,7 +1836,7 @@ in
           # Only allow typical syscalls
           SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
 
-          # This service will be considered started when the main process exits 
+          # This service will be considered started when the main process exits
           Type = "oneshot";
 
           # Make files accessible only by keymgr by default
