@@ -1293,6 +1293,7 @@ in
 
           # Enable Extended DNS Errors
           ede = true;
+          ede-serve-expired = true;
 
           # Reply to queries from the same address the query was sent to
           interface-automatic = true;
