@@ -394,7 +394,7 @@ in
             # Allow DHCP handled by systemd-networkd
             udp dport 67 iifname web-vm socket cgroupv2 level 2 @systemd_networkd accept
             # Allow DHCP handled by dnsmasq
-            udp dport 67 iifname { "bridge", guest } socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 67 iifname { "bridge", guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
             # udp dport { 67, 547 } iifname enp1s0 socket cgroupv2 level 2 @dnsmasq accept
 
             icmpv6 type != { nd-redirect, 139 } accept
@@ -1058,6 +1058,7 @@ in
           "5c:96:66:b5:0f:e8,ps5-wifi"
           "80:99:e7:9e:b0:3b,sony-tv"
           "R8000P,set:r8000p,1h"
+          "52:54:00:12:34:56,web-vm,192.168.2.2,infinite"
         ];
 
         # Set the router, ntp server and DNS server addresses.
@@ -1071,6 +1072,8 @@ in
           "tag:private,option:router,192.168.0.1"
           "tag:private,option:ntp-server,192.168.1.1"
           "tag:private,option:dns-server,192.168.0.1"
+          "tag:web-vm,option:router,192.168.2.1"
+          "tag:web-vm,option:dns-server,192.168.2.1"
         ];
         # Enable DHCP and allocate from a suitable IP address range
         dhcp-range = [
@@ -1078,6 +1081,7 @@ in
           "set:home,192.168.1.2,192.168.1.199,10m"
           "set:private,192.168.0.2,192.168.0.199,10m"
           "set:private,fd09:a389:7c1e:7::,fd09:a389:7c1e:7:ffff:ffff:ffff:ffff,64,10m"
+          "set:web-vm,192.168.2.2,static"
         ];
         # Enable DHCP rapid commit (allows for a two message DHCP exchange)
         dhcp-rapid-commit = true;
@@ -1095,6 +1099,7 @@ in
         interface = [
           "guest"
           "bridge"
+          "web-vm"
         ];
 
         # Add a DNS entry for ourselves
@@ -1626,22 +1631,8 @@ in
 
         # Configure the web VM interface
         "10-web-vm" = {
-          matchConfig = {
-            Name = "web-vm";
-          };
-          networkConfig = {
-            Address = "192.168.2.1/30";
-            DHCPServer = true;
-          };
-          dhcpServerConfig = {
-            DNS = "192.168.2.1";
-          };
-          dhcpServerStaticLeases = [
-            {
-              Address = "192.168.2.2";
-              MACAddress = "52:54:00:12:34:56";
-            }
-          ];
+          address = [ "192.168.2.1/30" ];
+          name = "web-vm";
         };
       };
 
