@@ -1286,6 +1286,8 @@ in
           ede = true;
           ede-serve-expired = true;
 
+          fast-server-permil = 900;
+
           # Reply to queries from the same address the query was sent to
           interface-automatic = true;
 
