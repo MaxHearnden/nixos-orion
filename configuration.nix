@@ -301,7 +301,7 @@ in
         # Allow DHCP from managed networks
         web-vm.allowedUDPPorts = [ 67 ];
         guest.allowedUDPPorts = [ 67 ];
-        "\"bridge\"".allowedUDPPorts = [ 67 547 ];
+        "\"2-shadow-2-lan\"".allowedUDPPorts = [ 67 547 ];
       };
     };
     fqdn = "local.zandoodle.me.uk";
@@ -391,8 +391,8 @@ in
             udp dport 443 socket cgroupv2 level 2 @caddy accept
 
             # Allow DHCP handled by dnsmasq
-            udp dport 67 iifname { "bridge", guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
-            udp dport 547 iifname "bridge" socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 67 iifname { "2-shadow-2-lan", guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 547 iifname "2-shadow-2-lan" socket cgroupv2 level 2 @dnsmasq accept
 
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
@@ -1071,14 +1071,16 @@ in
           "tag:private,option:router,192.168.0.1"
           "tag:private,option:ntp-server,192.168.1.1"
           "tag:private,option:dns-server,192.168.0.1"
+          "tag:shadow,option:router,192.168.10.1"
+          "tag:shadow,option:dns-server,192.168.10.1"
           "tag:web-vm,option:router,192.168.2.1"
           "tag:web-vm,option:dns-server,192.168.2.1"
         ];
         # Enable DHCP and allocate from a suitable IP address range
         dhcp-range = [
           "set:guest,192.168.5.2,192.168.5.199,10m"
-          "set:home,192.168.1.2,192.168.1.199,10m"
-          "set:home,fd09:a389:7c1e:5::,fd09:a389:7c1e:5:ffff:ffff:ffff:ffff,64,10m"
+          "set:shadow,192.168.10.2,192.168.10.199,10m"
+          "set:shadow,fd09:a389:7c1e:4::,fd09:a389:7c1e:4:ffff:ffff:ffff:ffff,64,10m"
           "set:web-vm,192.168.2.2,static"
         ];
         # Enable DHCP rapid commit (allows for a two message DHCP exchange)
@@ -1096,6 +1098,7 @@ in
         # Enable DHCP operation on C-VLAN 10
         interface = [
           "guest"
+          "2-shadow-2-lan"
           "web-vm"
         ];
 
@@ -1105,6 +1108,7 @@ in
           "orion-guest.home.arpa,guest"
           "orion-private.home.arpa,enp1s0"
           "orion-bridge.home.arpa,bridge"
+          "orion-shadow.home.arpa,shadow"
         ];
 
         # Operate on port 56
@@ -1499,13 +1503,6 @@ in
         "10-bridge" = {
           address = [ "192.168.1.201/24" ];
           ipv6SendRAConfig = {
-            # Advertise DNS
-            DNS = "_link_local";
-            EmitDNS = true;
-
-            # Advertise DHCPv6
-            Managed = true;
-
             # Don't advertise ourselves as a router to the internet
             RouterLifetimeSec = 0;
           };
@@ -1628,6 +1625,7 @@ in
           ipv6SendRAConfig = {
             DNS = "_link_local";
             EmitDNS = true;
+            Managed = true;
             RouterLifetimeSec = 0;
           };
 
