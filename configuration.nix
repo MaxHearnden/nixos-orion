@@ -310,7 +310,7 @@ in
       # Translate network addresses from local interfaces to the internet
       enable = true;
       externalInterface = "bridge";
-      internalInterfaces = [ "web-vm" "2-shadow-2-lan" "plat" ];
+      internalInterfaces = [ "2-shadow-2-lan" "plat" ];
     };
     nftables = {
       # Disable checking the ruleset using lkl as cgroups are not enabled in lkl
@@ -1042,20 +1042,11 @@ in
         # Respect any DHCP lease (Allows clients to change DHCP server after T2 rather than lease expirey)
         dhcp-authoritative = true;
 
-        # dhcp-broadcast = "tag:r8000p";
-
         # Generate hostnames for hosts which don't provide one
         dhcp-generate-names = true;
 
         # Add hostnames for known hosts
         dhcp-host = [
-          "d4:da:cd:d6:3c:93,sky"
-          "08:c2:24:54:e2:ea,alexa"
-          "70:9e:29:c7:b9:99,ps4"
-          "5c:96:66:b5:0f:e8,ps5-wifi"
-          "80:99:e7:9e:b0:3b,sony-tv"
-          "a0:29:19:f3:7c:1f,set:bad"
-          "R8000P,set:r8000p,1h"
           "52:54:00:12:34:56,web-vm,192.168.2.2,infinite"
         ];
 
@@ -1064,13 +1055,6 @@ in
           "tag:guest,option:router,192.168.5.1"
           "tag:guest,option:ntp-server,192.168.5.1"
           "tag:guest,option:dns-server,192.168.5.201"
-          "tag:home,option:router,192.168.1.1"
-          "tag:home,option:ntp-server,192.168.1.1"
-          "tag:home,tag:!bad,option:dns-server,192.168.1.201"
-          "tag:home,tag:bad,option:dns-server,192.168.1.1"
-          "tag:private,option:router,192.168.0.1"
-          "tag:private,option:ntp-server,192.168.1.1"
-          "tag:private,option:dns-server,192.168.0.1"
           "tag:shadow,option:router,192.168.10.1"
           "tag:shadow,option:dns-server,192.168.10.1"
           "tag:web-vm,option:router,192.168.2.1"
@@ -1095,7 +1079,7 @@ in
           "vodafone-guest.home.arpa,192.168.5.1"
         ];
 
-        # Enable DHCP operation on C-VLAN 10
+        # Enable DHCP operation on C-VLAN 10, S-VLAN 20 and the web-vm TAP interface
         interface = [
           "guest"
           "2-shadow-2-lan"
@@ -1104,9 +1088,7 @@ in
 
         # Add a DNS entry for ourselves
         interface-name = [
-          "orion.home.arpa,enp49s0"
           "orion-guest.home.arpa,guest"
-          "orion-private.home.arpa,enp1s0"
           "orion-bridge.home.arpa,bridge"
           "orion-shadow.home.arpa,shadow"
         ];
