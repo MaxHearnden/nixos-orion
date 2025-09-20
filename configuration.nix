@@ -1096,7 +1096,6 @@ in
         # Enable DHCP operation on C-VLAN 10
         interface = [
           "guest"
-          "bridge"
           "web-vm"
         ];
 
