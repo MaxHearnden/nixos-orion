@@ -1515,7 +1515,10 @@ in
             # Don't advertise ourselves as a router to the internet
             RouterLifetimeSec = 0;
           };
-          linkConfig.RequiredForOnline = false;
+          linkConfig = {
+            AllMulticast = true;
+            RequiredForOnline = false;
+          };
           name = "bridge";
           networkConfig = {
             IPv6AcceptRA = true;
