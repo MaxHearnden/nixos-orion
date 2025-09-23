@@ -1438,6 +1438,7 @@ in
       netdevs = {
         # Configure a bridge
         "10-bridge" = {
+          bridgeConfig.STP = true;
           netdevConfig = {
             Kind = "bridge";
             Name = "bridge";
