@@ -163,6 +163,7 @@ in
         $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include multi-string-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include null-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include ttl-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
@@ -213,6 +214,8 @@ in
 
         local-shadow A 192.168.10.1
         local-shadow AAAA fd09:a389:7c1e:4::1
+
+        multi-string-check TXT string 1 string 2
 
         ; Check that null bytes within TXT records are handled correctly
         null-check TXT "\000"
