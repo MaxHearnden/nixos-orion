@@ -159,9 +159,11 @@ in
         $INCLUDE /etc/knot/no-email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include dot-check\..zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include null-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include ttl-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
 
@@ -190,6 +192,8 @@ in
         ; Advertise HTTP/2 and HTTP/3 support for cardgames.zandoodle.me.uk
         cardgames HTTPS 1 . alpn=h3,h2
 
+        dot-check\. txt dot\ check
+
         ; Advertise HTTP/2 and HTTP/3 support for local.zandoodle.me.uk
         local HTTPS 1 . alpn=h3,h2
 
@@ -209,6 +213,9 @@ in
 
         local-shadow A 192.168.10.1
         local-shadow AAAA fd09:a389:7c1e:4::1
+
+        ; Check that null bytes within TXT records are handled correctly
+        null-check TXT "\000"
 
         ; Add a zero ttl record for testing DNS resolvers
         ttl-check 0 txt ttl\ check
