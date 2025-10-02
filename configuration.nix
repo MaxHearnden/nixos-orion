@@ -165,6 +165,7 @@ in
         $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include multi-string-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include null-check.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include null-domain-check\000.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include ttl-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
 
@@ -219,6 +220,9 @@ in
 
         ; Check that null bytes within TXT records are handled correctly
         null-check TXT "\000"
+
+        ; Check that null bytes within domains are handled correctly
+        null-domain-check\000 TXT "null domain check"
 
         ; Add a zero ttl record for testing DNS resolvers
         ttl-check 0 txt ttl\ check
