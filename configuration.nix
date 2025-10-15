@@ -2001,6 +2001,10 @@ in
             exit 1
           fi
 
+          # Append the IPv6 records
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary | ${lib.getExe pkgs.jq} -r \
+            '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/zonefile
+
           # Get the IP address for enp49s0
           ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev bridge | ${lib.getExe pkgs.jq} -r \
             '.[].addr_info.[]
