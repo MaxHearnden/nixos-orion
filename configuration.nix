@@ -1463,6 +1463,7 @@ in
         "10-guest" = {
           netdevConfig = {
             Kind = "vlan";
+            MACAddress = "72:06:83:ff:5d:0c";
             Name = "guest";
           };
           vlanConfig = {
@@ -1537,7 +1538,6 @@ in
           name = "bridge";
           networkConfig = {
             IPv6AcceptRA = true;
-            IPv6PrivacyExtensions = "kernel";
             IPv6SendRA = true;
           };
           ipv6Prefixes = [
