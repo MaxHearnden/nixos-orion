@@ -117,12 +117,15 @@ in
 
         ; Advertise DANE
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.compsoc-dev.com.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.ollama.compsoc-dev.com.
 
         ; Setup DMARC and SPF for this domain
         $INCLUDE /etc/knot/no-email.zone.include
+        $INCLUDE /etc/knot/no-email.zone.include ollama.compsoc-dev.com.
 
         ; Advertise our public IP address as the IP address for compsoc-dev.com and dns.compsoc-dev.com
         $INCLUDE /var/lib/ddns/zonefile
+        $INCLUDE /var/lib/ddns/local-tailscale-zonefile ollama.compsoc-dev.com.
 
         ; Setup certificate authority restrictions
         @ CAA 0 issuemail ";"
@@ -133,6 +136,7 @@ in
 
         ; Advertise HTTP/2 and HTTP/3 support
         @ HTTPS 1 . alpn=h3,h2
+        ollama HTTPS 1 . alpn=h3,h2
 
         ; Advertise the authoritative nameserver
         @ NS dns.zandoodle.me.uk.
@@ -163,6 +167,7 @@ in
         $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include local-tailscale.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include multi-string-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include null-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include null-domain-check\000.zandoodle.me.uk.
@@ -172,6 +177,7 @@ in
         ; Advertise IP addresses for this domain
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-guest-zonefile local-guest.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/local-tailscale-zonefile local-tailscale.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile cardgames.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
@@ -212,6 +218,10 @@ in
         local-shadow IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
         local-shadow IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
         local-shadow IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
+        local-tailscale IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
+        local-tailscale IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
+        local-tailscale IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
+        local-tailscale IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
 
         local-shadow A 192.168.10.1
         local-shadow AAAA fd09:a389:7c1e:4::1
@@ -297,7 +307,7 @@ in
   networking = {
     firewall = {
       # Allow DNS, HTTP and HTTPS
-      allowedUDPPorts = [ 53 54 443 ];
+      allowedUDPPorts = [ 53 54 443 41641 ];
       allowedTCPPorts = [ 53 54 80 443 ];
       extraForwardRules = ''
         # Allow packets from 2-shadow-2-lan to reach the NAT64 interface
@@ -352,11 +362,19 @@ in
             type cgroupsv2
           }
 
+          set ollama {
+            type cgroupsv2
+          }
+
           set sshd {
             type cgroupsv2
           }
 
           set systemd_networkd {
+            type cgroupsv2
+          }
+
+          set tailscaled {
             type cgroupsv2
           }
 
@@ -407,6 +425,10 @@ in
             # Allow DHCP handled by dnsmasq
             udp dport 67 iifname { "2-shadow-2-lan", guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
             udp dport 547 iifname "2-shadow-2-lan" socket cgroupv2 level 2 @dnsmasq accept
+
+            iifname lo socket cgroupv2 level 2 @ollama accept
+
+            udp dport 41641 socket cgroupv2 level 2 @tailscaled accept
 
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
@@ -1034,6 +1056,28 @@ in
             respond "This is a test of config ${inputs.self}"
           '';
         };
+        "ollama.compsoc-dev.com" = {
+          extraConfig = ''
+            @denied not {
+              client_ip private_ranges
+            }
+            abort @denied
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            }
+
+            abort /api/pull
+
+            reverse_proxy 127.0.0.1:11434 {
+              header_up Host 127.0.0.1
+            }
+          '';
+        };
       };
     };
     # Use dbus-broker
@@ -1134,6 +1178,7 @@ in
               "_acme-challenge.wss.cardgames"
               "_acme-challenge.cardgames"
               "_acme-challenge.local"
+              "_acme-challenge.ollama.compsoc-dev.com."
             ];
             update-type = "TXT";
           }
@@ -1247,6 +1292,10 @@ in
         ];
       };
     };
+    ollama = {
+      enable = true;
+      host = "127.0.0.1";
+    };
     openssh = {
       enable = true;
       settings = {
@@ -1257,6 +1306,9 @@ in
     };
     # Disable systemd-resolved
     resolved.enable = false;
+
+    tailscale.enable = true;
+
     unbound = {
       enable = true;
       localControlSocketPath = "/run/unbound/unbound.ctl";
@@ -2030,6 +2082,17 @@ in
                 empty
               end' >/run/ddns/local-guest-zonefile
 
+          # Get the IP address for tailscale
+          ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev tailscale0 | ${lib.getExe pkgs.jq} -r \
+            '.[].addr_info.[]
+              | if .family == "inet" then
+                "@ A " + .local
+              elif (.family == "inet6") and (.scope != "link") then
+                "@ AAAA " + .local
+              else
+                empty
+              end' >/run/ddns/local-tailscale-zonefile
+
           # Check the zonefile is valid
           ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-guest-zonefile
 
@@ -2040,7 +2103,7 @@ in
 
           # Move the verified data from /run/ddns to /var/lib/ddns
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
-            /run/ddns/zonefile /run/ddns/local-zonefile /run/ddns/local-guest-zonefile /var/lib/ddns/
+            /run/ddns/zonefile /run/ddns/local-zonefile /run/ddns/local-guest-zonefile /run/ddns/local-tailscale-zonefile /var/lib/ddns/
         '';
         unitConfig.StartLimitIntervalSec = "20m";
 
@@ -2249,6 +2312,7 @@ in
         SystemCallArchitectures = "native";
         SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
       };
+      ollama.serviceConfig.NFTSet = "cgroup:inet:services:ollama";
       plat = {
         after = [ "sys-subsystem-net-devices-plat.device" ];
         confinement.enable = true;
@@ -2292,6 +2356,7 @@ in
       sshd.serviceConfig.NFTSet = "cgroup:inet:services:sshd";
       systemd-machined.enable = false;
       systemd-networkd.serviceConfig.NFTSet = "cgroup:inet:services:systemd_networkd";
+      tailscaled.serviceConfig.NFTSet = "cgroup:inet:services:tailscaled";
       unbound.serviceConfig.NFTSet = "cgroup:inet:services:unbound";
       web-vm = {
         confinement.enable = true;
