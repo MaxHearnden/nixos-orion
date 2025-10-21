@@ -1294,6 +1294,9 @@ in
     };
     ollama = {
       enable = true;
+      environmentVariables = {
+        OLLAMA_NUM_PARALLEL = "10";
+      };
       host = "127.0.0.1";
     };
     openssh = {
