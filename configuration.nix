@@ -362,10 +362,6 @@ in
             type cgroupsv2
           }
 
-          set ollama {
-            type cgroupsv2
-          }
-
           set sshd {
             type cgroupsv2
           }
@@ -425,8 +421,6 @@ in
             # Allow DHCP handled by dnsmasq
             udp dport 67 iifname { "2-shadow-2-lan", guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
             udp dport 547 iifname "2-shadow-2-lan" socket cgroupv2 level 2 @dnsmasq accept
-
-            iifname lo socket cgroupv2 level 2 @ollama accept
 
             udp dport 41641 socket cgroupv2 level 2 @tailscaled accept
 
@@ -1073,7 +1067,7 @@ in
 
             abort /api/pull
 
-            reverse_proxy 127.0.0.1:11434 {
+            reverse_proxy unix//run/ollama {
               header_up Host 127.0.0.1
             }
           '';
@@ -1297,7 +1291,7 @@ in
       environmentVariables = {
         OLLAMA_NUM_PARALLEL = "10";
       };
-      host = "127.0.0.1";
+      host = "[::1]";
     };
     openssh = {
       enable = true;
@@ -2315,7 +2309,54 @@ in
         SystemCallArchitectures = "native";
         SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
       };
-      ollama.serviceConfig.NFTSet = "cgroup:inet:services:ollama";
+      ollama = {
+        postStart = ''
+          for i in $(seq 60); do
+            ${pkgs.netcat}/bin/nc -z ::1 11434 && exit
+            sleep 1
+          done
+        '';
+        serviceConfig = {
+          PrivateNetwork = true;
+          IPAddressAllow = "localhost";
+          IPAddressDeny = "any";
+          NFTSet = "cgroup:inet:services:ollama";
+        };
+        unitConfig.StopWhenUnneeded = true;
+        wantedBy = lib.mkForce [];
+      };
+      ollama-proxy = {
+        after = [ "ollama.service" "ollama-proxy.socket" ];
+        confinement.enable = true;
+        requires = [ "ollama.service" "ollama-proxy.socket" ];
+        serviceConfig = {
+          CapabilityBoundingSet = "";
+          DynamicUser = true;
+          ExecStart = "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd ::1:11434 --exit-idle-time=5min";
+          Group = "ollama-proxy";
+          IPAddressAllow = "localhost";
+          IPAddressDeny = "any";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          PrivateNetwork = true;
+          PrivateTmp = true;
+          PrivateUsers = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          RestrictAddressFamilies = "AF_INET AF_INET6";
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          UMask = "077";
+          User = "ollama-proxy";
+        };
+        unitConfig.JoinsNamespaceOf = "ollama.service";
+      };
       plat = {
         after = [ "sys-subsystem-net-devices-plat.device" ];
         confinement.enable = true;
@@ -2393,6 +2434,12 @@ in
           User = "web-vm";
         };
         wantedBy = [ "multi-user.target" ];
+      };
+    };
+    sockets = {
+      ollama-proxy = {
+        listenStreams = [ "/run/ollama" ];
+        wantedBy = [ "sockets.target" ];
       };
     };
     targets.knot-reload = {
