@@ -485,7 +485,8 @@ in
             chain dns-rd-output {
               type nat hook output priority dstnat; policy accept;
               # Redirect recusive queries from ourself to unbound
-              fib daddr . mark type local udp dport 53 @th,87,1 == 1 redirect to :55 comment "Recursion desired"
+              fib daddr . mark type local udp dport 53 @th,87,1 == 1 ip saddr @local_ip redirect to :55 comment "Recursion desired"
+              fib daddr . mark type local udp dport 53 @th,87,1 == 1 ip6 saddr @local_ip6 redirect to :55 comment "Recursion desired"
             }
           '';
         };
