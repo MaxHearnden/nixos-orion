@@ -1053,7 +1053,7 @@ in
         "ollama.compsoc-dev.com" = {
           extraConfig = ''
             @denied not {
-              client_ip private_ranges
+              client_ip private_ranges 100.64.0.0/10
             }
             abort @denied
             header {
