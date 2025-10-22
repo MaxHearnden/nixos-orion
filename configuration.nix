@@ -2320,7 +2320,6 @@ in
           PrivateNetwork = true;
           IPAddressAllow = "localhost";
           IPAddressDeny = "any";
-          NFTSet = "cgroup:inet:services:ollama";
         };
         unitConfig.StopWhenUnneeded = true;
         wantedBy = lib.mkForce [];
