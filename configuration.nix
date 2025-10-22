@@ -2400,7 +2400,47 @@ in
       sshd.serviceConfig.NFTSet = "cgroup:inet:services:sshd";
       systemd-machined.enable = false;
       systemd-networkd.serviceConfig.NFTSet = "cgroup:inet:services:systemd_networkd";
-      tailscaled.serviceConfig.NFTSet = "cgroup:inet:services:tailscaled";
+      tailscaled = {
+        after = [ "modprobe@tun.service" ];
+        confinement = {
+          enable = true;
+          packages = [ config.services.tailscale.package ];
+        };
+        environment = {
+          TS_DEBUG_FIREWALL_MODE = "nftables";
+          DBUS_SYSTEM_BUS_ADDRESS = "unix:path=/run/dbus/system_bus_socket";
+        };
+        serviceConfig = {
+          UMask = "077";
+          BindPaths = "/dev/net/tun";
+          BindReadOnlyPaths = "/etc/resolv.conf /etc/ssl /run/dbus/system_bus_socket";
+          User = "tailscale";
+          Group = "tailscale";
+          DeviceAllow = "/dev/net/tun";
+          AmbientCapabilities = "CAP_NET_RAW CAP_NET_ADMIN";
+          ProtectKernelModules = true;
+          ProtectProc = [ "invisible" ];
+          SystemCallFilter = [ "@system-service" "~@privileged" ];
+          PrivateUsers = lib.mkForce false;
+          RemoveIPC = true;
+          NoNewPrivileges = true;
+          RestrictNamespaces = true;
+          RestrictSUIDSGID = true;
+          ProtectHostname = true;
+          ProtectSystem = lib.mkForce "strict";
+          LockPersonality = true;
+          RestrictAddressFamilies = "AF_NETLINK AF_UNIX AF_INET AF_INET6";
+          ProtectClock = true;
+          ProtectKernelLogs = true;
+          SystemCallArchitectures = "native";
+          MemoryDenyWriteExecute = true;
+          RestrictRealtime = true;
+          ProtectHome = true;
+          CapabilityBoundingSet = "CAP_NET_RAW CAP_NET_ADMIN";
+          NFTSet = "cgroup:inet:services:tailscaled";
+        };
+        wants = [ "modprobe@tun.service" ];
+      };
       unbound.serviceConfig.NFTSet = "cgroup:inet:services:unbound";
       web-vm = {
         confinement.enable = true;
@@ -2466,6 +2506,7 @@ in
       ddns = {};
       dnsdist = {};
       nix-gc = {};
+      tailscale = {};
       tayga = {};
       web-vm = {};
     };
@@ -2508,6 +2549,10 @@ in
       nix-gc = {
         isSystemUser = true;
         group = "nix-gc";
+      };
+      tailscale = {
+        isSystemUser = true;
+        group = "tailscale";
       };
       tayga = {
         isSystemUser = true;
