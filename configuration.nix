@@ -2542,6 +2542,7 @@ in
           lshw
           lsof
           nixos-kexec
+          passt
           ripgrep
           tio
         ];
