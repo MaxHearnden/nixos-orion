@@ -362,6 +362,10 @@ in
             type cgroupsv2
           }
 
+          set ollama_socket {
+            type cgroupsv2
+          }
+
           set sshd {
             type cgroupsv2
           }
@@ -421,6 +425,8 @@ in
             # Allow DHCP handled by dnsmasq
             udp dport 67 iifname { "2-shadow-2-lan", guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
             udp dport 547 iifname "2-shadow-2-lan" socket cgroupv2 level 2 @dnsmasq accept
+
+            iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
             udp dport 41641 socket cgroupv2 level 2 @tailscaled accept
 
@@ -1066,7 +1072,8 @@ in
               Referrer-Policy no-referrer
             }
 
-            abort /api/pull
+            respond /api/pull "You get deepseek-r1:1.5b and that's it" 403
+            respond /api/delete "You can't delete models" 403
 
             reverse_proxy unix//run/ollama {
               header_up Host 127.0.0.1
@@ -2478,7 +2485,8 @@ in
     };
     sockets = {
       ollama-proxy = {
-        listenStreams = [ "/run/ollama" ];
+        listenStreams = [ "/run/ollama" "127.0.0.1:11434" "[::1]:11434" ];
+        socketConfig.NFTSet = "cgroup:inet:services:ollama_socket";
         wantedBy = [ "sockets.target" ];
       };
     };
