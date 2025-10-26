@@ -140,6 +140,8 @@ in
 
         ; Advertise the authoritative nameserver
         @ NS dns.zandoodle.me.uk.
+
+        flag-0be5c4b29b type65534 \# 0
       '';
       "knot/letsencrypt.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {} [ "ISRG_Root_X1" "ISRG_Root_X2" ];
@@ -239,6 +241,8 @@ in
 
         ; Advertise HTTP/2 and HTTP/3 support for wss.cardgames.zandoodle.me.uk
         wss.cardgames HTTPS 1 . alpn=h3,h2
+
+        zzsecond-flag-80a053ba81 type65534 \# 0
       '';
       "resolv.conf".text = ''
         # Use the local DNS resolver
@@ -1072,7 +1076,7 @@ in
               Referrer-Policy no-referrer
             }
 
-            respond /api/pull "You get deepseek-r1:1.5b and that's it" 403
+            respond /api/pull "You can't pull models" 403
             respond /api/delete "You can't delete models" 403
 
             reverse_proxy unix//run/ollama {
@@ -1176,11 +1180,12 @@ in
             update-owner = "name";
             update-owner-match = "equal";
             update-owner-name = [
-              "_acme-challenge"
-              "_acme-challenge.wss.cardgames"
-              "_acme-challenge.cardgames"
-              "_acme-challenge.local"
+              "_acme-challenge.cardgames.zandoodle.me.uk."
+              "_acme-challenge.compsoc-dev.com."
+              "_acme-challenge.local.zandoodle.me.uk."
               "_acme-challenge.ollama.compsoc-dev.com."
+              "_acme-challenge.wss.cardgames.zandoodle.me.uk."
+              "_acme-challenge.zandoodle.me.uk."
             ];
             update-type = "TXT";
           }
@@ -2552,6 +2557,7 @@ in
           nixos-kexec
           passt
           ripgrep
+          slirp4netns
           tio
         ];
       };
