@@ -143,8 +143,24 @@ in
 
         flag-0be5c4b29b type65534 \# 0
       '';
+      "knot/email.zone.include".text = ''
+        ; Deny sending emails
+        @ TXT "v=spf1 -all"
+        @ MX 10 mail.zandoodle.me.uk.
+        _mta-sts TXT "v=STSv1; id=1"
+        _dmarc TXT "v=DMARC1;p=reject;sp=reject;adkim=s;aspf=s;fo=1"
+      '';
       "knot/letsencrypt.zone.include".source =
-        pkgs.callPackage ./gen-TLSA.nix {} [ "ISRG_Root_X1" "ISRG_Root_X2" ];
+        pkgs.callPackage ./gen-TLSA.nix {
+          names = [ "ISRG_Root_X1" "ISRG_Root_X2" ];
+        };
+      "knot/letsencrypt-dane.zone.include".source =
+        pkgs.callPackage ./gen-TLSA.nix {
+          names = [ "ISRG_Root_X1" "ISRG_Root_X2" ];
+          tlsa_usage = 2;
+          tlsa_selector = 0;
+          tlsa_matching = 0;
+        };
       "knot/no-email.zone.include".text = ''
         ; Deny sending or receiving emails
         @ TXT "v=spf1 -all"
@@ -158,11 +174,13 @@ in
         ; Setup DANE for this domain
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.local.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt-dane.zone.include _25._tcp.mail.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.mta-sts.zandoodle.me.uk.
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.wss.cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
 
         ; Setup SPF and DMARC for this domain
-        $INCLUDE /etc/knot/no-email.zone.include
+        $INCLUDE /etc/knot/email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include dot-check\..zandoodle.me.uk.
@@ -170,6 +188,8 @@ in
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-tailscale.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include mail.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include mta-sts.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include multi-string-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include null-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include null-domain-check\000.zandoodle.me.uk.
@@ -180,9 +200,11 @@ in
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-guest-zonefile local-guest.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-tailscale-zonefile local-tailscale.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/local-tailscale-zonefile mail.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile cardgames.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/zonefile mta-sts.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile wss.cardgames.zandoodle.me.uk.
 
         ; Setup certificate authority restrictions for this domain
@@ -670,8 +692,10 @@ in
       '';
       logFormat = "level INFO";
       package = pkgs.caddy.withPlugins {
-        plugins = ["github.com/caddy-dns/rfc2136@v1.0.0"];
-        hash = "sha256-OuZeeKsAItmWtKwDYDnh+zZv/ZjiIFHRdAFhMDBFnqI=";
+        plugins = [
+          "github.com/caddy-dns/rfc2136@v1.0.0"
+        ];
+        hash = "sha256-Rw6B8FsQjUbsG5mFeoaT0waEiU8lhgdjBU+C+KZ0TPI=";
       };
       virtualHosts = {
         "compsoc-dev.com" = {
@@ -1064,6 +1088,17 @@ in
             respond "This is a test of config ${inputs.self}"
           '';
         };
+        "mta-sts.zandoodle.me.uk" = {
+          extraConfig = ''
+            respond /.well-known/mta-sts.txt <<EOF
+              version: STSv1
+              mode: enforce
+              max_age: 31557600
+              mx: mail.zandoodle.me.uk
+
+              EOF
+          '';
+        };
         "ollama.compsoc-dev.com" = {
           extraConfig = ''
             @denied not {
@@ -1186,6 +1221,7 @@ in
               "_acme-challenge.cardgames.zandoodle.me.uk."
               "_acme-challenge.compsoc-dev.com."
               "_acme-challenge.local.zandoodle.me.uk."
+              "_acme-challenge.mta-sts.zandoodle.me.uk."
               "_acme-challenge.ollama.compsoc-dev.com."
               "_acme-challenge.wss.cardgames.zandoodle.me.uk."
               "_acme-challenge.zandoodle.me.uk."
@@ -2142,8 +2178,10 @@ in
         restartTriggers = map (zone: config.environment.etc."knot/${zone}".source) [
           "bogus.zandoodle.me.uk.zone"
           "compsoc-dev.com.zone"
-          "no-email.zone.include"
+          "email.zone.include"
           "letsencrypt.zone.include"
+          "letsencrypt-dane.zone.include"
+          "no-email.zone.include"
           "zandoodle.me.uk.zone"
         ];
         serviceConfig = {
