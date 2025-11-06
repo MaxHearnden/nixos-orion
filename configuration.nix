@@ -662,6 +662,9 @@ in
           server "127.0.0.1:54"
         }
 
+        # Use (marginally) more secure public keys
+        key_type p384
+
         # Prefer the smallest chain (X2)
         preferred_chains smallest
       '';
