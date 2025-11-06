@@ -692,9 +692,7 @@ in
       '';
       logFormat = "level INFO";
       package = pkgs.caddy.withPlugins {
-        plugins = [
-          "github.com/caddy-dns/rfc2136@v1.0.0"
-        ];
+        plugins = [ "github.com/caddy-dns/rfc2136@v1.0.0" ];
         hash = "sha256-Rw6B8FsQjUbsG5mFeoaT0waEiU8lhgdjBU+C+KZ0TPI=";
       };
       virtualHosts = {
