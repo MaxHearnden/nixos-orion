@@ -2447,6 +2447,12 @@ in
       maddy.serviceConfig = {
         LoadCredential = "tsig.conf:/run/keymgr/maddy-config";
         NFTSet = "cgroup:inet:services:maddy";
+        SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+        ProcSubset = "pid";
+        ProtectKernelLogs = true;
+        ProtectProc = "invisible";
+        RemoveIPC = true;
+        SystemCallArchitectures = "native";
       };
       nftables = {
         confinement = {
