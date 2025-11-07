@@ -125,6 +125,7 @@ in
 
         ; Advertise our public IP address as the IP address for compsoc-dev.com and dns.compsoc-dev.com
         $INCLUDE /var/lib/ddns/zonefile
+        $INCLUDE /var/lib/ddns/zonefile mta-sts.compsoc-dev.com.
         $INCLUDE /var/lib/ddns/local-tailscale-zonefile ollama.compsoc-dev.com.
 
         ; Setup certificate authority restrictions
@@ -1113,6 +1114,17 @@ in
             respond "This is a test of config ${inputs.self}"
           '';
         };
+        "mta-sts.compsoc-dev.com" = {
+          extraConfig = ''
+            respond /.well-known/mta-sts.txt <<EOF
+              version: STSv1
+              mode: enforce
+              max_age: 31557600
+              mx: mail.zandoodle.me.uk
+
+              EOF
+          '';
+        };
         "mta-sts.zandoodle.me.uk" = {
           extraConfig = ''
             respond /.well-known/mta-sts.txt <<EOF
@@ -1249,6 +1261,7 @@ in
               "_acme-challenge.cardgames.zandoodle.me.uk."
               "_acme-challenge.compsoc-dev.com."
               "_acme-challenge.local.zandoodle.me.uk."
+              "_acme-challenge.mta-sts.compsoc-dev.com."
               "_acme-challenge.mta-sts.zandoodle.me.uk."
               "_acme-challenge.ollama.compsoc-dev.com."
               "_acme-challenge.wss.cardgames.zandoodle.me.uk."
