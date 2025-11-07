@@ -121,6 +121,7 @@ in
 
         ; Setup DMARC and SPF for this domain
         $INCLUDE /etc/knot/email.zone.include
+        $INCLUDE /etc/knot/no-email.zone.include mta-sts.compsoc-dev.com.
         $INCLUDE /etc/knot/no-email.zone.include ollama.compsoc-dev.com.
 
         ; Advertise our public IP address as the IP address for compsoc-dev.com and dns.compsoc-dev.com
@@ -1116,6 +1117,14 @@ in
         };
         "mta-sts.compsoc-dev.com" = {
           extraConfig = ''
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            };
             respond /.well-known/mta-sts.txt <<EOF
               version: STSv1
               mode: enforce
@@ -1127,6 +1136,14 @@ in
         };
         "mta-sts.zandoodle.me.uk" = {
           extraConfig = ''
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            };
             respond /.well-known/mta-sts.txt <<EOF
               version: STSv1
               mode: enforce
