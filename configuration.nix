@@ -142,6 +142,9 @@ in
         @ NS dns.zandoodle.me.uk.
 
         flag-0be5c4b29b type65534 \# 0
+
+        ; Add google site verification
+        @ TXT "google-site-verification=oZJUabY5f9TzTiPw8Ml-k8GrRILLRbITIEF8eamsLY4"
       '';
       "knot/email.zone.include".text = ''
         @ TXT "v=spf1 mx -all"
@@ -273,6 +276,9 @@ in
         wss.cardgames HTTPS 1 . alpn=h3,h2
 
         zzsecond-flag-80a053ba81 type65534 \# 0
+
+        ; Google stuff
+        @ TXT "google-site-verification=ZDVckD_owTCKFzcbI9VqqGQOoNfd_8C0tKNqRVkiK8I"
       '';
       "resolv.conf".text = ''
         # Use the local DNS resolver
