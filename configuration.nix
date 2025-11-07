@@ -333,8 +333,8 @@ in
   networking = {
     firewall = {
       # Allow DNS, HTTP and HTTPS
-      allowedUDPPorts = [ 53 54 443 41641 ];
-      allowedTCPPorts = [ 53 54 80 443 ];
+      allowedUDPPorts = [ 25 53 54 443 41641 ];
+      allowedTCPPorts = [ 25 53 54 80 443 ];
       extraForwardRules = ''
         # Allow packets from 2-shadow-2-lan to reach the NAT64 interface
         iifname "2-shadow-2-lan" oifname "plat" accept
@@ -385,6 +385,10 @@ in
           }
 
           set knot {
+            type cgroupsv2
+          }
+
+          set maddy {
             type cgroupsv2
           }
 
@@ -455,6 +459,9 @@ in
             iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
             udp dport 41641 socket cgroupv2 level 2 @tailscaled accept
+
+            tcp dport 25 socket cgroupv2 level 2 @maddy accept
+            iifname lo tcp dport { 143, 587 } socket cgroupv2 level 2 @maddy accept
 
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
@@ -1204,7 +1211,10 @@ in
       enable = true;
 
       # Add shared caddy TSIG credentials
-      keyFiles = [ "/run/credentials/knot.service/caddy" ];
+      keyFiles = [
+        "/run/credentials/knot.service/caddy"
+        "/run/credentials/knot.service/maddy"
+      ];
       settings = {
         acl = [
           # Allow caddy to modify TXT records in _acme-challenge domains
@@ -1223,6 +1233,19 @@ in
               "_acme-challenge.ollama.compsoc-dev.com."
               "_acme-challenge.wss.cardgames.zandoodle.me.uk."
               "_acme-challenge.zandoodle.me.uk."
+            ];
+            update-type = "TXT";
+          }
+          # Allow maddy to modify TXT records in _acme-challenge domains
+          {
+            id = "maddy-acme";
+            address = "127.0.0.1";
+            action = "update";
+            key = [ "maddy" ];
+            update-owner = "name";
+            update-owner-match = "equal";
+            update-owner-name = [
+              "_acme-challenge.mail.zandoodle.me.uk."
             ];
             update-type = "TXT";
           }
@@ -1322,7 +1345,7 @@ in
             zonefile-sync = -1;
           }
           {
-            acl = [ "caddy-acme" "transfer" ];
+            acl = [ "caddy-acme" "transfer" "maddy-acme" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
@@ -1334,6 +1357,25 @@ in
             zonefile-sync = -1;
           }
         ];
+      };
+    };
+    maddy = {
+      enable = true;
+      package = pkgs.maddy.overrideAttrs (
+        { tags ? [], ... }: {
+          tags = tags ++ [ "libdns_rfc2136" ];
+        });
+      tls = {
+        extraConfig = ''
+          agreed
+          challenge dns-01
+          dns rfc2136 {
+            import /run/credentials/maddy.service/tsig.conf
+            server "127.0.0.1:54"
+          }
+          hostname mail.zandoodle.me.uk
+        '';
+        loader = "acme";
       };
     };
     ollama = {
@@ -1890,11 +1932,11 @@ in
       # Add the dnsmasq cgroup to the services table
       dnsmasq.serviceConfig.NFTSet = "cgroup:inet:services:dnsmasq";
 
-      # Generate a TSIG key for caddy
+      # Generate a TSIG key for caddy and maddy
       gen-tsig = {
-        # Generate the TSIG key before knot or caddy starts
-        before = [ "knot.service" "caddy.service" ];
-        requiredBy = [ "knot.service" "caddy.service" ];
+        # Generate the TSIG key before knot, caddy or maddy starts
+        before = [ "knot.service" "caddy.service" "maddy.service" ];
+        requiredBy = [ "knot.service" "caddy.service" "maddy.service" ];
         # Create a mininal sandbox for gen-tsig
         confinement.enable = true;
         serviceConfig = {
@@ -1977,12 +2019,18 @@ in
           User = "keymgr";
         };
         script = ''
-          # Generate a TSIG key
-          ${lib.getExe' pkgs.knot-dns "keymgr"} -t caddy >/run/keymgr/caddy
+          for key in caddy maddy; do
+            # Generate a TSIG key
+            ${lib.getExe' pkgs.knot-dns "keymgr"} -t $key >"/run/keymgr/$key"
+          done
           for attr in id algorithm secret; do
             # Split the elements of the key into seperate files for caddy
             ${lib.getExe pkgs.yq} -r .key.[]."$attr" </run/keymgr/caddy >/run/keymgr/caddy-"$attr"
           done
+
+          ${lib.getExe pkgs.yq} -r '"key_name " + .key.[].id' </run/keymgr/maddy >/run/keymgr/maddy-config
+          ${lib.getExe pkgs.yq} -r '"key " + .key.[].secret' </run/keymgr/maddy >>/run/keymgr/maddy-config
+          ${lib.getExe pkgs.yq} -r '"key_alg " + .key.[].algorithm' </run/keymgr/maddy >>/run/keymgr/maddy-config
         '';
       };
       # Get the IP address from the router
@@ -2159,7 +2207,10 @@ in
       };
       knot.serviceConfig = {
         # Get the TSIG credentials for caddy
-        LoadCredential = "caddy:/run/keymgr/caddy";
+        LoadCredential = [
+          "caddy:/run/keymgr/caddy"
+          "maddy:/run/keymgr/maddy"
+        ];
 
         # Allow knot to open as many files as it wants
         LimitNOFILE = "infinity";
@@ -2211,6 +2262,10 @@ in
           User = "knot";
         };
         wantedBy = [ "multi-user.target" ];
+      };
+      maddy.serviceConfig = {
+        LoadCredential = "tsig.conf:/run/keymgr/maddy-config";
+        NFTSet = "cgroup:inet:services:maddy";
       };
       nftables = {
         confinement = {
