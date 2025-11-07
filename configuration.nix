@@ -144,11 +144,12 @@ in
         flag-0be5c4b29b type65534 \# 0
       '';
       "knot/email.zone.include".text = ''
-        ; Deny sending emails
-        @ TXT "v=spf1 -all"
+        @ TXT "v=spf1 mx -all"
         @ MX 10 mail.zandoodle.me.uk.
         _mta-sts TXT "v=STSv1; id=1"
         _dmarc TXT "v=DMARC1;p=reject;sp=reject;adkim=s;aspf=s;fo=1"
+        ; Advertise imaps
+        _imaps._tcp SRV 0 10 993 imap.zandoodle.me.uk.
       '';
       "knot/letsencrypt.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {
@@ -184,6 +185,7 @@ in
         $INCLUDE /etc/knot/no-email.zone.include cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include dot-check\..zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include imap.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
@@ -193,17 +195,23 @@ in
         $INCLUDE /etc/knot/no-email.zone.include multi-string-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include null-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include null-domain-check\000.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include smtp.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include ttl-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
+
+        ; Setup DKIM for this domain
+        default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwCuGmFxA7aupe8x7tmSolntpa5qBxyQnGkgsfjyjD57doP55a57KXTxEo6t7buBpua/W6dktcw2zpLp9338yg1wA/9RJwhZclzrH5Kv4gNbMHHvhBbygnoJqbrwFH8+VDNG4NKUl5WKFRiITJXd8Y0xqpPhFwfmd2nITjc8wleGv4eQXmB5ytP8Nj2fE6pd4fGpF7sydnOo5BTBSeb0QtmgbQcReQ05CqwMGEAyKOQFnKMzEAOEtvyXUFyG7hFt4ZsngpRGDM/1d4rI/Kh7oCFfzuhR+ENhZkLqYz9xZ0QZ3GWVon7mXfiVvJL5GBfb9cwLjAGp5QhgN2El2yc/3/QIDAQAB"
 
         ; Advertise IP addresses for this domain
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-guest-zonefile local-guest.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/local-tailscale-zonefile imap.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-tailscale-zonefile local-tailscale.zandoodle.me.uk.
-        $INCLUDE /var/lib/ddns/local-tailscale-zonefile mail.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/local-tailscale-zonefile smtp.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
         $INCLUDE /var/lib/ddns/zonefile cardgames.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/zonefile mail.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile mta-sts.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile wss.cardgames.zandoodle.me.uk.
 
@@ -352,6 +360,9 @@ in
         web-vm.allowedUDPPorts = [ 67 ];
         guest.allowedUDPPorts = [ 67 ];
         "\"2-shadow-2-lan\"".allowedUDPPorts = [ 67 547 ];
+
+        # Allow submissions and imaps from tailscale
+        tailscale0.allowedTCPPorts = [ 465 587 993 ];
       };
     };
     fqdn = "local.zandoodle.me.uk";
@@ -461,7 +472,7 @@ in
             udp dport 41641 socket cgroupv2 level 2 @tailscaled accept
 
             tcp dport 25 socket cgroupv2 level 2 @maddy accept
-            iifname lo tcp dport { 143, 587 } socket cgroupv2 level 2 @maddy accept
+            iifname { lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
 
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
@@ -1245,7 +1256,9 @@ in
             update-owner = "name";
             update-owner-match = "equal";
             update-owner-name = [
+              "_acme-challenge.imap.zandoodle.me.uk."
               "_acme-challenge.mail.zandoodle.me.uk."
+              "_acme-challenge.smtp.zandoodle.me.uk."
             ];
             update-type = "TXT";
           }
@@ -1360,23 +1373,181 @@ in
       };
     };
     maddy = {
-      enable = true;
-      package = pkgs.maddy.overrideAttrs (
-        { tags ? [], ... }: {
-          tags = tags ++ [ "libdns_rfc2136" ];
-        });
-      tls = {
-        extraConfig = ''
+      config = ''
+        tls {
+          loader acme {
+            agreed
+            challenge dns-01
+            dns rfc2136 {
+              import /run/credentials/maddy.service/tsig.conf
+              server "127.0.0.1:54"
+            }
+            hostname mail.zandoodle.me.uk
+          }
+          protocols tls1.2 tls1.3
+        }
+        tls.loader.acme imap {
           agreed
           challenge dns-01
           dns rfc2136 {
             import /run/credentials/maddy.service/tsig.conf
             server "127.0.0.1:54"
           }
-          hostname mail.zandoodle.me.uk
-        '';
-        loader = "acme";
-      };
+          hostname imap.zandoodle.me.uk
+        }
+        tls.loader.acme smtp {
+          agreed
+          challenge dns-01
+          dns rfc2136 {
+            import /run/credentials/maddy.service/tsig.conf
+            server "127.0.0.1:54"
+          }
+          hostname smtp.zandoodle.me.uk
+        }
+        auth.pass_table local_authdb {
+          table sql_table {
+            driver sqlite3
+            dsn credentials.db
+            table_name passwords
+          }
+        }
+
+        storage.imapsql local_mailboxes {
+          driver sqlite3
+          dsn imapsql.db
+        }
+
+        table.chain local_rewrites {
+          optional_step regexp "(.+)\+(.+)@(.+)" "$1@$3"
+          optional_step static {
+            entry postmaster postmaster@zandoodle.me.uk
+          }
+        }
+
+        msgpipeline local_routing {
+          destination postmaster $(local_domains) {
+            modify {
+              replace_rcpt &local_rewrites
+            }
+            deliver_to &local_mailboxes
+          }
+
+          default_destination {
+            reject 550 5.1.1 "User doesn't exist"
+          }
+        }
+
+        smtp tcp://0.0.0.0:25 {
+          limits {
+            all rate 20 1s
+            all concurrency 10
+          }
+
+          dmarc yes
+          check {
+            require_mx_record
+            dkim
+            spf
+          }
+
+          source $(local_domains) {
+            reject 501 5.1.8 "Use Submission for outgoing SMTP"
+          }
+
+          default_source {
+            destination postmaster $(local_domains) {
+              deliver_to &local_routing
+            }
+            default_destination {
+              reject 550 5.1.1 "User doesn't exist"
+            }
+          }
+        }
+
+        submission tls://0.0.0.0:465 tcp://0.0.0.0:587 {
+          limits {
+            all rate 50 1s
+          }
+
+          tls {
+            loader &smtp
+            protocols tls1.2 tls1.3
+          }
+
+          auth &local_authdb
+
+          source $(local_domains) {
+            check {
+              authorize_sender {
+                prepare_email &local_rewrites
+                user_to_email identity
+              }
+            }
+
+            destination postmaster $(local_domains) {
+              deliver_to &local_routing
+            }
+            default_destination {
+              modify {
+                dkim $(primary_domain) $(local_domains) default
+              }
+              deliver_to &remote_queue
+            }
+          }
+          default_source {
+            reject 501 5.1.8 "Non-local sender domain"
+          }
+        }
+
+        target.remote outbound_delivery {
+          limits {
+            destination rate 20 1s
+            destination concurrency 10
+          }
+          mx_auth {
+            dane
+            mtasts {
+              cache fs
+              fs_dir mtasts_cache/
+            }
+            local_policy {
+              min_tls_level encrypted
+              min_mx_level none
+            }
+          }
+        }
+
+        target.queue remote_queue {
+          target &outbound_delivery
+
+          autogenerated_msg_domain $(primary_domain)
+          bounce {
+            destination postmaster $(local_domains) {
+              deliver_to &local_routing
+            }
+            default_destination {
+              reject 550 5.0.0 "Refusing to send DSNs to non-local addresses"
+            }
+          }
+        }
+
+        imap tls://0.0.0.0:993 {
+          auth &local_authdb
+          storage &local_mailboxes
+          tls {
+            loader &imap
+            protocols tls1.2 tls1.3
+          }
+        }
+      '';
+      enable = true;
+      hostname = "mail.zandoodle.me.uk";
+      package = pkgs.maddy.overrideAttrs (
+        { tags ? [], ... }: {
+          tags = tags ++ [ "libdns_rfc2136" ];
+        });
+      primaryDomain = "zandoodle.me.uk";
+      tls.loader = null;
     };
     ollama = {
       enable = true;
