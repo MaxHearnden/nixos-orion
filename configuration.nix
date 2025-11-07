@@ -113,7 +113,7 @@ in
       '';
       "knot/compsoc-dev.com.zone".text = ''
         $TTL 600
-        @ SOA dns.zandoodle.me.uk. mail 0 600 60 3600 600
+        @ SOA dns.zandoodle.me.uk. mail.zandoodle.me.uk. 0 600 60 3600 600
 
         ; Advertise DANE
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.compsoc-dev.com.
