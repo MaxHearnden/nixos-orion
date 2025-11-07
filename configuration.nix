@@ -120,7 +120,7 @@ in
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.ollama.compsoc-dev.com.
 
         ; Setup DMARC and SPF for this domain
-        $INCLUDE /etc/knot/no-email.zone.include
+        $INCLUDE /etc/knot/email.zone.include
         $INCLUDE /etc/knot/no-email.zone.include ollama.compsoc-dev.com.
 
         ; Advertise our public IP address as the IP address for compsoc-dev.com and dns.compsoc-dev.com
@@ -141,6 +141,8 @@ in
         ; Advertise the authoritative nameserver
         @ NS dns.zandoodle.me.uk.
 
+        default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs9i5JfSz0iOz0L5xG9OwO8N9bdhY+YT+Hq3AVCupqZmp487NTem0yoPEgfZDqVxGaTFVdCxAMhHHvv08jo6U5Cmubumo8HHGzwvYJux9CCWcbUFlr3994Avs04O5sDSXmeDDuG9rGZmepy0r+Gly0brAKEv6UxM2l1HnBB2qabkCzYUamc9TyH8BUM9PIj3RWVEO/FHo8XjYxwrMLd22inHQ8wAORc3ERXqEEe/XgaxnWmD4ledoqRF8imcmqClXN+2f7+WvsJo+/ovi5Oh7+8WfLyx9KVWwjWHPgd6a9Dm/ArSjiZbzR+DpynQZi+AvUXIxBpeQXlvofl0W+479pwIDAQAB"
+
         flag-0be5c4b29b type65534 \# 0
 
         ; Add google site verification
@@ -153,6 +155,7 @@ in
         _dmarc TXT "v=DMARC1;p=reject;sp=reject;adkim=s;aspf=s;fo=1"
         ; Advertise imaps
         _imaps._tcp SRV 0 10 993 imap.zandoodle.me.uk.
+        _submissions._tcp SRV 0 10 465 smtp.zandoodle.me.uk.
       '';
       "knot/letsencrypt.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {
@@ -1548,6 +1551,7 @@ in
       '';
       enable = true;
       hostname = "mail.zandoodle.me.uk";
+      localDomains = [ "$(primary_domain)" "compsoc-dev.com" ];
       package = pkgs.maddy.overrideAttrs (
         { tags ? [], ... }: {
           tags = tags ++ [ "libdns_rfc2136" ];
