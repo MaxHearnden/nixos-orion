@@ -350,7 +350,7 @@ in
   networking = {
     firewall = {
       # Allow DNS, HTTP and HTTPS
-      allowedUDPPorts = [ 25 53 54 443 41641 ];
+      allowedUDPPorts = [ 53 54 443 41641 ];
       allowedTCPPorts = [ 25 53 54 80 443 ];
       extraForwardRules = ''
         # Allow packets from 2-shadow-2-lan to reach the NAT64 interface
