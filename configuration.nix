@@ -1453,6 +1453,7 @@ in
 
         storage.imapsql local_mailboxes {
           driver sqlite3
+          delivery_map regexp ".*" max@zandoodle.me.uk
           dsn imapsql.db
         }
 
@@ -1460,6 +1461,12 @@ in
           optional_step regexp "(.+)\+(.+)@(.+)" "$1@$3"
           optional_step static {
             entry postmaster postmaster@zandoodle.me.uk
+          }
+        }
+
+        table.chain super_auth {
+          optional_step static {
+            entry max@zandoodle.me.uk *
           }
         }
 
@@ -1519,7 +1526,7 @@ in
             check {
               authorize_sender {
                 prepare_email &local_rewrites
-                user_to_email identity
+                user_to_email &super_auth
               }
             }
 
@@ -1528,7 +1535,7 @@ in
             }
             default_destination {
               modify {
-                dkim $(primary_domain) $(local_domains) default
+                dkim $(local_domains) default
               }
               deliver_to &remote_queue
             }
