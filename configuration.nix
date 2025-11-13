@@ -165,10 +165,28 @@ in
         };
       "knot/letsencrypt-dane.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {
-          names = [ "ISRG_Root_X1" "ISRG_Root_X2" ];
+          names = [
+            "e7-cross.der"
+            "e7.der"
+            "e8-cross.der"
+            "e8.der"
+            "e9-cross.der"
+            "e9.der"
+            "int-ye1.der"
+            "int-ye2.der"
+            "int-ye3.der"
+            "int-yr1.der"
+            "int-yr2.der"
+            "int-yr3.der"
+            "r12.der"
+            "r13.der"
+            "r14.der"
+          ];
+          bundle = ./intermediates;
+          bundle_subdir = ".";
           tlsa_usage = 2;
           tlsa_selector = 0;
-          tlsa_matching = 0;
+          tlsa_matching = 1;
         };
       "knot/no-email.zone.include".text = ''
         ; Deny sending or receiving emails
