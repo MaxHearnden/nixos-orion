@@ -1489,16 +1489,10 @@ in
         }
 
         msgpipeline local_routing {
-          destination postmaster $(local_domains) {
-            modify {
-              replace_rcpt &local_rewrites
-            }
-            deliver_to &local_mailboxes
+          modify {
+            replace_rcpt &local_rewrites
           }
-
-          default_destination {
-            reject 550 5.1.1 "User doesn't exist"
-          }
+          deliver_to &local_mailboxes
         }
 
         smtp tcp://0.0.0.0:25 {
@@ -1519,12 +1513,7 @@ in
           }
 
           default_source {
-            destination postmaster $(local_domains) {
-              deliver_to &local_routing
-            }
-            default_destination {
-              reject 550 5.1.1 "User doesn't exist"
-            }
+            deliver_to &local_routing
           }
         }
 
