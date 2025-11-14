@@ -223,6 +223,7 @@ in
         $INCLUDE /etc/knot/no-email.zone.include null-domain-check\000.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include smtp.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include ttl-check.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include workstation.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
 
         ; Setup DKIM for this domain
@@ -297,6 +298,9 @@ in
 
         ; Advertise HTTP/2 and HTTP/3 support for wss.cardgames.zandoodle.me.uk
         wss.cardgames HTTPS 1 . alpn=h3,h2
+
+        workstation a 100.91.224.22
+        workstation aaaa fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
 
         zzsecond-flag-80a053ba81 type65534 \# 0
 
