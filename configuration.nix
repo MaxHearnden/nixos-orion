@@ -101,11 +101,11 @@ in
         @ SOA dns.zandoodle.me.uk. mail.zandoodle.me.uk. 0 0 0 0 0
 
         ; DANE testing
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.bogus-exists.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.bogus.zandoodle.me.uk.
+        _tcp dname _tcp.zandoodle.me.uk
 
-        ; Setup DMARC and SPF for this domain
-        $INCLUDE /etc/knot/no-email.zone.include
+        ; Setup SPF for this domain
+        @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
+        @ mx 10 mail
 
         ; Advertise our public IP address as the IP address for this domain
         $INCLUDE /var/lib/ddns/zonefile
@@ -116,18 +116,18 @@ in
         @ SOA dns.zandoodle.me.uk. mail.zandoodle.me.uk. 0 600 60 3600 600
 
         ; Advertise DANE
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.compsoc-dev.com.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.ollama.compsoc-dev.com.
+        _tcp dname _tcp.zandoodle.me.uk.
 
         ; Setup DMARC and SPF for this domain
-        $INCLUDE /etc/knot/email.zone.include
-        $INCLUDE /etc/knot/no-email.zone.include mta-sts.compsoc-dev.com.
-        $INCLUDE /etc/knot/no-email.zone.include ollama.compsoc-dev.com.
+        @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
+        @ mx 10 mail.zandoodle.me.uk.
+        _dmarc cname _dmarc.zandoodle.me.uk.
 
         ; Advertise our public IP address as the IP address for compsoc-dev.com and dns.compsoc-dev.com
         $INCLUDE /var/lib/ddns/zonefile
-        $INCLUDE /var/lib/ddns/zonefile mta-sts.compsoc-dev.com.
-        $INCLUDE /var/lib/ddns/local-tailscale-zonefile ollama.compsoc-dev.com.
+        mta-sts cname @
+        ollama cname local-tailscale.zandoodle.me.uk.
+        _tcp.ollama dname _tcp.zandoodle.me.uk.
 
         ; Setup certificate authority restrictions
         @ CAA 0 issuemail ";"
@@ -138,7 +138,6 @@ in
 
         ; Advertise HTTP/2 and HTTP/3 support
         @ HTTPS 1 . alpn=h3,h2
-        ollama HTTPS 1 . alpn=h3,h2
 
         ; Advertise the authoritative nameserver
         @ NS dns.zandoodle.me.uk.
@@ -146,19 +145,10 @@ in
         default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs9i5JfSz0iOz0L5xG9OwO8N9bdhY+YT+Hq3AVCupqZmp487NTem0yoPEgfZDqVxGaTFVdCxAMhHHvv08jo6U5Cmubumo8HHGzwvYJux9CCWcbUFlr3994Avs04O5sDSXmeDDuG9rGZmepy0r+Gly0brAKEv6UxM2l1HnBB2qabkCzYUamc9TyH8BUM9PIj3RWVEO/FHo8XjYxwrMLd22inHQ8wAORc3ERXqEEe/XgaxnWmD4ledoqRF8imcmqClXN+2f7+WvsJo+/ovi5Oh7+8WfLyx9KVWwjWHPgd6a9Dm/ArSjiZbzR+DpynQZi+AvUXIxBpeQXlvofl0W+479pwIDAQAB"
 
         flag-0be5c4b29b type65534 \# 0
+        flag-0be5c4b29b txt "v=spf1 -all"
 
         ; Add google site verification
         @ TXT "google-site-verification=oZJUabY5f9TzTiPw8Ml-k8GrRILLRbITIEF8eamsLY4"
-      '';
-      "knot/email.zone.include".text = ''
-        ; The SPF policy uses ?mx as a pass result would bypass DKIM
-        @ TXT "v=spf1 ?mx -all"
-        @ MX 10 mail.zandoodle.me.uk.
-        _mta-sts TXT "v=STSv1; id=1"
-        _dmarc TXT "v=DMARC1;p=reject;sp=reject;adkim=s;aspf=s;fo=1"
-        ; Advertise imaps and submissions
-        _imaps._tcp SRV 0 10 993 imap.zandoodle.me.uk.
-        _submissions._tcp SRV 0 10 465 smtp.zandoodle.me.uk.
       '';
       "knot/letsencrypt.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {
@@ -193,39 +183,36 @@ in
         ; Deny sending or receiving emails
         @ TXT "v=spf1 -all"
         @ MX 0 .
-        _dmarc TXT "v=DMARC1;p=reject;sp=reject;adkim=s;aspf=s;fo=1"
       '';
       "knot/zandoodle.me.uk.zone".text = ''
         $TTL 600
         @ SOA dns mail 0 600 60 3600 600
 
         ; Setup DANE for this domain
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.cardgames.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.local.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt-dane.zone.include _25._tcp.mail.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.mta-sts.zandoodle.me.uk.
-        $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.wss.cardgames.zandoodle.me.uk.
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
+        $INCLUDE /etc/knot/letsencrypt-dane.zone.include _25._tcp.mail.zandoodle.me.uk.
+
+        _tcp.local dname _tcp
 
         ; Setup SPF and DMARC for this domain
-        $INCLUDE /etc/knot/email.zone.include
-        $INCLUDE /etc/knot/no-email.zone.include cardgames.zandoodle.me.uk.
+        @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
+        @ mx 10 mail
+        _dmarc txt "v=DMARC1;p=reject;aspf=s;adkim=s;fo=d;ruf=mailto:dmarc-reports@zandoodle.me.uk"
+
+        ; Advertise imaps and submissions
+        _imaps._tcp SRV 0 10 993 imap
+        _submissions._tcp SRV 0 10 465 smtp
+        _submission._tcp SRV 0 10 587 smtp
+
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include dot-check\..zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include imap.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-tailscale.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include mail.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include mta-sts.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include multi-string-check.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include null-check.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include null-domain-check\000.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include smtp.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include ttl-check.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include workstation.zandoodle.me.uk.
-        $INCLUDE /etc/knot/no-email.zone.include wss.cardgames.zandoodle.me.uk.
+        _spf txt "v=spf1 ?a:mail.zandoodle.me.uk -all"
+        mail txt "v=spf1 redirect=_spf.zandoodle.me.uk"
+        mail mx 0 .
 
         ; Setup DKIM for this domain
         default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwCuGmFxA7aupe8x7tmSolntpa5qBxyQnGkgsfjyjD57doP55a57KXTxEo6t7buBpua/W6dktcw2zpLp9338yg1wA/9RJwhZclzrH5Kv4gNbMHHvhBbygnoJqbrwFH8+VDNG4NKUl5WKFRiITJXd8Y0xqpPhFwfmd2nITjc8wleGv4eQXmB5ytP8Nj2fE6pd4fGpF7sydnOo5BTBSeb0QtmgbQcReQ05CqwMGEAyKOQFnKMzEAOEtvyXUFyG7hFt4ZsngpRGDM/1d4rI/Kh7oCFfzuhR+ENhZkLqYz9xZ0QZ3GWVon7mXfiVvJL5GBfb9cwLjAGp5QhgN2El2yc/3/QIDAQAB"
@@ -233,15 +220,17 @@ in
         ; Advertise IP addresses for this domain
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-guest-zonefile local-guest.zandoodle.me.uk.
-        $INCLUDE /var/lib/ddns/local-tailscale-zonefile imap.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/local-tailscale-zonefile local-tailscale.zandoodle.me.uk.
-        $INCLUDE /var/lib/ddns/local-tailscale-zonefile smtp.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
-        $INCLUDE /var/lib/ddns/zonefile cardgames.zandoodle.me.uk.
+        ; NS and MX targets musn't be an alias
         $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile mail.zandoodle.me.uk.
-        $INCLUDE /var/lib/ddns/zonefile mta-sts.zandoodle.me.uk.
-        $INCLUDE /var/lib/ddns/zonefile wss.cardgames.zandoodle.me.uk.
+
+        imap cname local-tailscale
+        smtp cname local-tailscale
+        cardgames cname @
+        mta-sts cname @
+        wss.cardgames cname @
 
         ; Setup certificate authority restrictions for this domain
         @ CAA 0 issuemail ";"
@@ -257,10 +246,8 @@ in
         ; Setup an extant domain for DNSSEC testing
         bogus-exists TYPE65534 \# 0
 
-        ; Advertise HTTP/2 and HTTP/3 support for cardgames.zandoodle.me.uk
-        cardgames HTTPS 1 . alpn=h3,h2
-
         dot-check\. txt dot\ check
+        dot-check\. txt "v=spf1 -all"
 
         ; Advertise HTTP/2 and HTTP/3 support for local.zandoodle.me.uk
         local HTTPS 1 . alpn=h3,h2
@@ -287,23 +274,22 @@ in
         local-shadow AAAA fd09:a389:7c1e:4::1
 
         multi-string-check TXT string 1 string 2
+        null-check txt "v=spf1 -all"
 
         ; Check that null bytes within TXT records are handled correctly
         null-check TXT "\000"
+        null-check txt "v=spf1 -all"
 
         ; Check that null bytes within domains are handled correctly
         null-domain-check\000 TXT "null domain check"
+        null-domain-check\000 txt "v=spf1 -all"
 
         ; Add a zero ttl record for testing DNS resolvers
         ttl-check 0 txt ttl\ check
-
-        ; Advertise HTTP/2 and HTTP/3 support for wss.cardgames.zandoodle.me.uk
-        wss.cardgames HTTPS 1 . alpn=h3,h2
+        ttl-check 0 txt "v=spf1 -all"
 
         workstation a 100.91.224.22
         workstation aaaa fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
-
-        zzsecond-flag-80a053ba81 type65534 \# 0
 
         ; Google stuff
         @ TXT "google-site-verification=ZDVckD_owTCKFzcbI9VqqGQOoNfd_8C0tKNqRVkiK8I"
@@ -1558,7 +1544,6 @@ in
         }
 
         target.remote outbound_delivery {
-          hostname zandoodle.me.uk
           limits {
             destination rate 20 1s
             destination concurrency 10
@@ -2458,7 +2443,6 @@ in
         restartTriggers = map (zone: config.environment.etc."knot/${zone}".source) [
           "bogus.zandoodle.me.uk.zone"
           "compsoc-dev.com.zone"
-          "email.zone.include"
           "letsencrypt.zone.include"
           "letsencrypt-dane.zone.include"
           "no-email.zone.include"
