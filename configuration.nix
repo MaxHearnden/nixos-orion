@@ -151,11 +151,12 @@ in
         @ TXT "google-site-verification=oZJUabY5f9TzTiPw8Ml-k8GrRILLRbITIEF8eamsLY4"
       '';
       "knot/email.zone.include".text = ''
-        @ TXT "v=spf1 mx -all"
+        ; The SPF policy uses ?mx as a pass result would bypass DKIM
+        @ TXT "v=spf1 ?mx -all"
         @ MX 10 mail.zandoodle.me.uk.
         _mta-sts TXT "v=STSv1; id=1"
         _dmarc TXT "v=DMARC1;p=reject;sp=reject;adkim=s;aspf=s;fo=1"
-        ; Advertise imaps
+        ; Advertise imaps and submissions
         _imaps._tcp SRV 0 10 993 imap.zandoodle.me.uk.
         _submissions._tcp SRV 0 10 465 smtp.zandoodle.me.uk.
       '';
