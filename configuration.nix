@@ -1560,13 +1560,15 @@ in
               }
             }
 
+            modify {
+              dkim $(local_domains) default
+              replace_sender regexp "(.+)@(.+)" "$1@insecure.zandoodle.me.uk"
+            }
+
             destination postmaster $(local_domains) {
               deliver_to &local_routing
             }
             default_destination {
-              modify {
-                dkim $(local_domains) default
-              }
               deliver_to &remote_queue
             }
           }
