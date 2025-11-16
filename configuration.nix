@@ -198,14 +198,15 @@ in
         ; Setup SPF and DMARC for this domain
         @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
         _dmarc txt "v=DMARC1;p=reject;aspf=s;adkim=s;fo=d;ruf=mailto:dmarc-reports@zandoodle.me.uk"
+        mail txt "v=spf1 a -all"
 
         ; Setup mail exchanges for this domain
         @ mx 10 mail
-        mail mx 0 .
+        mail mx 10 mail
 
         ; Setup MTA-STS for this domain
         _mta-sts txt "v=STSv1; id=1"
-        _mta-sts.insecure cname _mta-sts
+        _mta-sts.mail cname _mta-sts
 
         ; Advertise imaps and submissions
         _imaps._tcp SRV 0 10 993 imap
@@ -219,15 +220,9 @@ in
         $INCLUDE /etc/knot/no-email.zone.include local-tailscale.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include workstation.zandoodle.me.uk.
         _spf txt "v=spf1 ?a:mail.zandoodle.me.uk -all"
-        mail txt "v=spf1 redirect=_spf.zandoodle.me.uk"
-
-        ; Some domains require SPF to pass
-        insecure mx 10 mail
-        insecure txt "v=spf1 a:mail.zandoodle.me.uk -all"
 
         ; Setup DKIM for this domain
         default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwCuGmFxA7aupe8x7tmSolntpa5qBxyQnGkgsfjyjD57doP55a57KXTxEo6t7buBpua/W6dktcw2zpLp9338yg1wA/9RJwhZclzrH5Kv4gNbMHHvhBbygnoJqbrwFH8+VDNG4NKUl5WKFRiITJXd8Y0xqpPhFwfmd2nITjc8wleGv4eQXmB5ytP8Nj2fE6pd4fGpF7sydnOo5BTBSeb0QtmgbQcReQ05CqwMGEAyKOQFnKMzEAOEtvyXUFyG7hFt4ZsngpRGDM/1d4rI/Kh7oCFfzuhR+ENhZkLqYz9xZ0QZ3GWVon7mXfiVvJL5GBfb9cwLjAGp5QhgN2El2yc/3/QIDAQAB"
-        default._domainkey.insecure txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtZ0mrndeQzUiswBDxi3dvVi4Dh94A1qmLcpf4g5pim6m4zJfQxS4r1NoT+dnX4NIpLQcJD7o3pMHDqQoHDVwce8BqfE37mKSnI/6vxcrUMpxzyfccSFuqVGM9+OGGeRmJZ5B1sCJjCrp/WcCG2gHjqoH+KvrTCzwuijqd2fxedCChLzEiEWBZKVMjtaIPHW/OirFEjJrAOxhGAxGwA3CiuqoKXNiyVzedcTpMNY3F8fNwNzP3X64ebw2lTXVfUmo156Zsu+dFkSlqfk2055ZFD0SFrMtxSriikcfjhAWlxD2kjEpi13GMSagoe+MQkPvL6kg6YNo0qrL2BXj1wSi7wIDAQAB"
 
         ; Advertise IP addresses for this domain
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
@@ -242,7 +237,7 @@ in
         smtp cname local-tailscale
         cardgames cname @
         mta-sts cname @
-        mta-sts.insecure cname @
+        mta-sts.mail cname @
         wss.cardgames cname @
 
         ; Setup certificate authority restrictions for this domain
@@ -1155,7 +1150,7 @@ in
               EOF
           '';
         };
-        "mta-sts.insecure.zandoodle.me.uk" = {
+        "mta-sts.mail.zandoodle.me.uk" = {
           extraConfig = ''
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -1320,7 +1315,7 @@ in
               "_acme-challenge.local.zandoodle.me.uk."
               "_acme-challenge.mta-sts.compsoc-dev.com."
               "_acme-challenge.mta-sts.zandoodle.me.uk."
-              "_acme-challenge.mta-sts.insecure.zandoodle.me.uk."
+              "_acme-challenge.mta-sts.mail.zandoodle.me.uk."
               "_acme-challenge.ollama.compsoc-dev.com."
               "_acme-challenge.wss.cardgames.zandoodle.me.uk."
               "_acme-challenge.zandoodle.me.uk."
@@ -1562,7 +1557,7 @@ in
 
             modify {
               dkim $(local_domains) default
-              replace_sender regexp "(.+)@(.+)" "$1@insecure.zandoodle.me.uk"
+              replace_sender regexp "(.+)@(.+)" "$1@mail.zandoodle.me.uk"
             }
 
             destination postmaster $(local_domains) {
@@ -1623,7 +1618,7 @@ in
       localDomains = [
         "$(primary_domain)"
         "compsoc-dev.com"
-        "insecure.zandoodle.me.uk"
+        "mail.zandoodle.me.uk"
       ];
       package = pkgs.maddy.overrideAttrs (
         { tags ? [], ... }: {
