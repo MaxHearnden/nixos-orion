@@ -122,6 +122,7 @@ in
         @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
         @ mx 10 mail.zandoodle.me.uk.
         _dmarc cname _dmarc.zandoodle.me.uk.
+        _mta-sts cname _mta-sts.zandoodle.me.uk.
 
         ; Advertise our public IP address as the IP address for compsoc-dev.com and dns.compsoc-dev.com
         $INCLUDE /var/lib/ddns/zonefile
@@ -196,8 +197,15 @@ in
 
         ; Setup SPF and DMARC for this domain
         @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
-        @ mx 10 mail
         _dmarc txt "v=DMARC1;p=reject;aspf=s;adkim=s;fo=d;ruf=mailto:dmarc-reports@zandoodle.me.uk"
+
+        ; Setup mail exchanges for this domain
+        @ mx 10 mail
+        mail mx 0 .
+
+        ; Setup MTA-STS for this domain
+        _mta-sts txt "v=STSv1; id=1"
+        _mta-sts.insecure cname _mta-sts
 
         ; Advertise imaps and submissions
         _imaps._tcp SRV 0 10 993 imap
@@ -212,7 +220,6 @@ in
         $INCLUDE /etc/knot/no-email.zone.include workstation.zandoodle.me.uk.
         _spf txt "v=spf1 ?a:mail.zandoodle.me.uk -all"
         mail txt "v=spf1 redirect=_spf.zandoodle.me.uk"
-        mail mx 0 .
 
         ; Some domains require SPF to pass
         insecure mx 10 mail
