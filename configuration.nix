@@ -214,8 +214,13 @@ in
         mail txt "v=spf1 redirect=_spf.zandoodle.me.uk"
         mail mx 0 .
 
+        ; Some domains require SPF to pass
+        insecure mx 10 mail
+        insecure txt "v=spf1 a:mail.zandoodle.me.uk -all"
+
         ; Setup DKIM for this domain
         default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwCuGmFxA7aupe8x7tmSolntpa5qBxyQnGkgsfjyjD57doP55a57KXTxEo6t7buBpua/W6dktcw2zpLp9338yg1wA/9RJwhZclzrH5Kv4gNbMHHvhBbygnoJqbrwFH8+VDNG4NKUl5WKFRiITJXd8Y0xqpPhFwfmd2nITjc8wleGv4eQXmB5ytP8Nj2fE6pd4fGpF7sydnOo5BTBSeb0QtmgbQcReQ05CqwMGEAyKOQFnKMzEAOEtvyXUFyG7hFt4ZsngpRGDM/1d4rI/Kh7oCFfzuhR+ENhZkLqYz9xZ0QZ3GWVon7mXfiVvJL5GBfb9cwLjAGp5QhgN2El2yc/3/QIDAQAB"
+        default._domainkey.insecure txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtZ0mrndeQzUiswBDxi3dvVi4Dh94A1qmLcpf4g5pim6m4zJfQxS4r1NoT+dnX4NIpLQcJD7o3pMHDqQoHDVwce8BqfE37mKSnI/6vxcrUMpxzyfccSFuqVGM9+OGGeRmJZ5B1sCJjCrp/WcCG2gHjqoH+KvrTCzwuijqd2fxedCChLzEiEWBZKVMjtaIPHW/OirFEjJrAOxhGAxGwA3CiuqoKXNiyVzedcTpMNY3F8fNwNzP3X64ebw2lTXVfUmo156Zsu+dFkSlqfk2055ZFD0SFrMtxSriikcfjhAWlxD2kjEpi13GMSagoe+MQkPvL6kg6YNo0qrL2BXj1wSi7wIDAQAB"
 
         ; Advertise IP addresses for this domain
         $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
@@ -230,6 +235,7 @@ in
         smtp cname local-tailscale
         cardgames cname @
         mta-sts cname @
+        mta-sts.insecure cname @
         wss.cardgames cname @
 
         ; Setup certificate authority restrictions for this domain
@@ -1143,6 +1149,25 @@ in
               EOF
           '';
         };
+        "mta-sts.insecure.zandoodle.me.uk" = {
+          extraConfig = ''
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            };
+            respond /.well-known/mta-sts.txt <<EOF
+              version: STSv1
+              mode: enforce
+              max_age: 31557600
+              mx: mail.zandoodle.me.uk
+
+              EOF
+          '';
+        };
         "mta-sts.zandoodle.me.uk" = {
           extraConfig = ''
             header {
@@ -1289,6 +1314,7 @@ in
               "_acme-challenge.local.zandoodle.me.uk."
               "_acme-challenge.mta-sts.compsoc-dev.com."
               "_acme-challenge.mta-sts.zandoodle.me.uk."
+              "_acme-challenge.mta-sts.insecure.zandoodle.me.uk."
               "_acme-challenge.ollama.compsoc-dev.com."
               "_acme-challenge.wss.cardgames.zandoodle.me.uk."
               "_acme-challenge.zandoodle.me.uk."
@@ -1586,7 +1612,11 @@ in
       '';
       enable = true;
       hostname = "mail.zandoodle.me.uk";
-      localDomains = [ "$(primary_domain)" "compsoc-dev.com" ];
+      localDomains = [
+        "$(primary_domain)"
+        "compsoc-dev.com"
+        "insecure.zandoodle.me.uk"
+      ];
       package = pkgs.maddy.overrideAttrs (
         { tags ? [], ... }: {
           tags = tags ++ [ "libdns_rfc2136" ];
