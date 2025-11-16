@@ -287,7 +287,7 @@ in
         local-shadow AAAA fd09:a389:7c1e:4::1
 
         multi-string-check TXT string 1 string 2
-        null-check txt "v=spf1 -all"
+        multi-string-check txt "v=spf1 -all"
 
         ; Check that null bytes within TXT records are handled correctly
         null-check TXT "\000"
@@ -295,7 +295,6 @@ in
 
         ; Check that null bytes within domains are handled correctly
         null-domain-check\000 TXT "null domain check"
-        null-domain-check\000 txt "v=spf1 -all"
 
         ; Add a zero ttl record for testing DNS resolvers
         ttl-check 0 txt ttl\ check
