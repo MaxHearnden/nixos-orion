@@ -124,7 +124,7 @@ in
         _dmarc cname _dmarc.zandoodle.me.uk.
         _mta-sts cname _mta-sts.zandoodle.me.uk.
 
-        ; Advertise our public IP address as the IP address for compsoc-dev.com and dns.compsoc-dev.com
+        ; Advertise our public IP address as the IP address for compsoc-dev.com
         $INCLUDE /var/lib/ddns/zonefile
         mta-sts cname @
         ollama cname local-tailscale.zandoodle.me.uk.
