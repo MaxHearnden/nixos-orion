@@ -1655,6 +1655,7 @@ in
       resolveLocalQueries = false;
       settings = {
         auth-zone = {
+          answer-cookie = true;
           fallback-enabled = true;
           for-downstream = false;
           for-upstream = true;
