@@ -1655,7 +1655,6 @@ in
       resolveLocalQueries = false;
       settings = {
         auth-zone = {
-          answer-cookie = true;
           fallback-enabled = true;
           for-downstream = false;
           for-upstream = true;
@@ -1694,6 +1693,8 @@ in
             "fc00::/7 allow"
             "fe80::/10 allow"
           ];
+          # Add eDNS cookies to the responses
+          answer-cookie = true;
           # Allow querying localhost
           do-not-query-localhost = false;
 
