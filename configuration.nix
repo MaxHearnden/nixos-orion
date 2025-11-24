@@ -231,7 +231,7 @@ in
         $INCLUDE /var/lib/ddns/local-tailscale-zonefile local-tailscale.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile
         ; NS and MX targets musn't be an alias
-        $INCLUDE /var/lib/ddns/zonefile dns.zandoodle.me.uk.
+        $INCLUDE /var/lib/ddns/zonefile-ipv6-only dns.zandoodle.me.uk.
         $INCLUDE /var/lib/ddns/zonefile mail.zandoodle.me.uk.
 
         imap cname local-tailscale
@@ -2403,6 +2403,8 @@ in
           # Append the IPv6 records
           ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary | ${lib.getExe pkgs.jq} -r \
             '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/zonefile
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary | ${lib.getExe pkgs.jq} -r \
+            '"@ AAAA " + (.[].addr_info.[].local // empty)' >/run/ddns/zonefile-ipv6-only
 
           # Get the IP address for enp49s0
           ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev bridge | ${lib.getExe pkgs.jq} -r \
@@ -2450,7 +2452,7 @@ in
 
           # Move the verified data from /run/ddns to /var/lib/ddns
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
-            /run/ddns/zonefile /run/ddns/local-zonefile /run/ddns/local-guest-zonefile /run/ddns/local-tailscale-zonefile /var/lib/ddns/
+            /run/ddns/zonefile /run/ddns/local-zonefile /run/ddns/local-guest-zonefile /run/ddns/zonefile-ipv6-only /run/ddns/local-tailscale-zonefile /var/lib/ddns/
         '';
         unitConfig.StartLimitIntervalSec = "20m";
 
