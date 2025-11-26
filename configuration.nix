@@ -113,7 +113,7 @@ in
       '';
       "knot/compsoc-dev.com.zone".text = ''
         $TTL 600
-        @ SOA dns.zandoodle.me.uk. mail.zandoodle.me.uk. 0 600 60 3600 600
+        @ SOA dns mail.zandoodle.me.uk. 0 600 60 3600 600
 
         ; Advertise DANE
         _tcp dname _tcp.zandoodle.me.uk.
@@ -121,11 +121,14 @@ in
         ; Setup DMARC and SPF for this domain
         @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
         @ mx 10 mail.zandoodle.me.uk.
+        dns txt "v=spf1 -all"
         _dmarc cname _dmarc.zandoodle.me.uk.
         _mta-sts cname _mta-sts.zandoodle.me.uk.
+        dns mx 0 .
 
         ; Advertise our public IP address as the IP address for compsoc-dev.com
         $INCLUDE /var/lib/ddns/zonefile
+        $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
         mta-sts cname @
         ollama cname local-tailscale.zandoodle.me.uk.
         _tcp.ollama dname _tcp.zandoodle.me.uk.
@@ -141,7 +144,7 @@ in
         @ HTTPS 1 . alpn=h3,h2
 
         ; Advertise the authoritative nameserver
-        @ NS dns.zandoodle.me.uk.
+        @ NS dns
 
         default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs9i5JfSz0iOz0L5xG9OwO8N9bdhY+YT+Hq3AVCupqZmp487NTem0yoPEgfZDqVxGaTFVdCxAMhHHvv08jo6U5Cmubumo8HHGzwvYJux9CCWcbUFlr3994Avs04O5sDSXmeDDuG9rGZmepy0r+Gly0brAKEv6UxM2l1HnBB2qabkCzYUamc9TyH8BUM9PIj3RWVEO/FHo8XjYxwrMLd22inHQ8wAORc3ERXqEEe/XgaxnWmD4ledoqRF8imcmqClXN+2f7+WvsJo+/ovi5Oh7+8WfLyx9KVWwjWHPgd6a9Dm/ArSjiZbzR+DpynQZi+AvUXIxBpeQXlvofl0W+479pwIDAQAB"
 
