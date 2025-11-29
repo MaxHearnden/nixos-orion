@@ -2414,15 +2414,10 @@ in
             '"@ AAAA " + (.[].addr_info.[].local // empty)' >/run/ddns/zonefile-ipv6-only
 
           # Get the IP address for enp49s0
-          ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev bridge | ${lib.getExe pkgs.jq} -r \
-            '.[].addr_info.[]
-              | if .family == "inet" then
-                "@ A " + .local
-              elif (.family == "inet6") and (.scope != "link") then
-                "@ AAAA " + .local
-              else
-                empty
-              end' >/run/ddns/local-zonefile
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -4 address show dev bridge | ${lib.getExe pkgs.jq} -r \
+            '"@ A " + (.[].addr_info.[].local // empty)' >/run/ddns/local-zonefile
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to fc00::/7 | ${lib.getExe pkgs.jq} -r \
+            '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/local-zonefile
 
           # Check the zonefile is valid
           ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-zonefile
