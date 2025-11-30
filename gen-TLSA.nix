@@ -7,11 +7,11 @@
   tlsa_selector ? 1,
   tlsa_matching ? 2,
   openssl,
-  runCommandNoCC,
+  runCommand,
   xxd
 }:
 
-runCommandNoCC
+runCommand
   "gen-TLSA"
   {
     __structuredAttrs = true;

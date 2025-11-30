@@ -18,7 +18,7 @@ let
     else
       pkgs.emptyDirectory;
 
-  gen-csp = source: pkgs.runCommandNoCC "gen-csp" {} ''
+  gen-csp = source: pkgs.runCommand "gen-csp" {} ''
     ${lib.getExe inputs.cspc.packages.${config.nixpkgs.system}.default} ${
       if builtins.isPath source then
         source
@@ -742,7 +742,7 @@ in
       logFormat = "level INFO";
       package = pkgs.caddy.withPlugins {
         plugins = [ "github.com/caddy-dns/rfc2136@v1.0.0" ];
-        hash = "sha256-3aPw3ZKPkG2J5o5uY60xS2uxjx8+ZgUQwn8gIj5Q1rw=";
+        hash = "sha256-tVJf4lxv00TxdtCAoJhNs8tgRWiXw3poN4S+NlPhGwU=";
       };
       virtualHosts = {
         "compsoc-dev.com" = {

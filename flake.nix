@@ -16,7 +16,7 @@
       flake = false;
       url = "github:MaxHearnden/nixos-kexec";
     };
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
@@ -69,7 +69,7 @@
             };
             inherit system;
           });
-        in nixos-system.pkgs.runCommandNoCC "network-config" {} ''
+        in nixos-system.pkgs.runCommand "network-config" {} ''
           mkdir $out
           cp ${nixos-system.config.environment.etc."unbound/unbound.conf".source} $out/unbound.conf
           cp ${nixos-system.config.environment.etc."dnsdist/dnsdist.conf".source} $out/dnsdist.conf
