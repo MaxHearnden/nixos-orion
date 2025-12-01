@@ -1838,7 +1838,7 @@ in
     etc.overlay.enable = true;
 
     # Set the system state version
-    stateVersion = "24.11";
+    stateVersion = "25.11";
   };
   systemd = {
     additionalUpstreamSystemUnits = [
