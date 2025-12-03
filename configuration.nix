@@ -605,6 +605,7 @@ in
         '';
       };
     };
+    tempAddresses = "disabled";
     useNetworkd = true;
   };
   nix = {
