@@ -1390,10 +1390,20 @@ in
         ];
         remote = [
           {
-            id = "hetzner";
+            id = "hetzner1";
             address = [
               "2a01:4f8:0:a101::a:1"
+            ];
+          }
+          {
+            id = "hetzner2";
+            address = [
               "2a01:4f8:0:1::5ddc:2"
+            ];
+          }
+          {
+            id = "hetzner3";
+            address = [
               "2001:67c:192c::add:a3"
             ];
           }
@@ -1458,7 +1468,11 @@ in
             dnssec-signing = true;
             domain = "compsoc-dev.com";
             file = "/etc/knot/compsoc-dev.com.zone";
-            notify = "hetzner";
+            notify = [
+              "hetzner1"
+              "hetzner2"
+              "hetzner3"
+            ];
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
@@ -1471,7 +1485,11 @@ in
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
             file = "/etc/knot/zandoodle.me.uk.zone";
-            notify = "hetzner";
+            notify = [
+              "hetzner1"
+              "hetzner2"
+              "hetzner3"
+            ];
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
