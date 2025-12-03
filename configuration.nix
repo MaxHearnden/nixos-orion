@@ -122,14 +122,11 @@ in
         ; Setup DMARC and SPF for this domain
         @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
         @ mx 10 mail.zandoodle.me.uk.
-        dns txt "v=spf1 -all"
         _dmarc cname _dmarc.zandoodle.me.uk.
         _mta-sts cname _mta-sts.zandoodle.me.uk.
-        dns mx 0 .
 
         ; Advertise our public IP address as the IP address for compsoc-dev.com
         $INCLUDE /var/lib/ddns/zonefile
-        $INCLUDE /var/lib/ddns/zonefile dns.compsoc-dev.com.
         mta-sts cname @
         ollama cname local-tailscale.zandoodle.me.uk.
         _tcp.ollama dname _tcp.zandoodle.me.uk.
