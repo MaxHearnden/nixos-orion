@@ -110,12 +110,7 @@ in
         ; Advertise our public IP address as the IP address for this domain
         $INCLUDE /var/lib/ddns/zonefile
 
-        ; Advertise the authoritative nameserver
-        @ ns dns.zandoodle.me.uk.
-        ; Advertise Hetzner secondary nameservers
-        @ ns ns1.first-ns.de.
-        @ ns robotns2.second-ns.de.
-        @ ns robotns3.second-ns.com.
+        @ NS dns.zandoodle.me.uk.
       '';
       "knot/compsoc-dev.com.zone".text = ''
         $TTL 600
