@@ -109,11 +109,17 @@ in
 
         ; Advertise our public IP address as the IP address for this domain
         $INCLUDE /var/lib/ddns/zonefile
-        @ NS dns.zandoodle.me.uk.
+
+        ; Advertise the authoritative nameserver
+        @ ns dns.zandoodle.me.uk.
+        ; Advertise Hetzner secondary nameservers
+        @ ns ns1.first-ns.de.
+        @ ns robotns2.second-ns.de.
+        @ ns robotns3.second-ns.com.
       '';
       "knot/compsoc-dev.com.zone".text = ''
         $TTL 600
-        @ SOA dns mail.zandoodle.me.uk. 0 600 60 3600 600
+        @ SOA dns.zandoodle.me.uk. mail.zandoodle.me.uk. 0 600 60 3600 600
 
         ; Advertise DANE
         _tcp dname _tcp.zandoodle.me.uk.
@@ -144,7 +150,11 @@ in
         @ HTTPS 1 . alpn=h3,h2
 
         ; Advertise the authoritative nameserver
-        @ NS dns
+        @ ns dns.zandoodle.me.uk.
+        ; Advertise Hetzner secondary nameservers
+        @ ns ns1.first-ns.de.
+        @ ns robotns2.second-ns.de.
+        @ ns robotns3.second-ns.com.
 
         default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs9i5JfSz0iOz0L5xG9OwO8N9bdhY+YT+Hq3AVCupqZmp487NTem0yoPEgfZDqVxGaTFVdCxAMhHHvv08jo6U5Cmubumo8HHGzwvYJux9CCWcbUFlr3994Avs04O5sDSXmeDDuG9rGZmepy0r+Gly0brAKEv6UxM2l1HnBB2qabkCzYUamc9TyH8BUM9PIj3RWVEO/FHo8XjYxwrMLd22inHQ8wAORc3ERXqEEe/XgaxnWmD4ledoqRF8imcmqClXN+2f7+WvsJo+/ovi5Oh7+8WfLyx9KVWwjWHPgd6a9Dm/ArSjiZbzR+DpynQZi+AvUXIxBpeQXlvofl0W+479pwIDAQAB"
 
@@ -253,7 +263,13 @@ in
 
         ; Advertise HTTP/2 and HTTP/3 support for zandoodle.me.uk
         @ HTTPS 1 . alpn=h3,h2
-        @ NS dns
+
+        ; Advertise the primary DNS server
+        @ ns dns
+        ; Advertise Hetzner secondary nameservers
+        @ ns ns1.first-ns.de.
+        @ ns robotns2.second-ns.de.
+        @ ns robotns3.second-ns.com.
 
         ; Setup an extant domain for DNSSEC testing
         bogus-exists TYPE65534 \# 0
@@ -1345,6 +1361,14 @@ in
           {
             id = "transfer";
             address = [
+              # Hetzner DNS servers
+              "213.239.242.238"
+              "213.133.100.103"
+              "193.47.99.3"
+              "2a01:4f8:0:a101::a:1"
+              "2a01:4f8:0:1::5ddc:2"
+              "2001:67c:192c::add:a3"
+
               "10.0.0.0/8"
               "100.64.0.0/10"
               "127.0.0.0/8"
@@ -1369,6 +1393,14 @@ in
           }
         ];
         remote = [
+          {
+            id = "hetzner";
+            address = [
+              "2a01:4f8:0:a101::a:1"
+              "2a01:4f8:0:1::5ddc:2"
+              "2001:67c:192c::add:a3"
+            ];
+          }
           {
             id = "unbound";
             address = "127.0.0.1@55";
@@ -1430,6 +1462,7 @@ in
             dnssec-signing = true;
             domain = "compsoc-dev.com";
             file = "/etc/knot/compsoc-dev.com.zone";
+            notify = "hetzner";
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
@@ -1442,6 +1475,7 @@ in
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
             file = "/etc/knot/zandoodle.me.uk.zone";
+            notify = "hetzner";
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
