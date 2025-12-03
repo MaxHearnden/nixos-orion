@@ -98,7 +98,7 @@ in
         ; A zone for testing DNSSEC support.
         ; This zone is bogus.
         $TTL 0
-        @ SOA dns.zandoodle.me.uk. mail.zandoodle.me.uk. 0 0 0 0 0
+        @ SOA dns.zandoodle.me.uk. hostmaster.zandoodle.me.uk 0 0 0 0 0
 
         ; DANE testing
         _tcp dname _tcp.zandoodle.me.uk
@@ -114,7 +114,7 @@ in
       '';
       "knot/compsoc-dev.com.zone".text = ''
         $TTL 600
-        @ SOA dns.zandoodle.me.uk. mail.zandoodle.me.uk. 0 600 60 3600 600
+        @ SOA dns.zandoodle.me.uk. hostmaster 0 600 60 3600 600
 
         ; Advertise DANE
         _tcp dname _tcp.zandoodle.me.uk.
@@ -195,7 +195,7 @@ in
       '';
       "knot/zandoodle.me.uk.zone".text = ''
         $TTL 600
-        @ SOA dns mail 0 600 60 3600 600
+        @ SOA dns hostmaster 0 600 60 3600 600
 
         ; Setup DANE for this domain
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
