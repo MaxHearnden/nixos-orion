@@ -114,7 +114,7 @@ in
       '';
       "knot/compsoc-dev.com.zone".text = ''
         $TTL 600
-        @ SOA dns.zandoodle.me.uk. hostmaster 0 600 60 3600 600
+        @ SOA dns.zandoodle.me.uk. hostmaster 0 3600 60 86400 600
 
         ; Advertise DANE
         _tcp dname _tcp.zandoodle.me.uk.
@@ -1380,8 +1380,6 @@ in
             # Add a DNSSEC policy with a short rrsig lifetime and DS verfiication using unbound
             id = "porkbun";
             ksk-submission = "unbound";
-            rrsig-lifetime = "12h";
-            rrsig-refresh = "4h";
             single-type-signing = true;
           }
         ];
