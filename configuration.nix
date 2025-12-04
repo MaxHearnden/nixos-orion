@@ -192,7 +192,7 @@ in
       '';
       "knot/zandoodle.me.uk.zone".text = ''
         $TTL 600
-        @ SOA dns hostmaster 0 600 60 3600 600
+        @ SOA dns hostmaster 0 3600 60 86400 600
 
         ; Setup DANE for this domain
         $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
