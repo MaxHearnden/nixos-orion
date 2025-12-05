@@ -203,6 +203,7 @@ in
         ; Setup SPF and DMARC for this domain
         @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
         _dmarc txt "v=DMARC1;p=reject;aspf=s;adkim=s;fo=d;rua=mailto:dmarc-reports@zandoodle.me.uk;ruf=mailto:dmarc-reports@zandoodle.me.uk"
+        compsoc-dev.com._report._dmarc txt "v=DMARC1"
         mail txt "v=spf1 a -all"
 
         ; Setup mail exchanges for this domain
