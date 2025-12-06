@@ -230,7 +230,7 @@ in
         _acme-challenge ds 38839 13 2 FBDF78C60EF2B1759C14FA4FA82EA1D29E2A513DD9456D1362FA85CB77DBD152
         _acme-challenge ns dns
 
-        _acme-challenge.mail cds 53558 13 2 2E2AE00E05044C39CB91B19DBF07CD602E60D2941AB11DB831ABD7558EC65D5A
+        _acme-challenge.mail ds 53558 13 2 2E2AE00E05044C39CB91B19DBF07CD602E60D2941AB11DB831ABD7558EC65D5A
         _acme-challenge.mail ns dns
 
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
