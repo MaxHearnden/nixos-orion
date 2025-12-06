@@ -94,6 +94,10 @@ in
         -- Forward all remaining queries to the authoritative DNS server (knot)
         addAction(AllRule(), PoolAction("auth"))
       '';
+      "knot/acme-challenge.zandoodle.me.uk.zone".text = ''
+        @ soa dns.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3660 604800 86400
+        @ ns dns.zandoodle.me.uk.
+      '';
       "knot/bogus.zandoodle.me.uk.zone".text = ''
         ; A zone for testing DNSSEC support.
         ; This zone is bogus.
@@ -155,6 +159,8 @@ in
 
         ; Add google site verification
         @ TXT "google-site-verification=oZJUabY5f9TzTiPw8Ml-k8GrRILLRbITIEF8eamsLY4"
+
+        _acme-challenge cname _acme-challenge.zandoodle.me.uk.
       '';
       "knot/letsencrypt.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {
@@ -218,6 +224,9 @@ in
         _imaps._tcp SRV 0 10 993 imap
         _submissions._tcp SRV 0 10 465 smtp
         _submission._tcp SRV 0 10 587 smtp
+
+        _acme-challenge ds 38839 13 2 FBDF78C60EF2B1759C14FA4FA82EA1D29E2A513DD9456D1362FA85CB77DBD152
+        _acme-challenge ns dns
 
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
@@ -1311,33 +1320,37 @@ in
       # Add shared caddy TSIG credentials
       keyFiles = [
         "/run/credentials/knot.service/caddy"
+        "/run/credentials/knot.service/knot-ds"
         "/run/credentials/knot.service/maddy"
       ];
       settings = {
         acl = [
-          # Allow caddy to modify TXT records in _acme-challenge domains
           {
+            # Allow caddy to modify TXT records in _acme-challenge domains
             id = "caddy-acme";
-            address = "127.0.0.1";
+            address = [ "127.0.0.1" "::1" ];
             action = "update";
-            key = ["caddy"];
+            key = "caddy";
+            update-owner = "zone";
+            update-type = "TXT";
+          }
+          {
+            id = "knot-ds";
+            address = [
+              "127.0.0.1"
+              "::1"
+            ];
+            action = "update";
+            key = "knot-ds";
             update-owner = "name";
             update-owner-match = "equal";
             update-owner-name = [
-              "_acme-challenge.cardgames.zandoodle.me.uk."
-              "_acme-challenge.compsoc-dev.com."
-              "_acme-challenge.local.zandoodle.me.uk."
-              "_acme-challenge.mta-sts.compsoc-dev.com."
-              "_acme-challenge.mta-sts.zandoodle.me.uk."
-              "_acme-challenge.mta-sts.mail.zandoodle.me.uk."
-              "_acme-challenge.ollama.compsoc-dev.com."
-              "_acme-challenge.wss.cardgames.zandoodle.me.uk."
-              "_acme-challenge.zandoodle.me.uk."
+              "_acme-challenge"
             ];
-            update-type = "TXT";
+            update-type = "DS";
           }
-          # Allow maddy to modify TXT records in _acme-challenge domains
           {
+            # Allow maddy to modify TXT records in _acme-challenge domains
             id = "maddy-acme";
             address = "127.0.0.1";
             action = "update";
@@ -1351,8 +1364,8 @@ in
             ];
             update-type = "TXT";
           }
-          # Allow a zone transfer from local devices
           {
+            # Allow a zone transfer from local devices
             id = "transfer";
             address = [
               # Hetzner DNS servers
@@ -1394,10 +1407,17 @@ in
         ];
         policy = [
           {
-            # Add a DNSSEC policy with a short rrsig lifetime and DS verfiication using unbound
+            # Add a DNSSEC policy with DS verfiication using unbound
             id = "porkbun";
             ksk-submission = "unbound";
             rrsig-refresh = "7d";
+            single-type-signing = true;
+          }
+          {
+            # Add a policy for acme challenge zones
+            ds-push = "knot-ds-push";
+            id = "acme-challenge";
+            ksk-submission = "unbound";
             single-type-signing = true;
           }
         ];
@@ -1463,6 +1483,14 @@ in
             ];
           }
           {
+            id = "knot-ds-push";
+            address = [
+              "::1@54"
+              "127.0.0.1@54"
+            ];
+            key = "knot-ds";
+          }
+          {
             id = "unbound";
             address = "127.0.0.1@55";
           }
@@ -1522,6 +1550,10 @@ in
             id = "unbound";
             parent = "unbound";
           }
+          {
+            id = "acme-challenge";
+            parent = [ "unbound" "hetzner" ];
+          }
         ];
         template = [
           {
@@ -1531,14 +1563,27 @@ in
           }
         ];
         zone = [
-          # Serve a copy of the root zone
           {
+            # Serve a copy of the root zone
             acl = [ "transfer" ];
             dnssec-validation = true;
             domain = ".";
             master = "root-servers";
             module = "mod-queryacl/local";
             zonemd-verify = true;
+          }
+          {
+            # Add a zone for ACME challenges
+            acl = [ "caddy-acme" "transfer" ];
+            dnssec-policy = "acme-challenge";
+            dnssec-signing = true;
+            domain = "_acme-challenge.zandoodle.me.uk";
+            file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
+            semantic-checks = true;
+            journal-content = "all";
+            zonefile-load = "difference-no-serial";
+            zonemd-generate = "zonemd-sha512";
+            zonefile-sync = -1;
           }
           {
             # Add a domain for DNSSEC testing
@@ -1560,7 +1605,7 @@ in
             zonefile-sync = -1;
           }
           {
-            acl = [ "caddy-acme" "transfer" ];
+            acl = [ "transfer" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "compsoc-dev.com";
@@ -1573,7 +1618,7 @@ in
             zonefile-sync = -1;
           }
           {
-            acl = [ "caddy-acme" "transfer" "maddy-acme" ];
+            acl = [ "transfer" "maddy-acme" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
@@ -2394,7 +2439,7 @@ in
           User = "keymgr";
         };
         script = ''
-          for key in caddy maddy; do
+          for key in caddy knot-ds maddy; do
             # Generate a TSIG key
             ${lib.getExe' pkgs.knot-dns "keymgr"} -t $key >"/run/keymgr/$key"
           done
@@ -2582,6 +2627,7 @@ in
         LoadCredential = [
           "caddy:/run/keymgr/caddy"
           "maddy:/run/keymgr/maddy"
+          "knot-ds:/run/keymgr/knot-ds"
         ];
 
         # Allow knot to open as many files as it wants
@@ -2597,6 +2643,7 @@ in
         confinement.enable = true;
         requires = [ "knot.service" ];
         restartTriggers = map (zone: config.environment.etc."knot/${zone}".source) [
+          "acme-challenge.zandoodle.me.uk.zone"
           "bogus.zandoodle.me.uk.zone"
           "compsoc-dev.com.zone"
           "letsencrypt.zone.include"
