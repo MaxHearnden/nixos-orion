@@ -136,11 +136,10 @@ in
         _tcp.ollama dname _tcp.zandoodle.me.uk.
 
         ; Setup certificate authority restrictions
-        @ CAA 0 issuemail ";"
-        @ CAA 0 issuevmc ";"
-        @ CAA 0 issuewild ";"
+        @ caa 0 issuemail ";"
+        @ caa 0 issuevmc ";"
         ; Only Let's Encrypt can issue for this domain and only using the dns-01 validation method
-        @ CAA 128 issue "letsencrypt.org;validationmethods=dns-01"
+        @ caa 128 issue "letsencrypt.org;validationmethods=dns-01"
 
         ; Advertise HTTP/2 and HTTP/3 support
         @ HTTPS 1 . alpn=h3,h2
@@ -259,7 +258,6 @@ in
         ; Setup certificate authority restrictions for this domain
         @ CAA 0 issuemail ";"
         @ CAA 0 issuevmc ";"
-        @ CAA 0 issuewild ";"
         ; Only Let's Encrypt can issue for this domain and only using the dns-01 validation method
         @ CAA 128 issue "letsencrypt.org;validationmethods=dns-01"
 
@@ -745,7 +743,7 @@ in
         acme_ca "https://acme-v02.api.letsencrypt.org/directory"
 
         # Add credentials to change TXT records at the _acme-challenge subdomains
-        acme_dns rfc2136 {
+        dns rfc2136 {
           key_name {file./run/credentials/caddy.service/tsig-id}
           key_alg {file./run/credentials/caddy.service/tsig-algorithm}
           key {file./run/credentials/caddy.service/tsig-secret}
@@ -764,41 +762,64 @@ in
         hash = "sha256-tVJf4lxv00TxdtCAoJhNs8tgRWiXw3poN4S+NlPhGwU=";
       };
       virtualHosts = {
-        "compsoc-dev.com" = {
-          extraConfig = ''
-            # Enable compression
-            encode
+        "*.compsoc-dev.com".extraConfig = ''
+          tls {
+            dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+          }
 
+          @ollama host ollama.compsoc-dev.com
+          handle @ollama {
+            @denied not {
+              client_ip private_ranges 100.64.0.0/10
+            }
+            abort @denied
             header {
-              # Add a restrictive Content Security Policy
-              Content-Security-Policy "default-src 'none'; img-src https://compsoc-dev.com/full-transparent.webp https://compsoc-dev.com/TPP.png; style-src https://compsoc-dev.com/index_final.css https://compsoc-dev.com/about_final.css; font-src https://compsoc-dev.com/orbitron.woff2 https://compsoc-dev.com/poppins.woff2 https://compsoc-dev.com/poppins-light.woff2; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-
-              # Add a Cross Origin Resource Policy
-              Cross-Origin-Resource-Policy: same-origin
-
-              # Make browsers not send a referrer header when following links
-              Referrer-Policy no-referrer
-
-              # Force HTTPS use on this domain and all subdomains
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-              # Disable content sniffing (detecion of javascript)
               X-Content-Type-Options nosniff
-              # Disable this content being inside a frame
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
               X-Frame-Options DENY
-            };
-            root * ${compsoc-website}
+              Referrer-Policy no-referrer
+            }
 
-            # Add a security.txt file
-            respond /.well-known/security.txt <<EOF
-              Contact: https://github.com/MaxHearnden/Compsoc-Website-cobalt/issues
-              Expires: 2026-07-15T20:03:40+01:00
+            respond /api/pull "You can't pull models" 403
+            respond /api/delete "You can't delete models" 403
+
+            reverse_proxy unix//run/ollama {
+              header_up Host 127.0.0.1
+            }
+          }
+
+          @mta-sts host mta-sts.*.compsoc-dev.com mta-sts.compsoc-dev.com
+          handle @mta-sts {
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            }
+            respond /.well-known/mta-sts.txt <<EOF
+              version: STSv1
+              mode: enforce
+              max_age: 31557600
+              mx: mail.zandoodle.me.uk
 
               EOF
-            file_server
-          '';
-        };
-        "zandoodle.me.uk" = {
-          extraConfig = ''
+          }
+
+          handle {
+            abort
+          }
+        '';
+        "*.zandoodle.me.uk".extraConfig = ''
+          tls {
+            dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+          }
+
+          @wss-cardgames host wss.cardgames.zandoodle.me.uk
+          handle @wss-cardgames {
             header {
               # Add a Cross Origin Resource Policy
               Cross-Origin-Resource-Policy same-origin
@@ -817,39 +838,14 @@ in
 
               # Add a restrictive Content Security Policy
               Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-            };
-
-            respond "This is a test of config ${inputs.self}"
-          '';
-        };
-        "wss.cardgames.zandoodle.me.uk" = {
-          extraConfig = ''
-            header {
-              # Add a Cross Origin Resource Policy
-              Cross-Origin-Resource-Policy same-origin
-
-              # Force HTTPS use on this domain and all subdomains
-              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-
-              # Disable content sniffing (detecion of javascript)
-              X-Content-Type-Options nosniff
-
-              # Disable this content being inside a frame
-              X-Frame-Options DENY
-
-              # Make browsers not send a referrer header when following links
-              Referrer-Policy no-referrer
-
-              # Add a restrictive Content Security Policy
-              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-            };
+            }
 
             # Forward all requests to the VM
             reverse_proxy 192.168.2.2:80
-          '';
-        };
-        "cardgames.zandoodle.me.uk" = {
-          extraConfig = ''
+          }
+
+          @cardgames host cardgames.zandoodle.me.uk
+          handle @cardgames {
             # Compress all data
             encode
             header {
@@ -1134,10 +1130,10 @@ in
               }
               EOF
             file_server
-          '';
-        };
-        "local.zandoodle.me.uk" = {
-          extraConfig = ''
+          }
+
+          @local host local.zandoodle.me.uk
+          handle @local {
             @denied not {
               client_ip private_ranges fe80::/10
               not client_ip 192.168.1.1
@@ -1150,73 +1146,12 @@ in
               Cross-Origin-Resource-Policy same-origin
               X-Frame-Options DENY
               Referrer-Policy no-referrer
-            };
+            }
             respond "This is a test of config ${inputs.self}"
-          '';
-        };
-        "mta-sts.compsoc-dev.com" = {
-          extraConfig = ''
-            header {
-              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-              X-Content-Type-Options nosniff
-              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-              Cross-Origin-Resource-Policy same-origin
-              X-Frame-Options DENY
-              Referrer-Policy no-referrer
-            };
-            respond /.well-known/mta-sts.txt <<EOF
-              version: STSv1
-              mode: enforce
-              max_age: 31557600
-              mx: mail.zandoodle.me.uk
+          }
 
-              EOF
-          '';
-        };
-        "mta-sts.mail.zandoodle.me.uk" = {
-          extraConfig = ''
-            header {
-              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-              X-Content-Type-Options nosniff
-              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-              Cross-Origin-Resource-Policy same-origin
-              X-Frame-Options DENY
-              Referrer-Policy no-referrer
-            };
-            respond /.well-known/mta-sts.txt <<EOF
-              version: STSv1
-              mode: enforce
-              max_age: 31557600
-              mx: mail.zandoodle.me.uk
-
-              EOF
-          '';
-        };
-        "mta-sts.zandoodle.me.uk" = {
-          extraConfig = ''
-            header {
-              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-              X-Content-Type-Options nosniff
-              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-              Cross-Origin-Resource-Policy same-origin
-              X-Frame-Options DENY
-              Referrer-Policy no-referrer
-            };
-            respond /.well-known/mta-sts.txt <<EOF
-              version: STSv1
-              mode: enforce
-              max_age: 31557600
-              mx: mail.zandoodle.me.uk
-
-              EOF
-          '';
-        };
-        "ollama.compsoc-dev.com" = {
-          extraConfig = ''
-            @denied not {
-              client_ip private_ranges 100.64.0.0/10
-            }
-            abort @denied
+          @mta-sts host mta-sts.*.zandoodle.me.uk mta-sts.zandoodle.me.uk
+          handle @mta-sts {
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
               X-Content-Type-Options nosniff
@@ -1225,13 +1160,81 @@ in
               X-Frame-Options DENY
               Referrer-Policy no-referrer
             }
+            respond /.well-known/mta-sts.txt <<EOF
+              version: STSv1
+              mode: enforce
+              max_age: 31557600
+              mx: mail.zandoodle.me.uk
 
-            respond /api/pull "You can't pull models" 403
-            respond /api/delete "You can't delete models" 403
+              EOF
+          }
 
-            reverse_proxy unix//run/ollama {
-              header_up Host 127.0.0.1
+          handle {
+            abort
+          }
+        '';
+        "compsoc-dev.com" = {
+          extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
             }
+            # Enable compression
+            encode
+
+            header {
+              # Add a restrictive Content Security Policy
+              Content-Security-Policy "default-src 'none'; img-src https://compsoc-dev.com/full-transparent.webp https://compsoc-dev.com/TPP.png; style-src https://compsoc-dev.com/index_final.css https://compsoc-dev.com/about_final.css; font-src https://compsoc-dev.com/orbitron.woff2 https://compsoc-dev.com/poppins.woff2 https://compsoc-dev.com/poppins-light.woff2; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+
+              # Add a Cross Origin Resource Policy
+              Cross-Origin-Resource-Policy: same-origin
+
+              # Make browsers not send a referrer header when following links
+              Referrer-Policy no-referrer
+
+              # Force HTTPS use on this domain and all subdomains
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              # Disable content sniffing (detecion of javascript)
+              X-Content-Type-Options nosniff
+              # Disable this content being inside a frame
+              X-Frame-Options DENY
+            };
+            root * ${compsoc-website}
+
+            # Add a security.txt file
+            respond /.well-known/security.txt <<EOF
+              Contact: https://github.com/MaxHearnden/Compsoc-Website-cobalt/issues
+              Expires: 2026-07-15T20:03:40+01:00
+
+              EOF
+            file_server
+          '';
+        };
+        "zandoodle.me.uk" = {
+          extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            }
+            header {
+              # Add a Cross Origin Resource Policy
+              Cross-Origin-Resource-Policy same-origin
+
+              # Force HTTPS use on this domain and all subdomains
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+              # Disable content sniffing (detecion of javascript)
+              X-Content-Type-Options nosniff
+
+              # Disable this content being inside a frame
+              X-Frame-Options DENY
+
+              # Make browsers not send a referrer header when following links
+              Referrer-Policy no-referrer
+
+              # Add a restrictive Content Security Policy
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+            };
+
+            respond "This is a test of config ${inputs.self}"
           '';
         };
       };
@@ -1618,7 +1621,7 @@ in
             zonefile-sync = -1;
           }
           {
-            acl = [ "transfer" "maddy-acme" ];
+            acl = [ "knot-ds" "transfer" "maddy-acme" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
