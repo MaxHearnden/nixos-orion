@@ -266,6 +266,7 @@ in
         _acme-challenge.mta-sts.mail cname _acme-challenge
         wss.cardgames cname @
         _acme-challenge.wss.cardgames cname _acme-challenge
+        _acme-challenge.local cname _acme-challenge
 
         ; Setup certificate authority restrictions for this domain
         @ CAA 0 issuemail ";"
