@@ -227,6 +227,9 @@ in
         _acme-challenge ds 38839 13 2 FBDF78C60EF2B1759C14FA4FA82EA1D29E2A513DD9456D1362FA85CB77DBD152
         _acme-challenge ns dns
 
+        _acme-challenge.mail cds 53558 13 2 2E2AE00E05044C39CB91B19DBF07CD602E60D2941AB11DB831ABD7558EC65D5A
+        _acme-challenge.mail ns dns
+
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
@@ -1331,7 +1334,7 @@ in
           {
             # Allow caddy to modify TXT records in _acme-challenge domains
             id = "caddy-acme";
-            address = [ "127.0.0.1" "::1" ];
+            address = "127.0.0.1";
             action = "update";
             key = "caddy";
             update-owner = "zone";
@@ -1349,6 +1352,7 @@ in
             update-owner-match = "equal";
             update-owner-name = [
               "_acme-challenge"
+              "_acme-challenge.mail"
             ];
             update-type = "DS";
           }
@@ -1357,14 +1361,8 @@ in
             id = "maddy-acme";
             address = "127.0.0.1";
             action = "update";
-            key = [ "maddy" ];
-            update-owner = "name";
-            update-owner-match = "equal";
-            update-owner-name = [
-              "_acme-challenge.imap.zandoodle.me.uk."
-              "_acme-challenge.mail.zandoodle.me.uk."
-              "_acme-challenge.smtp.zandoodle.me.uk."
-            ];
+            key = "maddy";
+            update-owner = "zone";
             update-type = "TXT";
           }
           {
@@ -1577,6 +1575,19 @@ in
           }
           {
             # Add a zone for ACME challenges
+            acl = [ "maddy-acme" "transfer" ];
+            dnssec-policy = "acme-challenge";
+            dnssec-signing = true;
+            domain = "_acme-challenge.mail.zandoodle.me.uk";
+            file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
+            semantic-checks = true;
+            journal-content = "all";
+            zonefile-load = "difference-no-serial";
+            zonemd-generate = "zonemd-sha512";
+            zonefile-sync = -1;
+          }
+          {
+            # Add a zone for ACME challenges
             acl = [ "caddy-acme" "transfer" ];
             dnssec-policy = "acme-challenge";
             dnssec-signing = true;
@@ -1658,6 +1669,7 @@ in
             server "127.0.0.1:54"
           }
           hostname imap.zandoodle.me.uk
+          override_domain mail.zandoodle.me.uk
         }
         tls.loader.acme smtp {
           agreed
@@ -1667,6 +1679,7 @@ in
             server "127.0.0.1:54"
           }
           hostname smtp.zandoodle.me.uk
+          override_domain mail.zandoodle.me.uk
         }
         auth.pass_table local_authdb {
           table sql_table {
