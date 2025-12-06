@@ -788,7 +788,7 @@ in
               X-Content-Type-Options nosniff
               # Disable this content being inside a frame
               X-Frame-Options DENY
-            };
+            }
             root * ${compsoc-website}
 
             # Add a security.txt file
@@ -820,7 +820,7 @@ in
 
               # Add a restrictive Content Security Policy
               Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-            };
+            }
 
             respond "This is a test of config ${inputs.self}"
           '';
@@ -845,7 +845,7 @@ in
 
               # Add a restrictive Content Security Policy
               Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-            };
+            }
 
             # Forward all requests to the VM
             reverse_proxy 192.168.2.2:80
@@ -1153,7 +1153,7 @@ in
               Cross-Origin-Resource-Policy same-origin
               X-Frame-Options DENY
               Referrer-Policy no-referrer
-            };
+            }
             respond "This is a test of config ${inputs.self}"
           '';
         };
@@ -1166,7 +1166,7 @@ in
               Cross-Origin-Resource-Policy same-origin
               X-Frame-Options DENY
               Referrer-Policy no-referrer
-            };
+            }
             respond /.well-known/mta-sts.txt <<EOF
               version: STSv1
               mode: enforce
@@ -1185,7 +1185,7 @@ in
               Cross-Origin-Resource-Policy same-origin
               X-Frame-Options DENY
               Referrer-Policy no-referrer
-            };
+            }
             respond /.well-known/mta-sts.txt <<EOF
               version: STSv1
               mode: enforce
@@ -1204,7 +1204,7 @@ in
               Cross-Origin-Resource-Policy same-origin
               X-Frame-Options DENY
               Referrer-Policy no-referrer
-            };
+            }
             respond /.well-known/mta-sts.txt <<EOF
               version: STSv1
               mode: enforce
