@@ -1376,6 +1376,22 @@ in
             action = "transfer";
           }
         ];
+        mod-queryacl = [
+          {
+            id = "local";
+            address = [
+              "10.0.0.0/8"
+              "100.64.0.0/10"
+              "127.0.0.0/8"
+              "169.254.0.0/16"
+              "192.168.0.0/16"
+              "172.16.0.0/12"
+              "::1/128"
+              "fc00::/7"
+              "fe80::/10"
+            ];
+          }
+        ];
         policy = [
           {
             # Add a DNSSEC policy with a short rrsig lifetime and DS verfiication using unbound
@@ -1386,6 +1402,41 @@ in
           }
         ];
         remote = [
+          {
+            id = "b.root-servers.net";
+            address = [
+              "199.9.14.201"
+              "2001:500:200::b"
+            ];
+          }
+          {
+            id = "c.root-servers.net";
+            address = [
+              "192.33.4.12"
+              "2001:500:2::c"
+            ];
+          }
+          {
+            id = "d.root-servers.net";
+            address = [
+              "199.7.91.13"
+              "2001:500:2d::d"
+            ];
+          }
+          {
+            id = "f.root-servers.net";
+            address = [
+              "192.5.5.241"
+              "2001:500:2f::f"
+            ];
+          }
+          {
+            id = "g.root-servers.net";
+            address = [
+              "192.112.36.4"
+              "2001:500:12::d0d"
+            ];
+          }
           {
             id = "hetzner1";
             address = [
@@ -1405,8 +1456,48 @@ in
             ];
           }
           {
+            id = "k.root-servers.net";
+            address = [
+              "193.0.14.129"
+              "2001:7fd::1"
+            ];
+          }
+          {
             id = "unbound";
             address = "127.0.0.1@55";
+          }
+          {
+            id = "xfr.cjr.dns.icann.org";
+            address = [
+              "192.0.47.132"
+              "2620:0:2830:202::132"
+            ];
+          }
+          {
+            id = "xfr.lax.dns.icann.org";
+            address = [
+              "192.0.32.132"
+              "2620:0:2d0:202::132"
+            ];
+          }
+        ];
+        remotes = [
+          {
+            id = "hetzner";
+            remote = [ "hetzner1" "hetzner2" "hetzner3" ];
+          }
+          {
+            id = "root-servers";
+            remote = [
+              "b.root-servers.net"
+              "c.root-servers.net"
+              "d.root-servers.net"
+              "f.root-servers.net"
+              "g.root-servers.net"
+              "k.root-servers.net"
+              "xfr.cjr.dns.icann.org"
+              "xfr.lax.dns.icann.org"
+            ];
           }
         ];
         server = {
@@ -1440,6 +1531,15 @@ in
           }
         ];
         zone = [
+          # Serve a copy of the root zone
+          {
+            acl = [ "transfer" ];
+            dnssec-validation = true;
+            domain = ".";
+            master = "root-servers";
+            module = "mod-queryacl/local";
+            zonemd-verify = true;
+          }
           {
             # Add a domain for DNSSEC testing
             acl = [ "transfer" ];
@@ -1465,11 +1565,7 @@ in
             dnssec-signing = true;
             domain = "compsoc-dev.com";
             file = "/etc/knot/compsoc-dev.com.zone";
-            notify = [
-              "hetzner1"
-              "hetzner2"
-              "hetzner3"
-            ];
+            notify = "hetzner";
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
@@ -1482,11 +1578,7 @@ in
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
             file = "/etc/knot/zandoodle.me.uk.zone";
-            notify = [
-              "hetzner1"
-              "hetzner2"
-              "hetzner3"
-            ];
+            notify = "hetzner";
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
@@ -1706,33 +1798,6 @@ in
       # Don't modify /etc/resolv.conf
       resolveLocalQueries = false;
       settings = {
-        auth-zone = {
-          fallback-enabled = true;
-          for-downstream = false;
-          for-upstream = true;
-          name = ".";
-          primary = [
-            "199.9.14.201"         # b.root-servers.net
-            "192.33.4.12"          # c.root-servers.net
-            "199.7.91.13"          # d.root-servers.net
-            "192.5.5.241"          # f.root-servers.net
-            "192.112.36.4"         # g.root-servers.net
-            "193.0.14.129"         # k.root-servers.net
-            "192.0.47.132"         # xfr.cjr.dns.icann.org
-            "192.0.32.132"         # xfr.lax.dns.icann.org
-            "2001:500:200::b"      # b.root-servers.net
-            "2001:500:2::c"        # c.root-servers.net
-            "2001:500:2d::d"       # d.root-servers.net
-            "2001:500:2f::f"       # f.root-servers.net
-            "2001:500:12::d0d"     # g.root-servers.net
-            "2001:7fd::1"          # k.root-servers.net
-            "2620:0:2830:202::132" # xfr.cjr.dns.icann.org
-            "2620:0:2d0:202::132"  # xfr.lax.dns.icann.org
-          ];
-          zonefile = "/var/lib/unbound/root.zone";
-          zonemd-check = true;
-          zonemd-reject-absence = true;
-        };
         server = {
           # Allow queries from local devices
           access-control = [
@@ -1824,6 +1889,12 @@ in
           val-log-level = 2;
         };
         stub-zone = [
+          # Use the local root instance
+          {
+            name = ".";
+            stub-addr = "127.0.0.1@54";
+            stub-first = true;
+          }
           {
             # Query knot for zandoodle.me.uk
             name = "zandoodle.me.uk";
