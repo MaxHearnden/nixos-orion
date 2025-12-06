@@ -132,7 +132,9 @@ in
         ; Advertise our public IP address as the IP address for compsoc-dev.com
         $INCLUDE /var/lib/ddns/zonefile
         mta-sts cname @
+        _acme-challenge.mta-sts cname _acme-challenge.zandoodle.me.uk.
         ollama cname local-tailscale.zandoodle.me.uk.
+        _acme-challenge.ollama cname _acme-challenge.zandoodle.me.uk.
         _tcp.ollama dname _tcp.zandoodle.me.uk.
 
         ; Setup certificate authority restrictions
@@ -253,11 +255,17 @@ in
         $INCLUDE /var/lib/ddns/zonefile mail.zandoodle.me.uk.
 
         imap cname local-tailscale
+        _acme-challenge.imap cname _acme-challenge.mail
         smtp cname local-tailscale
+        _acme-challenge.smtp cname _acme-challenge.mail
         cardgames cname @
+        _acme-challenge.cardgames cname _acme-challenge
         mta-sts cname @
+        _acme-challenge.mta-sts cname _acme-challenge
         mta-sts.mail cname @
+        _acme-challenge.mta-sts.mail cname _acme-challenge
         wss.cardgames cname @
+        _acme-challenge.wss.cardgames cname _acme-challenge
 
         ; Setup certificate authority restrictions for this domain
         @ CAA 0 issuemail ";"
@@ -748,7 +756,7 @@ in
         acme_ca "https://acme-v02.api.letsencrypt.org/directory"
 
         # Add credentials to change TXT records at the _acme-challenge subdomains
-        acme_dns rfc2136 {
+        dns rfc2136 {
           key_name {file./run/credentials/caddy.service/tsig-id}
           key_alg {file./run/credentials/caddy.service/tsig-algorithm}
           key {file./run/credentials/caddy.service/tsig-secret}
@@ -769,6 +777,9 @@ in
       virtualHosts = {
         "compsoc-dev.com" = {
           extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            }
             # Enable compression
             encode
 
@@ -827,6 +838,9 @@ in
         };
         "wss.cardgames.zandoodle.me.uk" = {
           extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            }
             header {
               # Add a Cross Origin Resource Policy
               Cross-Origin-Resource-Policy same-origin
@@ -853,6 +867,9 @@ in
         };
         "cardgames.zandoodle.me.uk" = {
           extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            }
             # Compress all data
             encode
             header {
@@ -1141,6 +1158,9 @@ in
         };
         "local.zandoodle.me.uk" = {
           extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            }
             @denied not {
               client_ip private_ranges fe80::/10
               not client_ip 192.168.1.1
@@ -1159,6 +1179,9 @@ in
         };
         "mta-sts.compsoc-dev.com" = {
           extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
               X-Content-Type-Options nosniff
@@ -1178,6 +1201,9 @@ in
         };
         "mta-sts.mail.zandoodle.me.uk" = {
           extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
               X-Content-Type-Options nosniff
@@ -1197,6 +1223,9 @@ in
         };
         "mta-sts.zandoodle.me.uk" = {
           extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
               X-Content-Type-Options nosniff
@@ -1216,6 +1245,9 @@ in
         };
         "ollama.compsoc-dev.com" = {
           extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            }
             @denied not {
               client_ip private_ranges 100.64.0.0/10
             }
@@ -1629,7 +1661,7 @@ in
             zonefile-sync = -1;
           }
           {
-            acl = [ "transfer" "maddy-acme" ];
+            acl = [ "knot-ds" "transfer" ];
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
