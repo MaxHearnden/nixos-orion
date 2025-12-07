@@ -95,7 +95,7 @@ in
         addAction(AllRule(), PoolAction("auth"))
       '';
       "knot/acme-challenge.zandoodle.me.uk.zone".text = ''
-        @ soa dns.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3660 604800 86400
+        @ soa dns.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3600 604800 86400
         @ ns dns.zandoodle.me.uk.
       '';
       "knot/bogus.zandoodle.me.uk.zone".text = ''
