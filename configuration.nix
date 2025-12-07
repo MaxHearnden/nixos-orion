@@ -123,11 +123,16 @@ in
         ; Advertise DANE
         _tcp dname _tcp.zandoodle.me.uk.
 
-        ; Setup DMARC and SPF for this domain
-        @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
+        ; Setup mail for this domain
         @ mx 10 mail.zandoodle.me.uk.
+        @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
         _dmarc cname _dmarc.zandoodle.me.uk.
         _mta-sts cname _mta-sts.zandoodle.me.uk.
+        _mta-sts.mail cname _mta-sts.zandoodle.me.uk.
+        mail mx 10 mail.zandoodle.me.uk.
+        mail txt "v=spf1 mx -all"
+        mta-sts.mail cname @
+        _acme-challenge.mta-sts.mail cname _acme-challenge.zandoodle.me.uk.
 
         ; Advertise our public IP address as the IP address for compsoc-dev.com
         $INCLUDE /var/lib/ddns/zonefile
@@ -155,6 +160,7 @@ in
         @ ns robotns3.second-ns.com.
 
         default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs9i5JfSz0iOz0L5xG9OwO8N9bdhY+YT+Hq3AVCupqZmp487NTem0yoPEgfZDqVxGaTFVdCxAMhHHvv08jo6U5Cmubumo8HHGzwvYJux9CCWcbUFlr3994Avs04O5sDSXmeDDuG9rGZmepy0r+Gly0brAKEv6UxM2l1HnBB2qabkCzYUamc9TyH8BUM9PIj3RWVEO/FHo8XjYxwrMLd22inHQ8wAORc3ERXqEEe/XgaxnWmD4ledoqRF8imcmqClXN+2f7+WvsJo+/ovi5Oh7+8WfLyx9KVWwjWHPgd6a9Dm/ArSjiZbzR+DpynQZi+AvUXIxBpeQXlvofl0W+479pwIDAQAB"
+        default._domainkey.mail txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw+wMyRqY5sX/bHyuyYlSHM3N0tEqoCV6zQnSjMwCrxoETQsBx6ceXvFmEW1JCE9rp2l+DVDFk9IUVhvMUqHfC+NBKDojqX7PX4gNHrP+E6wkmPRuNzff07dHMSRat1pugpleP9oJgffJBjpGh/YpROsDbpOhlggd5gQjkgP2hH6JsrEwPtdRA/VBqGi6fonSpP9aWB19GVEKAx1xnpaZy991mzcpPSGhXXlOLXM6tgDthBEk0KCcJ3nKoIzbiDRc9oWRlyBxfOND2DYiDMVV02D2ykswCGb5GKhJ4Dy6KbFr9jbUo4h8zdN765P52Phd+tddDOVCbA9xyUI4rTZmkwIDAQAB"
 
         flag-0be5c4b29b type65534 \# 0
         flag-0be5c4b29b txt "v=spf1 -all"
@@ -1200,6 +1206,28 @@ in
               EOF
           '';
         };
+        "mta-sts.mail.compsoc-dev.com" = {
+          extraConfig = ''
+            tls {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            }
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            }
+            respond /.well-known/mta-sts.txt <<EOF
+              version: STSv1
+              mode: enforce
+              max_age: 31557600
+              mx: mail.zandoodle.me.uk
+
+              EOF
+          '';
+        };
         "mta-sts.mail.zandoodle.me.uk" = {
           extraConfig = ''
             tls {
@@ -1699,7 +1727,7 @@ in
             server "127.0.0.1:54"
           }
           hostname imap.zandoodle.me.uk
-          override_domain mail.zandoodle.me.uk
+          override_domain _acme-challenge.mail.zandoodle.me.uk
         }
         tls.loader.acme smtp {
           agreed
@@ -1709,7 +1737,7 @@ in
             server "127.0.0.1:54"
           }
           hostname smtp.zandoodle.me.uk
-          override_domain mail.zandoodle.me.uk
+          override_domain _acme-challenge.mail.zandoodle.me.uk
         }
         auth.pass_table local_authdb {
           table sql_table {
@@ -1736,6 +1764,11 @@ in
           optional_step static {
             entry max@zandoodle.me.uk *
           }
+        }
+
+        table.chain sender_rewriting {
+          optional_step regexp "(.+)@mail.(.+)" "$1@$2"
+          step regexp "(.+)@(.+)" "$1@mail.$2"
         }
 
         msgpipeline local_routing {
@@ -1793,7 +1826,7 @@ in
 
             modify {
               dkim $(local_domains) default
-              replace_sender regexp "(.+)@(.+)" "$1@mail.zandoodle.me.uk"
+              replace_sender &sender_rewriting
             }
 
             destination postmaster $(local_domains) {
@@ -1854,6 +1887,7 @@ in
       localDomains = [
         "$(primary_domain)"
         "compsoc-dev.com"
+        "mail.compsoc-dev.com"
         "mail.zandoodle.me.uk"
       ];
       package = pkgs.maddy.overrideAttrs (
