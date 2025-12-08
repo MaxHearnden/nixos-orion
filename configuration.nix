@@ -2698,9 +2698,6 @@ in
             /run/ddns/zonefile /run/ddns/local-zonefile /run/ddns/local-guest-zonefile /run/ddns/zonefile-ipv6-only /run/ddns/local-tailscale-zonefile /var/lib/ddns/
         '';
         unitConfig.StartLimitIntervalSec = "20m";
-
-        # Start on boot
-        wantedBy = ["multi-user.target"];
       };
       knot.serviceConfig = {
         # Get the TSIG credentials for caddy
@@ -3101,6 +3098,8 @@ in
     };
     timers.get-IP-address = {
       timerConfig = {
+        # Start the unit on boot
+        OnBootSec = "0";
         OnUnitActiveSec = "1h";
       };
       wantedBy = [ "timers.target" ];
