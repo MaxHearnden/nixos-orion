@@ -1795,12 +1795,14 @@ in
             reject 501 5.1.8 "Use Submission for outgoing SMTP"
           }
 
-          source spameri@tiscali.it {
-            reject
-          }
-
           default_source {
-            deliver_to &local_routing
+            destination $(local_domains) {
+              deliver_to &local_routing
+            }
+
+            default_destination {
+              reject
+            }
           }
         }
 
