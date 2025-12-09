@@ -1402,7 +1402,7 @@ in
               "127.0.0.1"
               "::1"
             ];
-            action = [ "transfer" "update" ];
+            action = [ "query" "update" ];
             key = "knot-ds";
             update-owner = "name";
             update-owner-match = "equal";
