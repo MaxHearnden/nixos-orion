@@ -233,10 +233,8 @@ in
         _submissions._tcp SRV 0 10 465 smtp
         _submission._tcp SRV 0 10 587 smtp
 
-        _acme-challenge ds 37066 13 2 c758eaaefc1f369c9eca663a14ee798fa565114a54c17cba89ae3a2856727d69
         _acme-challenge ns dns
 
-        _acme-challenge.mail ds 53558 13 2 2E2AE00E05044C39CB91B19DBF07CD602E60D2941AB11DB831ABD7558EC65D5A
         _acme-challenge.mail ns dns
 
         $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
@@ -1404,7 +1402,7 @@ in
               "127.0.0.1"
               "::1"
             ];
-            action = "update";
+            action = [ "transfer" "update" ];
             key = "knot-ds";
             update-owner = "name";
             update-owner-match = "equal";
@@ -1477,6 +1475,8 @@ in
             ds-push = "knot-ds-push";
             id = "acme-challenge";
             ksk-submission = "unbound";
+            ksk-lifetime = "14d";
+            propagation-delay = "1d";
             single-type-signing = true;
           }
         ];
@@ -1611,7 +1611,7 @@ in
           }
           {
             id = "acme-challenge";
-            parent = [ "unbound" "hetzner" ];
+            parent = [ "unbound" "knot-ds-push" "hetzner" ];
           }
         ];
         template = [
@@ -1641,6 +1641,7 @@ in
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
+            zonefile-skip = "TXT";
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
           }
@@ -1654,6 +1655,7 @@ in
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
+            zonefile-skip = "TXT";
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
           }
@@ -1699,6 +1701,7 @@ in
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
+            zonefile-skip = "DS";
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
           }
