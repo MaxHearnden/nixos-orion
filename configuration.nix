@@ -204,6 +204,11 @@ in
         @ TXT "v=spf1 -all"
         @ MX 0 .
       '';
+      "knot/rDNS.zone".text = ''
+        $TTL 600
+        @ soa local.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 1200 180 1209600 600
+        @ ns local.zandoodle.me.uk.
+      '';
       "knot/zandoodle.me.uk.zone".text = ''
         $TTL 600
         @ SOA dns hostmaster 0 14400 3600 604800 86400
@@ -1425,14 +1430,6 @@ in
             # Allow a zone transfer from local devices
             id = "transfer";
             address = [
-              # Hetzner DNS servers
-              "213.239.242.238"
-              "213.133.100.103"
-              "193.47.99.3"
-              "2a01:4f8:0:a101::a:1"
-              "2a01:4f8:0:1::5ddc:2"
-              "2001:67c:192c::add:a3"
-
               "10.0.0.0/8"
               "100.64.0.0/10"
               "127.0.0.0/8"
@@ -1487,6 +1484,7 @@ in
               "2001:500:200::b"
               "199.9.14.201"
             ];
+            automatic-acl = false;
           }
           {
             id = "c.root-servers.net";
@@ -1494,6 +1492,7 @@ in
               "2001:500:2::c"
               "192.33.4.12"
             ];
+            automatic-acl = false;
           }
           {
             id = "d.root-servers.net";
@@ -1501,6 +1500,15 @@ in
               "2001:500:2d::d"
               "199.7.91.13"
             ];
+            automatic-acl = false;
+          }
+          {
+            id = "dnsmasq";
+            address = [
+              "::1@56"
+              "127.0.0.1@56"
+            ];
+            automatic-acl = false;
           }
           {
             id = "f.root-servers.net";
@@ -1508,6 +1516,7 @@ in
               "2001:500:2f::f"
               "192.5.5.241"
             ];
+            automatic-acl = false;
           }
           {
             id = "g.root-servers.net";
@@ -1515,6 +1524,7 @@ in
               "2001:500:12::d0d"
               "192.112.36.4"
             ];
+            automatic-acl = false;
           }
           {
             id = "hetzner1";
@@ -1540,6 +1550,7 @@ in
               "2001:7fd::1"
               "193.0.14.129"
             ];
+            automatic-acl = false;
           }
           {
             id = "knot-ds-push";
@@ -1548,10 +1559,12 @@ in
               "127.0.0.1@54"
             ];
             key = "knot-ds";
+            automatic-acl = false;
           }
           {
             id = "unbound";
             address = "127.0.0.1@55";
+            automatic-acl = false;
           }
           {
             id = "xfr.cjr.dns.icann.org";
@@ -1559,6 +1572,7 @@ in
               "2620:0:2830:202::132"
               "192.0.47.132"
             ];
+            automatic-acl = false;
           }
           {
             id = "xfr.lax.dns.icann.org";
@@ -1566,6 +1580,7 @@ in
               "2620:0:2d0:202::132"
               "192.0.32.132"
             ];
+            automatic-acl = false;
           }
         ];
         remotes = [
@@ -1588,6 +1603,9 @@ in
           }
         ];
         server = {
+          # Allow secondary servers to transfer zones from this server
+          automatic-acl = true;
+
           # Set an identity for id.server queries
           identity = "dns.zandoodle.me.uk";
 
@@ -1620,6 +1638,17 @@ in
             # Add DNS cookies and rate limiting
             global-module = ["mod-cookies" "mod-rrl"];
           }
+          {
+            acl = [ "transfer" ];
+            id = "rDNS";
+            file = "/etc/knot/rDNS.zone";
+            module = [ "mod-queryacl/local" ];
+            reverse-generate = [ "home.arpa" ];
+            semantic-checks = true;
+            journal-content = "all";
+            zonefile-load = "difference-no-serial";
+            zonefile-sync = -1;
+          }
         ];
         zone = [
           {
@@ -1631,6 +1660,10 @@ in
             master = "root-servers";
             module = "mod-queryacl/local";
             zonemd-verify = true;
+          }
+          {
+            template = "rDNS";
+            domain = "168.192.in-addr.arpa";
           }
           {
             # Add a zone for ACME challenges
@@ -1691,6 +1724,17 @@ in
             zonefile-load = "difference-no-serial";
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
+          }
+          {
+            template = "rDNS";
+            domain = "d.f.ip6.arpa";
+          }
+          {
+            acl = [ "transfer" ];
+            domain = "home.arpa";
+            ixfr-from-axfr = true;
+            master = "dnsmasq";
+            module = "mod-queryacl/local";
           }
           {
             acl = [ "knot-ds" "transfer" ];
@@ -2732,6 +2776,7 @@ in
           "letsencrypt.zone.include"
           "letsencrypt-dane.zone.include"
           "no-email.zone.include"
+          "rDNS.zone"
           "zandoodle.me.uk.zone"
         ];
         serviceConfig = {
