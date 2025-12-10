@@ -1627,6 +1627,7 @@ in
             acl = [ "transfer" ];
             dnssec-validation = true;
             domain = ".";
+            ixfr-from-axfr = true;
             master = "root-servers";
             module = "mod-queryacl/local";
             zonemd-verify = true;
