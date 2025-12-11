@@ -219,8 +219,8 @@ in
         workstation.zerotier.max aaaa fd80:56c2:e21c:3d4b:c99:93c5:d88:e258
         workstation.zerotier.max aaaa fc9c:6b89:eec5:d88:e258::1
         orion ns local.zandoodle.me.uk.
-        vodafone 192.168.1.1
-        vodafone-guest 192.168.5.1
+        vodafone a 192.168.1.1
+        vodafone-guest a 192.168.5.1
       '';
       "knot/letsencrypt.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {
