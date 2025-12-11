@@ -54,6 +54,7 @@ in
     # Use systemd-boot as the bootloader
     loader.systemd-boot.enable = true;
   };
+  # Save several minutes per rebuild
   documentation.man.generateCaches = false;
   environment = {
     sessionVariables.SYSTEMD_EDITOR = "nvim";
@@ -64,6 +65,30 @@ in
         addLocal("0.0.0.0:53")
         addLocal("[::]:53")
 
+        local private_addresses = newNMG()
+        private_addresses:addMask("127.0.0.0/8")
+        private_addresses:addMask("10.0.0.0/8")
+        private_addresses:addMask("100.64.0.0/10")
+        private_addresses:addMask("169.254.0.0/16")
+        private_addresses:addMask("192.168.0.0/16")
+        private_addresses:addMask("172.16.0.0/12")
+        private_addresses:addMask("::1/128")
+        private_addresses:addMask("fc00::/7")
+        private_addresses:addMask("fe80::/10")
+
+        local apex_domains = newDNSNameSet()
+        apex_domains:add(newDNSName("zandoodle.me.uk"))
+        apex_domains:add(newDNSName("compsoc-dev.com"))
+
+        -- Make sure the query is for a public zone
+        local public_zone_rule = AndRule({
+          QNameSuffixRule({"zandoodle.me.uk", "compsoc-dev.com"}),
+          NotRule(AndRule({
+            QNameSetRule(apex_domains),
+            QTypeRule(DNSQType.DS),
+          })),
+        })
+
         -- Add local DNS servers
         newServer({address = "127.0.0.1:54", name = "knot-dns", pool = "auth", healthCheckMode = "lazy"})
         newServer({address = "127.0.0.1:55", name = "unbound", pool = "iterative", healthCheckMode = "lazy"})
@@ -73,27 +98,41 @@ in
         setACL({"0.0.0.0/0", "::/0"})
 
         -- Forward recursive queries to the recursive resolver (unbound)
-        addAction(AndRule({RDRule(), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("iterative"))
-
-        -- Forward local queries for home.arpa and associated rDNS domains to dnsmasq
-        addAction(AndRule({QNameSuffixRule({"home.arpa", "168.192.in-addr.arpa", "d.f.ip6.arpa"}), NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"})}), PoolAction("dnsmasq"))
-
-        -- Filter out non-local zone transfers
-        addAction(AndRule({OrRule({QTypeRule(DNSQType.AXFR), QTypeRule(DNSQType.IXFR)}), NotRule(NetmaskGroupRule({"127.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "169.254.0.0/16", "192.168.0.0/16", "172.16.0.0/12", "::1/128", "fc00::/7", "fe80::/10"}))}), DropAction())
+        addAction(AndRule({RDRule(), NetmaskGroupRule(private_addresses)}), PoolAction("iterative"))
 
         -- Provide some rate limiting
         addAction(
           AndRule({
             TCPRule(false),
             OrRule({
-              NotRule(QNameSuffixRule({"zandoodle.me.uk", "compsoc-dev.com"})),
+              QClassRule(DNSClass.CHAOS),
               MaxQPSIPRule(5),
             }),
           }),
           TCAction())
 
+        -- Allow Hetzner to transfer from this server
+        local axfr_addresses = newNMG()
+        axfr_addresses:addNMG(private_addresses)
+        axfr_addresses:addMask("2a01:4f8:0:a101::a:1/128")
+        axfr_addresses:addMask("2a01:4f8:0:1::5ddc:2/128")
+        axfr_addresses:addMask("2001:67c:192c::add:a3/128")
+
+        addAction(
+          AndRule({
+            OrRule({QTypeRule(DNSQType.AXFR), QTypeRule(DNSQType.IXFR)}),
+            NotRule(NetmaskGroupRule(axfr_addresses)),
+          }),
+          DropAction())
+
         -- Forward all remaining queries to the authoritative DNS server (knot)
-        addAction(AllRule(), PoolAction("auth"))
+        addAction(
+          OrRule({
+            NetmaskGroupRule(private_addresses),
+            public_zone_rule,
+            QClassRule(DNSClass.CHAOS),
+          }),
+          PoolAction("auth"))
       '';
       "knot/acme-challenge.zandoodle.me.uk.zone".text = ''
         @ soa dns.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3600 604800 86400
