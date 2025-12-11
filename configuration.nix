@@ -2153,21 +2153,21 @@ in
             stub-no-cache = true;
           }
           {
-            # Query dnsmasq for home.arpa
+            # Query knot for home.arpa
             name = "home.arpa";
-            stub-addr = "127.0.0.1@56";
+            stub-addr = "127.0.0.1@54";
             stub-no-cache = true;
           }
           {
-            # Query dnsmasq for 168.192.in-addr.arpa (192.168.0.0/16)
+            # Query knot for 168.192.in-addr.arpa (192.168.0.0/16)
             name = "168.192.in-addr.arpa";
-            stub-addr = "127.0.0.1@56";
+            stub-addr = "127.0.0.1@54";
             stub-no-cache = true;
           }
           {
-            # Query dnsmasq for d.f.ip6.arpa (fd00::/8)
+            # Query knot for d.f.ip6.arpa (fd00::/8)
             name = "d.f.ip6.arpa";
-            stub-addr = "127.0.0.1@56";
+            stub-addr = "127.0.0.1@54";
             stub-no-cache = true;
           }
         ];
