@@ -54,6 +54,7 @@ in
     # Use systemd-boot as the bootloader
     loader.systemd-boot.enable = true;
   };
+  documentation.man.generateCaches = false;
   environment = {
     sessionVariables.SYSTEMD_EDITOR = "nvim";
     etc = {
@@ -169,6 +170,16 @@ in
         @ TXT "google-site-verification=oZJUabY5f9TzTiPw8Ml-k8GrRILLRbITIEF8eamsLY4"
 
         _acme-challenge cname _acme-challenge.zandoodle.me.uk.
+      '';
+      "knot/home.arpa.zone".text = ''
+        $TTL 600
+        @ soa local.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 1200 180 1209600 600
+        @ ns local.zandoodle.me.uk.
+        max ns workstation.zerotier.max.home.arpa.
+        workstation.zerotier.max a 172.28.10.244
+        workstation.zerotier.max aaaa fd80:56c2:e21c:3d4b:c99:93c5:d88:e258
+        workstation.zerotier.max aaaa fc9c:6b89:eec5:d88:e258::1
+        orion ns local.zandoodle.me.uk.
       '';
       "knot/letsencrypt.zone.include".source =
         pkgs.callPackage ./gen-TLSA.nix {
@@ -1316,8 +1327,10 @@ in
 
         # Be authoritative for queries on localhost with the SOA mname (master server) set to local.zandoodle.me.uk
         auth-server = "local.zandoodle.me.uk,192.168.1.201,::1,127.0.0.1";
+        # Set the email address for the zone
+        auth-soa = "0,hostmaster.zandoodle.me.uk";
         # Be authoritative for home.arpa and the associated rDNS zones.
-        auth-zone = "home.arpa,192.168.0.0/16,fd00::/8";
+        auth-zone = "orion.home.arpa,192.168.0.0/16,fd00::/8";
         # Bind to configured interfaces as they appear
         bind-dynamic = true;
         # Respect any DHCP lease (Allows clients to change DHCP server after T2 rather than lease expirey)
@@ -1352,7 +1365,7 @@ in
         dhcp-rapid-commit = true;
 
         # Set the search domain for unqualified names
-        domain = "home.arpa";
+        domain = "orion.home.arpa";
 
         # Add host records for the home router
         host-record = [
@@ -1369,16 +1382,13 @@ in
 
         # Add a DNS entry for ourselves
         interface-name = [
-          "orion-guest.home.arpa,guest"
-          "orion-bridge.home.arpa,bridge"
-          "orion-shadow.home.arpa,shadow"
+          "orion-guest.orion.home.arpa,guest"
+          "orion-bridge.orion.home.arpa,bridge"
+          "orion-shadow.orion.home.arpa,shadow"
         ];
 
         # Operate on port 56
         port = 56;
-
-        # Add a placeholder record
-        txt-record = "max.home.arpa,placeholder";
       };
     };
     knot = {
@@ -1640,10 +1650,18 @@ in
           }
           {
             acl = [ "transfer" ];
+            id = "dnsmasq";
+            ixfr-from-axfr = true;
+            master = "dnsmasq";
+            module = "mod-queryacl/local";
+            semantic-checks = true;
+          }
+          {
+            acl = [ "transfer" ];
             id = "rDNS";
             file = "/etc/knot/rDNS.zone";
             module = [ "mod-queryacl/local" ];
-            reverse-generate = [ "home.arpa" ];
+            reverse-generate = [ "home.arpa" "orion.home.arpa" ];
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
@@ -1732,9 +1750,16 @@ in
           {
             acl = [ "transfer" ];
             domain = "home.arpa";
-            ixfr-from-axfr = true;
-            master = "dnsmasq";
+            file = "/etc/knot/home.arpa.zone";
             module = "mod-queryacl/local";
+            semantic-checks = true;
+            journal-content = "all";
+            zonefile-load = "difference-no-serial";
+            zonefile-sync = -1;
+          }
+          {
+            domain = "orion.home.arpa";
+            template = "dnsmasq";
           }
           {
             acl = [ "knot-ds" "transfer" ];
@@ -2773,6 +2798,7 @@ in
           "acme-challenge.zandoodle.me.uk.zone"
           "bogus.zandoodle.me.uk.zone"
           "compsoc-dev.com.zone"
+          "home.arpa.zone"
           "letsencrypt.zone.include"
           "letsencrypt-dane.zone.include"
           "no-email.zone.include"
