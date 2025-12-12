@@ -158,7 +158,7 @@ in
       '';
       "knot/compsoc-dev.com.zone".text = ''
         $TTL 600
-        @ soa dns.zandoodle.me.uk. hostmaster 0 14400 3660 604800 86400
+        @ soa dns.zandoodle.me.uk. hostmaster 0 14400 3600 604800 86400
 
         ; Advertise DANE
         _tcp dname _tcp.zandoodle.me.uk.
