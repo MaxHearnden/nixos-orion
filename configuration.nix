@@ -1341,7 +1341,7 @@ in
             respond /api/delete "You can't delete models" 403
 
             reverse_proxy unix//run/ollama {
-              header_up Host [::1]
+              header_up Host localhost
             }
           '';
         };
