@@ -1572,19 +1572,19 @@ in
             automatic-acl = false;
           }
           {
-            id = "hetzner1";
+            id = "ns1.first-ns.de";
             address = [
               "2a01:4f8:0:a101::a:1"
             ];
           }
           {
-            id = "hetzner2";
+            id = "robotns2.second-ns.de";
             address = [
               "2a01:4f8:0:1::5ddc:2"
             ];
           }
           {
-            id = "hetzner3";
+            id = "robotns3.second-ns.com";
             address = [
               "2001:67c:192c::add:a3"
             ];
@@ -1631,7 +1631,11 @@ in
         remotes = [
           {
             id = "hetzner";
-            remote = [ "hetzner1" "hetzner2" "hetzner3" ];
+            remote = [
+              "ns1.first-ns.de"
+              "robotns2.second-ns.de"
+              "robotns3.second-ns.com"
+            ];
           }
           {
             id = "root-servers";
