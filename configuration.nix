@@ -1351,6 +1351,10 @@ in
     dbus.implementation = "broker";
     dnsmasq = {
       enable = true;
+      package = pkgs.dnsmasq.overrideAttrs (
+        { patches ? [], ... }: {
+          patches = patches ++ [ ./dnsmasq-ixfr.patch ];
+        });
       # Don't change /etc/resolv.conf
       resolveLocalQueries = false;
       settings = {
@@ -1413,6 +1417,9 @@ in
           "orion-bridge.orion.home.arpa,bridge"
           "orion-shadow.orion.home.arpa,shadow"
         ];
+
+        log-debug = true;
+        log-queries = true;
 
         # Operate on port 56
         port = 56;

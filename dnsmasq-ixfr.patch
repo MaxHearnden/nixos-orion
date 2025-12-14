@@ -1,0 +1,48 @@
+diff --git a/src/auth.c b/src/auth.c
+index 2b8d385..1abca22 100644
+--- a/src/auth.c
++++ b/src/auth.c
+@@ -434,7 +434,7 @@ size_t answer_auth(struct dns_header *header, char *limit, size_t qlen, time_t n
+ 	      auth = soa = 1; /* inhibits auth section */
+ 	      log_query(F_RRNAME | F_AUTH, zone->domain, NULL, "<SOA>", 0);
+ 	    }
+-      	  else if (qtype == T_AXFR)
++	  else if (qtype == T_IXFR || qtype == T_AXFR)
+ 	    {
+ 	      struct iname *peers;
+ 	      
+diff --git a/src/dns-protocol.h b/src/dns-protocol.h
+index 0db5913..832dd1d 100644
+--- a/src/dns-protocol.h
++++ b/src/dns-protocol.h
+@@ -73,6 +73,7 @@
+ #define T_NSEC3         50
+ #define	T_TKEY		249		
+ #define	T_TSIG		250
++#define T_IXFR          251
+ #define T_AXFR          252
+ #define T_MAILB		253	
+ #define T_ANY		255
+diff --git a/src/rfc1035.c b/src/rfc1035.c
+index fabfdac..39c2955 100644
+--- a/src/rfc1035.c
++++ b/src/rfc1035.c
+@@ -1245,15 +1245,15 @@ unsigned int extract_request(struct dns_header *header, size_t qlen, char *name,
+   if (ntohs(header->qdcount) != 1 || OPCODE(header) != QUERY)
+     return 0; /* must be exactly one query. */
+ 
+-  if (!(header->hb3 & HB3_QR) && (ntohs(header->ancount) != 0 || ntohs(header->nscount) != 0))
+-    return 0; /* non-standard query. */
+-  
+   if (!extract_name(header, qlen, &p, name, EXTR_NAME_EXTRACT, 4))
+     return 0; /* bad packet */
+    
+   GETSHORT(qtype, p); 
+   GETSHORT(qclass, p);
+ 
++  if (!(header->hb3 & HB3_QR) && (ntohs(header->ancount) != 0 || (ntohs(header->nscount) != 0 && qtype != T_IXFR)))
++    return 0; /* non-standard query. */
++
+   if (typep)
+     *typep = qtype;
+ 
