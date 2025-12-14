@@ -356,21 +356,13 @@ in
         local HTTPS 1 . alpn=h3,h2
 
         ; Public SSH key fingerprints for local domains
-        local IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
         local IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
-        local IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
         local IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
-        local-guest IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
         local-guest IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
-        local-guest IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
         local-guest IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
-        local-shadow IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
         local-shadow IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
-        local-shadow IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
         local-shadow IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
-        local-tailscale IN SSHFP 1 1 d7e54c857d4a789060cb2f84126ae04edd73eb6f
         local-tailscale IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
-        local-tailscale IN SSHFP 4 1 9187d9131278f1a92603a1a74647e0cc98f59f6d
         local-tailscale IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
 
         local-shadow A 192.168.10.1
