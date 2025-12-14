@@ -90,9 +90,9 @@ in
         })
 
         -- Add local DNS servers
-        newServer({address = "127.0.0.1:54", name = "knot-dns", pool = "auth", healthCheckMode = "lazy"})
-        newServer({address = "127.0.0.1:55", name = "unbound", pool = "iterative", healthCheckMode = "lazy"})
-        newServer({address = "127.0.0.1:56", name = "dnsmasq", pool = "dnsmasq", healthCheckMode = "lazy"})
+        newServer({address = "[::1]:54", name = "knot-dns", pool = "auth", healthCheckMode = "lazy"})
+        newServer({address = "[::1]:55", name = "unbound", pool = "iterative", healthCheckMode = "lazy"})
+        newServer({address = "[::1]:56", name = "dnsmasq", pool = "dnsmasq", healthCheckMode = "lazy"})
 
         -- Allow connections from all IP addresses
         setACL({"0.0.0.0/0", "::/0"})
@@ -814,7 +814,7 @@ in
           key_name {file./run/credentials/caddy.service/tsig-id}
           key_alg {file./run/credentials/caddy.service/tsig-algorithm}
           key {file./run/credentials/caddy.service/tsig-secret}
-          server "127.0.0.1:54"
+          server "[::1]:54"
         }
 
         # Use (marginally) more secure public keys
@@ -1341,7 +1341,7 @@ in
             respond /api/delete "You can't delete models" 403
 
             reverse_proxy unix//run/ollama {
-              header_up Host 127.0.0.1
+              header_up Host [::1]
             }
           '';
         };
@@ -1439,7 +1439,7 @@ in
           {
             # Allow caddy to modify TXT records in _acme-challenge domains
             id = "caddy-acme";
-            address = "127.0.0.1";
+            address = "::1";
             action = "update";
             key = "caddy";
             update-owner = "zone";
@@ -1464,7 +1464,7 @@ in
           {
             # Allow maddy to modify TXT records in _acme-challenge domains
             id = "maddy-acme";
-            address = "127.0.0.1";
+            address = "::1";
             action = "update";
             key = "maddy";
             update-owner = "zone";
@@ -1607,7 +1607,7 @@ in
           }
           {
             id = "unbound";
-            address = "127.0.0.1@55";
+            address = "::1@55";
             automatic-acl = false;
           }
           {
@@ -1824,7 +1824,7 @@ in
             challenge dns-01
             dns rfc2136 {
               import /run/credentials/maddy.service/tsig.conf
-              server "127.0.0.1:54"
+              server "[::1]:54"
             }
             hostname mail.zandoodle.me.uk
           }
@@ -1835,7 +1835,7 @@ in
           challenge dns-01
           dns rfc2136 {
             import /run/credentials/maddy.service/tsig.conf
-            server "127.0.0.1:54"
+            server "[::1]:54"
           }
           hostname imap.zandoodle.me.uk
           override_domain _acme-challenge.mail.zandoodle.me.uk
@@ -1845,7 +1845,7 @@ in
           challenge dns-01
           dns rfc2136 {
             import /run/credentials/maddy.service/tsig.conf
-            server "127.0.0.1:54"
+            server "[::1]:54"
           }
           hostname smtp.zandoodle.me.uk
           override_domain _acme-challenge.mail.zandoodle.me.uk
@@ -2130,19 +2130,19 @@ in
           # Use the local root instance
           {
             name = ".";
-            stub-addr = "127.0.0.1@54";
+            stub-addr = "::1@54";
             stub-first = true;
           }
           {
             # Query knot for zandoodle.me.uk
             name = "zandoodle.me.uk";
-            stub-addr = "127.0.0.1@54";
+            stub-addr = "::1@54";
             stub-no-cache = true;
           }
           {
             # Query knot for compsoc-dev.com
             name = "compsoc-dev.com";
-            stub-addr = "127.0.0.1@54";
+            stub-addr = "::1@54";
             stub-no-cache = true;
           }
           {
@@ -2154,19 +2154,19 @@ in
           {
             # Query knot for home.arpa
             name = "home.arpa";
-            stub-addr = "127.0.0.1@54";
+            stub-addr = "::1@54";
             stub-no-cache = true;
           }
           {
             # Query knot for 168.192.in-addr.arpa (192.168.0.0/16)
             name = "168.192.in-addr.arpa";
-            stub-addr = "127.0.0.1@54";
+            stub-addr = "::1@54";
             stub-no-cache = true;
           }
           {
             # Query knot for d.f.ip6.arpa (fd00::/8)
             name = "d.f.ip6.arpa";
-            stub-addr = "127.0.0.1@54";
+            stub-addr = "::1@54";
             stub-no-cache = true;
           }
         ];
