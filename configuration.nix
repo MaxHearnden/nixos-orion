@@ -2301,6 +2301,7 @@ in
               # devices to allocate an address
               Assign = true;
               Prefix = "fd09:a389:7c1e:5::/64";
+              PreferredLifetimeSec = 0;
             }
           ];
           routes = [
