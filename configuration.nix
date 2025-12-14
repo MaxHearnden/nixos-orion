@@ -390,8 +390,8 @@ in
       '';
       "resolv.conf".text = ''
         # Use the local DNS resolver
-        nameserver 127.0.0.1
         nameserver ::1
+        nameserver 127.0.0.1
 
         # Trust the AD (authentic data) flag and use EDNS(0)
         options trust-ad edns0
