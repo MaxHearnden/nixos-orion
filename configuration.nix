@@ -2204,6 +2204,11 @@ in
             stub-first = true;
           }
           {
+            name = "arpa";
+            stub-addr = "::1@54";
+            stub-first = true;
+          }
+          {
             # Query knot for zandoodle.me.uk
             name = "zandoodle.me.uk";
             stub-addr = "::1@54";
