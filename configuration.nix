@@ -1594,6 +1594,13 @@ in
             ];
           }
           {
+            id = "pc";
+            address = [
+              "fd7a:115c:a1e0::d2df:ec69@8053"
+              "100.95.236.105@8053"
+            ];
+          }
+          {
             id = "robotns2.second-ns.de";
             address = [
               "2a01:4f8:0:1::5ddc:2"
@@ -1705,12 +1712,14 @@ in
             id = "default";
             # Add DNS cookies and rate limiting
             global-module = ["mod-cookies" "mod-rrl"];
+            notify = "pc";
             semantic-checks = true;
           }
           {
             acl = [ "transfer" ];
             catalog-role = "generate";
             id = "catalog";
+            notify = "pc";
           }
           {
             acl = [ "transfer" ];
@@ -1720,6 +1729,7 @@ in
             ixfr-from-axfr = true;
             master = "dnsmasq";
             module = "mod-queryacl/local";
+            notify = "pc";
             semantic-checks = true;
           }
           {
@@ -1737,6 +1747,7 @@ in
             ixfr-from-axfr = true;
             master = "root-servers";
             module = "mod-queryacl/local";
+            notify = "pc";
             semantic-checks = true;
           }
           {
@@ -1746,6 +1757,7 @@ in
             id = "rDNS";
             file = "/etc/knot/rDNS.zone";
             module = [ "mod-queryacl/local" ];
+            notify = "pc";
             reverse-generate = [ "home.arpa" "orion.home.arpa" ];
             semantic-checks = true;
             journal-content = "all";
@@ -1829,7 +1841,7 @@ in
             dnssec-signing = true;
             domain = "compsoc-dev.com";
             file = "/etc/knot/compsoc-dev.com.zone";
-            notify = "hetzner";
+            notify = [ "hetzner" "pc" ];
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
@@ -1861,7 +1873,7 @@ in
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
             file = "/etc/knot/zandoodle.me.uk.zone";
-            notify = "hetzner";
+            notify = [ "hetzner" "pc" ];
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
