@@ -2135,6 +2135,8 @@ in
 
           fast-server-permil = 900;
 
+          identity = "recusive.dns.zandoodle.me.uk";
+
           # Reply to queries from the same address the query was sent to
           interface-automatic = true;
 
