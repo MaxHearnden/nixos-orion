@@ -677,7 +677,6 @@ in
         '';
       };
     };
-    tempAddresses = "disabled";
     useNetworkd = true;
   };
   nix = {
@@ -2281,10 +2280,6 @@ in
       networks = {
         "10-bridge" = {
           address = [ "192.168.1.201/24" ];
-          ipv6SendRAConfig = {
-            # Don't advertise ourselves as a router to the internet
-            RouterLifetimeSec = 0;
-          };
           linkConfig = {
             AllMulticast = true;
             RequiredForOnline = false;
@@ -2292,17 +2287,8 @@ in
           name = "bridge";
           networkConfig = {
             IPv6AcceptRA = true;
-            IPv6SendRA = true;
+            IPv6PrivacyExtensions = false;
           };
-          ipv6Prefixes = [
-            {
-              # Advertise fd09:a389:7c1e:5::/64 as the network address and allow
-              # devices to allocate an address
-              Assign = true;
-              Prefix = "fd09:a389:7c1e:5::/64";
-              PreferredLifetimeSec = 0;
-            }
-          ];
           routes = [
             {
               # Add a static route to the router
