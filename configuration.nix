@@ -134,6 +134,7 @@ in
           }),
           PoolAction("auth"))
       '';
+      "dnsmasq.conf".source = config.services.dnsmasq.configFile;
       "knot/acme-challenge.zandoodle.me.uk.zone".text = ''
         @ soa dns.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3600 604800 86400
         @ ns dns.zandoodle.me.uk.
@@ -1347,7 +1348,22 @@ in
       };
     };
     # Use dbus-broker
-    dbus.implementation = "broker";
+    dbus = {
+      implementation = "broker";
+      packages = [
+        (pkgs.writeTextDir "share/dbus-1/system.d/dnsmasq-rootless.conf" ''
+          <!DOCTYPE busconfig PUBLIC
+           "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+           "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+          <busconfig>
+                  <policy user="dnsmasq">
+                          <allow own="uk.org.thekelleys.dnsmasq"/>
+                          <allow send_destination="uk.org.thekelleys.dnsmasq"/>
+                  </policy>
+          </busconfig>
+        '')
+      ];
+    };
     dnsmasq = {
       enable = true;
       package = pkgs.dnsmasq.overrideAttrs (
@@ -1414,11 +1430,13 @@ in
         interface-name = [
           "orion-guest.orion.home.arpa,guest"
           "orion-bridge.orion.home.arpa,bridge"
-          "orion-shadow.orion.home.arpa,shadow"
+          "orion-shadow.orion.home.arpa,2-shadow-2-lan"
         ];
 
         log-debug = true;
         log-queries = true;
+
+        no-hosts = true;
 
         # Operate on port 56
         port = 56;
@@ -2095,6 +2113,8 @@ in
           num-threads = 12;
           port = 55;
 
+          prefer-ip6 = true;
+
           prefetch = true;
 
           prefetch-key = true;
@@ -2539,8 +2559,47 @@ in
         wantedBy = [ "multi-user.target" ];
       };
 
-      # Add the dnsmasq cgroup to the services table
-      dnsmasq.serviceConfig.NFTSet = "cgroup:inet:services:dnsmasq";
+      dnsmasq = {
+        confinement.enable = true;
+        serviceConfig = {
+          AmbientCapabilities = "CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE";
+          BindReadOnlyPaths = [
+            "/etc/passwd"
+            "/run/dbus/system_bus_socket"
+            "/run/systemd/journal/dev-log"
+          ];
+          CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE";
+          Group = "dnsmasq";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          # Add the dnsmasq cgroup to the services table
+          NFTSet = "cgroup:inet:services:dnsmasq";
+          NoNewPrivileges = true;
+          PrivateDevices = true;
+          PrivateUsers = lib.mkForce false;
+          ProcSubset = "pid";
+          ProtectControlGroups = true;
+          ProtectClock = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectKernelModules = true;
+          ProtectKernelTunables = true;
+          ProtectProc = "invisible";
+          ProtectSystem = lib.mkForce "strict";
+          RemoveIPC = true;
+          RestrictAddressFamilies = "AF_INET AF_INET6 AF_NETLINK AF_UNIX";
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          StateDirectory = "dnsmasq";
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@resources @privileged" ];
+          User = "dnsmasq";
+        };
+        preStart = lib.mkForce ''
+          dnsmasq --test -C ${config.services.dnsmasq.configFile}
+        '';
+      };
 
       # Generate a TSIG key for caddy and maddy
       gen-tsig = {
