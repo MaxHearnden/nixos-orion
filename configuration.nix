@@ -143,7 +143,7 @@ in
         ; A zone for testing DNSSEC support.
         ; This zone is bogus.
         $TTL 0
-        @ SOA dns.zandoodle.me.uk. hostmaster.zandoodle.me.uk 0 0 0 0 0
+        @ soa dns.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3600 604800 86400
 
         ; DANE testing
         _tcp dname _tcp.zandoodle.me.uk
@@ -1699,12 +1699,23 @@ in
         ];
         template = [
           {
+            acl = [ "transfer" ];
+            catalog-role = "member";
+            catalog-zone = "catz";
             id = "default";
             # Add DNS cookies and rate limiting
             global-module = ["mod-cookies" "mod-rrl"];
+            semantic-checks = true;
           }
           {
             acl = [ "transfer" ];
+            catalog-role = "generate";
+            id = "catalog";
+          }
+          {
+            acl = [ "transfer" ];
+            catalog-role = "member";
+            catalog-zone = "catz";
             id = "dnsmasq";
             ixfr-from-axfr = true;
             master = "dnsmasq";
@@ -1712,7 +1723,15 @@ in
             semantic-checks = true;
           }
           {
+            # Template for zones that shouldn't be added to the catalog
             acl = [ "transfer" ];
+            id = "local";
+            semantic-checks = true;
+          }
+          {
+            acl = [ "transfer" ];
+            catalog-role = "member";
+            catalog-zone = "catz";
             dnssec-validation = true;
             id = "root-servers";
             ixfr-from-axfr = true;
@@ -1722,6 +1741,8 @@ in
           }
           {
             acl = [ "transfer" ];
+            catalog-role = "member";
+            catalog-zone = "catz";
             id = "rDNS";
             file = "/etc/knot/rDNS.zone";
             module = [ "mod-queryacl/local" ];
@@ -1751,6 +1772,7 @@ in
             domain = "_acme-challenge.mail.zandoodle.me.uk";
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
             semantic-checks = true;
+            template = "local";
             journal-content = "all";
             zonefile-load = "difference-no-serial";
             zonefile-skip = "TXT";
@@ -1765,6 +1787,7 @@ in
             domain = "_acme-challenge.zandoodle.me.uk";
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
             semantic-checks = true;
+            template = "local";
             journal-content = "all";
             zonefile-load = "difference-no-serial";
             zonefile-skip = "TXT";
@@ -1796,7 +1819,12 @@ in
             zonefile-sync = -1;
           }
           {
+            domain = "catz";
+            template = "catalog";
+          }
+          {
             acl = [ "transfer" ];
+            catalog-group = "global";
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "compsoc-dev.com";
@@ -1828,6 +1856,7 @@ in
           }
           {
             acl = [ "knot-ds" "transfer" ];
+            catalog-group = "global";
             dnssec-policy = "porkbun";
             dnssec-signing = true;
             domain = "zandoodle.me.uk";
