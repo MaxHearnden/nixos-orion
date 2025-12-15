@@ -1695,6 +1695,15 @@ in
           }
           {
             acl = [ "transfer" ];
+            dnssec-validation = true;
+            id = "root-servers";
+            ixfr-from-axfr = true;
+            master = "root-servers";
+            module = "mod-queryacl/local";
+            semantic-checks = true;
+          }
+          {
+            acl = [ "transfer" ];
             id = "rDNS";
             file = "/etc/knot/rDNS.zone";
             module = [ "mod-queryacl/local" ];
@@ -1708,12 +1717,8 @@ in
         zone = [
           {
             # Serve a copy of the root zone
-            acl = [ "transfer" ];
-            dnssec-validation = true;
             domain = ".";
-            ixfr-from-axfr = true;
-            master = "root-servers";
-            module = "mod-queryacl/local";
+            template = "root-servers";
             zonemd-verify = true;
           }
           {
@@ -1747,6 +1752,11 @@ in
             zonefile-skip = "TXT";
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
+          }
+          {
+            # Serve a copy of the root zone
+            domain = "arpa";
+            template = "root-servers";
           }
           {
             # Add a domain for DNSSEC testing
