@@ -834,8 +834,10 @@ in
         "compsoc-dev.com" = {
           extraConfig = ''
             tls {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile tlsserver
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile tlsserver
+              }
             }
             # Enable compression
             encode
@@ -896,8 +898,10 @@ in
         "wss.cardgames.zandoodle.me.uk" = {
           extraConfig = ''
             tls {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile tlsserver
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile tlsserver
+              }
             }
             header {
               # Add a Cross Origin Resource Policy
@@ -926,8 +930,10 @@ in
         "cardgames.zandoodle.me.uk" = {
           extraConfig = ''
             tls {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile tlsserver
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile tlsserver
+              }
             }
             # Compress all data
             encode
@@ -1218,8 +1224,10 @@ in
         "local.zandoodle.me.uk" = {
           extraConfig = ''
             tls {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile tlsserver
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile tlsserver
+              }
             }
             @denied not {
               client_ip private_ranges fe80::/10
@@ -1240,8 +1248,10 @@ in
         "mta-sts.compsoc-dev.com" = {
           extraConfig = ''
             tls {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile tlsserver
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile tlsserver
+              }
             }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -1263,8 +1273,10 @@ in
         "mta-sts.mail.compsoc-dev.com" = {
           extraConfig = ''
             tls {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile tlsserver
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile tlsserver
+              }
             }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -1286,8 +1298,10 @@ in
         "mta-sts.mail.zandoodle.me.uk" = {
           extraConfig = ''
             tls {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile tlsserver
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile tlsserver
+              }
             }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -1309,8 +1323,10 @@ in
         "mta-sts.zandoodle.me.uk" = {
           extraConfig = ''
             tls {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile tlsserver
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile tlsserver
+              }
             }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -1332,8 +1348,10 @@ in
         "ollama.compsoc-dev.com" = {
           extraConfig = ''
             tls {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile tlsserver
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile tlsserver
+              }
             }
             @denied not {
               client_ip private_ranges 100.64.0.0/10
