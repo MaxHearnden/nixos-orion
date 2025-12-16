@@ -1599,6 +1599,7 @@ in
               "127.0.0.1@56"
             ];
             automatic-acl = false;
+            block-notify-after-transfer = true;
           }
           {
             id = "f.root-servers.net";
