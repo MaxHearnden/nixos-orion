@@ -835,6 +835,7 @@ in
           extraConfig = ''
             tls {
               dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile tlsserver
             }
             # Enable compression
             encode
@@ -896,6 +897,7 @@ in
           extraConfig = ''
             tls {
               dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile tlsserver
             }
             header {
               # Add a Cross Origin Resource Policy
@@ -925,6 +927,7 @@ in
           extraConfig = ''
             tls {
               dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile tlsserver
             }
             # Compress all data
             encode
@@ -1216,6 +1219,7 @@ in
           extraConfig = ''
             tls {
               dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile tlsserver
             }
             @denied not {
               client_ip private_ranges fe80::/10
@@ -1237,6 +1241,7 @@ in
           extraConfig = ''
             tls {
               dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile tlsserver
             }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -1259,6 +1264,7 @@ in
           extraConfig = ''
             tls {
               dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile tlsserver
             }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -1281,6 +1287,7 @@ in
           extraConfig = ''
             tls {
               dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile tlsserver
             }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -1303,6 +1310,7 @@ in
           extraConfig = ''
             tls {
               dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile tlsserver
             }
             header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
@@ -1325,6 +1333,7 @@ in
           extraConfig = ''
             tls {
               dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile tlsserver
             }
             @denied not {
               client_ip private_ranges 100.64.0.0/10
