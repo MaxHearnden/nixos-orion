@@ -2103,6 +2103,7 @@ in
     unbound = {
       enable = true;
       localControlSocketPath = "/run/unbound/unbound.ctl";
+      package = pkgs.unbound-full;
       # Don't modify /etc/resolv.conf
       resolveLocalQueries = false;
       settings = {
