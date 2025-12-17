@@ -146,7 +146,8 @@ in
         @ soa dns.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3600 604800 86400
 
         ; DANE testing
-        _tcp dname _tcp.zandoodle.me.uk
+        _tcp dname _tcp.zandoodle.me.uk.
+        _tls dname _tls.zandoodle.me.uk.
 
         ; Setup SPF for this domain
         @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
@@ -163,6 +164,7 @@ in
 
         ; Advertise DANE
         _tcp dname _tcp.zandoodle.me.uk.
+        _tls dname _tls.zandoodle.me.uk.
 
         ; Setup mail for this domain
         @ mx 10 mail.zandoodle.me.uk.
@@ -172,6 +174,7 @@ in
         _mta-sts.mail cname _mta-sts.zandoodle.me.uk.
         mail mx 10 mail.zandoodle.me.uk.
         mail txt "v=spf1 mx -all"
+        _tls.mail dname _tls.zandoodle.me.uk.
         mta-sts.mail cname @
         _acme-challenge.mta-sts.mail cname _acme-challenge.zandoodle.me.uk.
 
@@ -285,6 +288,10 @@ in
         ; Setup MTA-STS for this domain
         _mta-sts txt "v=STSv1; id=1"
         _mta-sts.mail cname _mta-sts
+
+        ; Setup TLSRPT
+        _tls.mail dname _tls
+        _smtp._tls txt "v=TLSRPTv1;rua=mailto:tlsrpt@zandoodle.me.uk"
 
         ; Advertise imaps and submissions
         _imaps._tcp SRV 0 10 993 imap
