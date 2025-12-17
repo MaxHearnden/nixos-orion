@@ -333,6 +333,8 @@ in
         _acme-challenge.mta-sts cname _acme-challenge
         mta-sts.mail cname @
         _acme-challenge.mta-sts.mail cname _acme-challenge
+        recursive.dns cname local
+        _acme-challenge.recursive.dns cname _acme-challenge
         wss.cardgames cname @
         _acme-challenge.wss.cardgames cname _acme-challenge
         _acme-challenge.local cname _acme-challenge
@@ -580,6 +582,7 @@ in
             meta l4proto {udp, tcp} th dport 54 socket cgroupv2 level 2 @knot accept
             meta l4proto {udp, tcp} th dport 55 ip saddr == @local_ip socket cgroupv2 level 2 @unbound accept
             meta l4proto {udp, tcp} th dport 55 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @unbound accept
+            iifname lo tcp dport 8080 socket cgroupv2 level 2 @unbound accept
             meta l4proto {udp, tcp} th dport 56 ip saddr == @local_ip socket cgroupv2 level 2 @dnsmasq accept
             meta l4proto {udp, tcp} th dport 56 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @dnsmasq accept
 
@@ -1381,6 +1384,28 @@ in
             }
           '';
         };
+        "recursive.dns.zandoodle.me.uk" = {
+          extraConfig = ''
+            tls {
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile tlsserver
+              }
+            }
+            @denied not client_ip private_ranges 100.64.0.0/10
+            abort @denied
+
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            }
+            reverse_proxy h2c://[::1]:8080
+          '';
+        };
       };
     };
     # Use dbus-broker
@@ -2173,10 +2198,15 @@ in
 
           fast-server-permil = 900;
 
+          http-notls-downstream = true;
+
+          https-port = 8080;
+
           identity = "recusive.dns.zandoodle.me.uk";
 
           # Reply to queries from the same address the query was sent to
           interface-automatic = true;
+          interface-automatic-ports = "\"55 8080\"";
 
           # Disable local zones for special domains
           local-zone = [
