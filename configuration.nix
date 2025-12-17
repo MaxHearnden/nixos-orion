@@ -846,7 +846,7 @@ in
             tls {
               issuer acme {
                 dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-                profile tlsserver
+                profile shortlived
               }
             }
             # Enable compression
@@ -910,7 +910,7 @@ in
             tls {
               issuer acme {
                 dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-                profile tlsserver
+                profile shortlived
               }
             }
             header {
@@ -942,7 +942,7 @@ in
             tls {
               issuer acme {
                 dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-                profile tlsserver
+                profile shortlived
               }
             }
             # Compress all data
@@ -1236,7 +1236,7 @@ in
             tls {
               issuer acme {
                 dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-                profile tlsserver
+                profile shortlived
               }
             }
             @denied not {
@@ -1260,7 +1260,7 @@ in
             tls {
               issuer acme {
                 dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-                profile tlsserver
+                profile shortlived
               }
             }
             header {
@@ -1285,7 +1285,7 @@ in
             tls {
               issuer acme {
                 dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-                profile tlsserver
+                profile shortlived
               }
             }
             header {
@@ -1310,7 +1310,7 @@ in
             tls {
               issuer acme {
                 dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-                profile tlsserver
+                profile shortlived
               }
             }
             header {
@@ -1335,7 +1335,7 @@ in
             tls {
               issuer acme {
                 dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-                profile tlsserver
+                profile shortlived
               }
             }
             header {
@@ -1360,7 +1360,7 @@ in
             tls {
               issuer acme {
                 dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-                profile tlsserver
+                profile shortlived
               }
             }
             @denied not {
@@ -1389,7 +1389,7 @@ in
             tls {
               issuer acme {
                 dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-                profile tlsserver
+                profile shortlived
               }
             }
             @denied not client_ip private_ranges 100.64.0.0/10
