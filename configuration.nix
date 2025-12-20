@@ -482,6 +482,9 @@ in
       # Filter packets that would have been forwarded
       filterForward = true;
       interfaces = {
+        # Allow the TP-link WAP to send logs
+        "\"bridge\"".allowedTCPPorts = [ 465 ];
+
         # Allow DHCP from managed networks
         web-vm.allowedUDPPorts = [ 67 ];
         guest.allowedUDPPorts = [ 67 ];
@@ -600,6 +603,7 @@ in
 
             tcp dport 25 socket cgroupv2 level 2 @maddy accept
             iifname { lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
+            iifname "bridge" tcp dport {465, 587} ip saddr @local_ip socket cgroupv2 level 2 @maddy accept
 
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
@@ -2058,6 +2062,22 @@ in
           }
 
           auth &local_authdb
+
+          # Allow tp-link@zandoodle.me.uk to send mail to tp-link-logs@zandoodle.me.uk
+          source tp-link@zandoodle.me.uk {
+            check {
+              authorize_sender {
+                prepare_email &local_rewrites
+                user_to_email &super_auth
+              }
+            }
+            destination tp-link-logs@zandoodle.me.uk {
+              deliver_to &local_routing
+            }
+            default_destination {
+              reject
+            }
+          }
 
           source $(local_domains) {
             check {
