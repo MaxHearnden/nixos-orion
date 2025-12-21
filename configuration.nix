@@ -2371,7 +2371,11 @@ in
       netdevs = {
         # Configure a bridge
         "10-bridge" = {
-          bridgeConfig.STP = true;
+          bridgeConfig = {
+            MulticastIGMPVersion = 3;
+            STP = true;
+            VLANFiltering = true;
+          };
           netdevConfig = {
             Kind = "bridge";
             Name = "bridge";
@@ -2429,8 +2433,18 @@ in
       networks = {
         "10-bridge" = {
           address = [ "192.168.1.201/24" ];
+          bridgeVLANs = [
+            {
+              VLAN = "10";
+              PVID = 1;
+              EgressUntagged = "1";
+            }
+            {
+              VLAN = "20";
+            }
+          ];
           linkConfig = {
-            AllMulticast = true;
+            # AllMulticast = true;
             RequiredForOnline = false;
           };
           name = "bridge";
@@ -2459,22 +2473,17 @@ in
         };
         "10-enp1s0" = {
           bridge = [ "bridge" ];
-          matchConfig = {
-            Name = "enp1s0";
-          };
-          # address = [ "192.168.0.1/24" ];
-          # ipv6Prefixes = [
-          #   {
-          #     Assign = true;
-          #     Prefix = "fd09:a389:7c1e:7::/64";
-          #   }
-          # ];
-          # ipv6SendRAConfig = {
-          #   DNS = "_link_local";
-          #   EmitDNS = true;
-          #   Managed = true;
-          #   RouterLifetimeSec = 0;
-          # };
+          bridgeVLANs = [
+            {
+              VLAN = "10";
+              PVID = 1;
+              EgressUntagged = "1";
+            }
+            {
+              VLAN = "20";
+            }
+          ];
+          name = "enp1s0";
           linkConfig = {
             RequiredForOnline = false;
           };
@@ -2486,6 +2495,16 @@ in
         };
         "10-enp49s0" = {
           bridge = [ "bridge" ];
+          bridgeVLANs = [
+            {
+              VLAN = "10";
+              PVID = 1;
+              EgressUntagged = "1";
+            }
+            {
+              VLAN = "20";
+            }
+          ];
           name = "enp49s0";
         };
 
