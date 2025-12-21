@@ -2373,6 +2373,7 @@ in
         "10-bridge" = {
           bridgeConfig = {
             MulticastIGMPVersion = 3;
+            MulticastQuerier = true;
             STP = true;
             VLANFiltering = true;
           };
@@ -2465,6 +2466,8 @@ in
         # configure the guest interface
         "10-guest" = {
           address = [ "192.168.5.201/24" ];
+
+          ipv6AcceptRAConfig.RouteMetric = 2048;
 
           # Don't wait for this interface to be configured
           linkConfig.RequiredForOnline = false;
