@@ -2472,7 +2472,7 @@ in
           # Don't wait for this interface to be configured
           linkConfig.RequiredForOnline = false;
           name = "guest";
-          networkConfig.IPv6AcceptRA = false;
+          networkConfig.IPv6AcceptRA = true;
         };
         "10-enp1s0" = {
           bridge = [ "bridge" ];
@@ -2969,15 +2969,11 @@ in
           ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-zonefile
 
           # Get the IP address for guest
-          ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev guest | ${lib.getExe pkgs.jq} -r \
-            '.[].addr_info.[]
-              | if .family == "inet" then
-                "@ A " + .local
-              elif (.family == "inet6") and (.scope != "link") then
-                "@ AAAA " + .local
-              else
-                empty
-              end' >/run/ddns/local-guest-zonefile
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -4 address show dev guest | ${lib.getExe pkgs.jq} -r \
+            '"@ A " + (.[].addr_info.[].local // empty)' >/run/ddns/local-guest-zonefile
+
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev guest to fc00::/7 | ${lib.getExe pkgs.jq} -r \
+            '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/local-guest-zonefile
 
           # Get the IP address for tailscale
           ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev tailscale0 | ${lib.getExe pkgs.jq} -r \
