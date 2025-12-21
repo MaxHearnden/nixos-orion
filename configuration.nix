@@ -375,8 +375,8 @@ in
         local-tailscale IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
         local-tailscale IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
 
-        local-shadow A 192.168.10.1
-        local-shadow AAAA fd09:a389:7c1e:4::1
+        local-shadow A 192.168.4.1
+        local-shadow AAAA fd09:a389:7c1e:1::1
 
         multi-string-check TXT string 1 string 2
         multi-string-check txt "v=spf1 -all"
@@ -470,8 +470,7 @@ in
       allowedUDPPorts = [ 53 54 443 41641 ];
       allowedTCPPorts = [ 25 53 54 80 443 ];
       extraForwardRules = ''
-        # Allow packets from 2-shadow-2-lan to reach the NAT64 interface
-        iifname "2-shadow-2-lan" oifname "plat" accept
+        # Allow packets from shadow-lan to reach the NAT64 interface
         iifname "shadow-lan" oifname "plat" accept
       '';
       extraInputRules = ''
@@ -489,7 +488,6 @@ in
         # Allow DHCP from managed networks
         web-vm.allowedUDPPorts = [ 67 ];
         guest.allowedUDPPorts = [ 67 ];
-        "\"2-shadow-2-lan\"".allowedUDPPorts = [ 67 547 ];
         "shadow-lan".allowedUDPPorts = [ 67 547 ];
 
         # Allow submissions and imaps from tailscale
@@ -502,7 +500,7 @@ in
       # Translate network addresses from local interfaces to the internet
       enable = true;
       externalInterface = "bridge";
-      internalInterfaces = [ "2-shadow-2-lan" "shadow-lan" "plat" ];
+      internalInterfaces = [ "shadow-lan" "plat" ];
     };
     nftables = {
       # Disable checking the ruleset using lkl as cgroups are not enabled in lkl
@@ -596,8 +594,8 @@ in
             udp dport 443 socket cgroupv2 level 2 @caddy accept
 
             # Allow DHCP handled by dnsmasq
-            udp dport 67 iifname { "2-shadow-2-lan", shadow-lan, guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
-            udp dport 547 iifname {"2-shadow-2-lan", shadow-lan} socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 67 iifname { shadow-lan, guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 547 iifname shadow-lan socket cgroupv2 level 2 @dnsmasq accept
 
             iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
@@ -1493,7 +1491,6 @@ in
         # Enable DHCP operation on C-VLAN 10, S-VLAN 20 and the web-vm TAP interface
         interface = [
           "guest"
-          "2-shadow-2-lan"
           "shadow-lan"
           "web-vm"
         ];
@@ -1502,7 +1499,7 @@ in
         interface-name = [
           "orion-guest.orion.home.arpa,guest"
           "orion-bridge.orion.home.arpa,bridge"
-          "orion-shadow.orion.home.arpa,2-shadow-2-lan"
+          "orion-shadow.orion.home.arpa,shadow-lan"
         ];
 
         log-debug = true;
@@ -2419,19 +2416,6 @@ in
           vlanConfig.Id = 20;
         };
 
-        # Configure an S-VLAN based overlay network
-        "10-2-shadow-2-lan" = {
-          extraConfig = ''
-            [VLAN]
-            Id=20
-            Protocol=802.1ad
-          '';
-          netdevConfig = {
-            Kind = "vlan";
-            Name = "2-shadow-2-lan";
-          };
-        };
-
         # Configure an interface for the VM
         "10-web-vm" = {
           netdevConfig = {
@@ -2466,7 +2450,7 @@ in
             }
           ];
           # Create VLANs and bind them to this interface
-          vlan = [ "2-shadow-2-lan" "guest" "shadow-lan" ];
+          vlan = [ "guest" "shadow-lan" ];
         };
         # configure the guest interface
         "10-guest" = {
@@ -2557,40 +2541,6 @@ in
           ];
           linkConfig.RequiredForOnline = false;
           matchConfig.Name = "shadow-lan";
-          networkConfig = {
-            IPv6SendRA = true;
-          };
-          dhcpServerConfig.DNS = "_server_address";
-        };
-
-        # Configure S-VLAN 20
-        "10-2-shadow-2-lan" = {
-          address = [ "fd09:a389:7c1e:4::1/64" "192.168.10.1/24" ];
-          ipv6Prefixes = [
-            {
-              Prefix = "fd09:a389:7c1e:4::/64";
-            }
-          ];
-          ipv6RoutePrefixes = [
-            {
-              Route = "fd09:a389:7c1e::/48";
-            }
-          ];
-          ipv6SendRAConfig = {
-            DNS = "_link_local";
-            EmitDNS = true;
-            Managed = true;
-            RouterLifetimeSec = 0;
-          };
-
-          # Advertise NAT64 prefixes
-          ipv6PREF64Prefixes = [
-            {
-              Prefix = "fd09:a389:7c1e:3::/64";
-            }
-          ];
-          linkConfig.RequiredForOnline = false;
-          matchConfig.Name = "2-shadow-2-lan";
           networkConfig = {
             IPv6SendRA = true;
           };
