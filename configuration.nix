@@ -472,6 +472,7 @@ in
       extraForwardRules = ''
         # Allow packets from 2-shadow-2-lan to reach the NAT64 interface
         iifname "2-shadow-2-lan" oifname "plat" accept
+        iifname "shadow-lan" oifname "plat" accept
       '';
       extraInputRules = ''
         # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
@@ -489,6 +490,7 @@ in
         web-vm.allowedUDPPorts = [ 67 ];
         guest.allowedUDPPorts = [ 67 ];
         "\"2-shadow-2-lan\"".allowedUDPPorts = [ 67 547 ];
+        "shadow-lan".allowedUDPPorts = [ 67 547 ];
 
         # Allow submissions and imaps from tailscale
         tailscale0.allowedTCPPorts = [ 465 587 993 ];
@@ -500,7 +502,7 @@ in
       # Translate network addresses from local interfaces to the internet
       enable = true;
       externalInterface = "bridge";
-      internalInterfaces = [ "2-shadow-2-lan" "plat" ];
+      internalInterfaces = [ "2-shadow-2-lan" "shadow-lan" "plat" ];
     };
     nftables = {
       # Disable checking the ruleset using lkl as cgroups are not enabled in lkl
@@ -594,8 +596,8 @@ in
             udp dport 443 socket cgroupv2 level 2 @caddy accept
 
             # Allow DHCP handled by dnsmasq
-            udp dport 67 iifname { "2-shadow-2-lan", guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
-            udp dport 547 iifname "2-shadow-2-lan" socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 67 iifname { "2-shadow-2-lan", shadow-lan, guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 547 iifname {"2-shadow-2-lan", shadow-lan} socket cgroupv2 level 2 @dnsmasq accept
 
             iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
@@ -1466,16 +1468,20 @@ in
           "tag:guest,option:router,192.168.5.1"
           "tag:guest,option:ntp-server,192.168.5.1"
           "tag:guest,option:dns-server,192.168.5.201"
-          "tag:shadow,option:router,192.168.10.1"
-          "tag:shadow,option:dns-server,192.168.10.1"
+          "tag:cshadow,option:router,192.168.4.1"
+          "tag:cshadow,option:dns-server,192.168.4.1"
+          "tag:sshadow,option:router,192.168.10.1"
+          "tag:sshadow,option:dns-server,192.168.10.1"
           "tag:web-vm,option:router,192.168.2.1"
           "tag:web-vm,option:dns-server,192.168.2.1"
         ];
         # Enable DHCP and allocate from a suitable IP address range
         dhcp-range = [
           "set:guest,192.168.5.2,192.168.5.199,10m"
-          "set:shadow,192.168.10.2,192.168.10.199,10m"
-          "set:shadow,fd09:a389:7c1e:4::,fd09:a389:7c1e:4:ffff:ffff:ffff:ffff,64,10m"
+          "set:cshadow,192.168.4.2,192.168.4.199,10m"
+          "set:cshadow,fd09:a389:7c1e:1::,fd09:a389:7c1e:1:ffff:ffff:ffff:ffff,64,10m"
+          "set:sshadow,192.168.10.2,192.168.10.199,10m"
+          "set:sshadow,fd09:a389:7c1e:4::,fd09:a389:7c1e:4:ffff:ffff:ffff:ffff,64,10m"
           "set:web-vm,192.168.2.2,static"
         ];
         # Enable DHCP rapid commit (allows for a two message DHCP exchange)
@@ -1488,6 +1494,7 @@ in
         interface = [
           "guest"
           "2-shadow-2-lan"
+          "shadow-lan"
           "web-vm"
         ];
 
@@ -2390,19 +2397,6 @@ in
           };
         };
 
-        # Configure a network for tesing purposes
-        "10-experimental" = {
-          extraConfig = ''
-            [VLAN]
-            Id=10
-            Protocol=802.1ad
-          '';
-          netdevConfig = {
-            Kind = "vlan";
-            Name = "experimental";
-          };
-        };
-
         # Configure the NAT64 interface
         "10-plat" = {
           netdevConfig = {
@@ -2414,6 +2408,15 @@ in
             User = "tayga";
             Group = "tayga";
           };
+        };
+
+        # Configure an C-VLAN based overlay network
+        "10-shadow-lan" = {
+          netdevConfig = {
+            Kind = "vlan";
+            Name = "shadow-lan";
+          };
+          vlanConfig.Id = 20;
         };
 
         # Configure an S-VLAN based overlay network
@@ -2463,7 +2466,7 @@ in
             }
           ];
           # Create VLANs and bind them to this interface
-          vlan = [ "2-shadow-2-lan" "experimental" "guest" ];
+          vlan = [ "2-shadow-2-lan" "guest" "shadow-lan" ];
         };
         # configure the guest interface
         "10-guest" = {
@@ -2506,23 +2509,6 @@ in
           name = "enp49s0";
         };
 
-        # Configure S-VLAN 10 (unused)
-        "10-experimental" = {
-          address = [ "192.168.11.1/24" ];
-          ipv6Prefixes = [
-            {
-              Assign = true;
-              Prefix = "fd09:a389:7c1e:6::/64";
-            }
-          ];
-          ipv6SendRAConfig = {
-            Managed = true;
-            RouterLifetimeSec = 0;
-          };
-          name = "experimental";
-          networkConfig.IPv6SendRA = true;
-        };
-
         # Configure the NAT64 interface
         "10-plat" = {
           # Add IP addresses for the link
@@ -2541,6 +2527,40 @@ in
               MTUBytes = 1480;
             }
           ];
+        };
+
+        # Configure C-VLAN 20
+        "10-shadow-lan" = {
+          address = [ "fd09:a389:7c1e:1::1/64" "192.168.4.1/24" ];
+          ipv6Prefixes = [
+            {
+              Prefix = "fd09:a389:7c1e:1::/64";
+            }
+          ];
+          ipv6RoutePrefixes = [
+            {
+              Route = "fd09:a389:7c1e::/48";
+            }
+          ];
+          ipv6SendRAConfig = {
+            DNS = "_link_local";
+            EmitDNS = true;
+            Managed = true;
+            RouterLifetimeSec = 0;
+          };
+
+          # Advertise NAT64 prefixes
+          ipv6PREF64Prefixes = [
+            {
+              Prefix = "fd09:a389:7c1e:3::/64";
+            }
+          ];
+          linkConfig.RequiredForOnline = false;
+          matchConfig.Name = "shadow-lan";
+          networkConfig = {
+            IPv6SendRA = true;
+          };
+          dhcpServerConfig.DNS = "_server_address";
         };
 
         # Configure S-VLAN 20
