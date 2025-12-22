@@ -499,8 +499,9 @@ in
     nat = {
       # Translate network addresses from local interfaces to the internet
       enable = true;
+      enableIPv6 = true;
       externalInterface = "bridge";
-      internalInterfaces = [ "shadow-lan" "plat" ];
+      internalInterfaces = [ "shadow-lan" "plat" "guest" ];
     };
     nftables = {
       # Disable checking the ruleset using lkl as cgroups are not enabled in lkl
