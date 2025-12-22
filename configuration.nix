@@ -2572,7 +2572,6 @@ in
             DNS = "_link_local";
             EmitDNS = true;
             Managed = true;
-            RouterLifetimeSec = 0;
           };
 
           # Advertise NAT64 prefixes
