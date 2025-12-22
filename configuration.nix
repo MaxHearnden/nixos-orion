@@ -2079,6 +2079,29 @@ in
             }
           }
 
+          source dkim-test@compsoc-dev.com dkim-test@zandoodle.me.uk {
+            check {
+              authorize_sender {
+                prepare_email &local_rewrites
+                user_to_email &super_auth
+              }
+            }
+
+            modify {
+              dkim $(local_domains) default {
+                oversign_fields Subject To From Date MIME-Version Content-Type Content-Tranfer-Encoding Reply-To Message-Id References Autocrypt Openpgp Return-Path
+              }
+              replace_sender &sender_rewriting
+            }
+
+            destination postmaster $(local_domains) {
+              deliver_to &local_routing
+            }
+            default_destination {
+              deliver_to &remote_queue
+            }
+          }
+
           source $(local_domains) {
             check {
               authorize_sender {
