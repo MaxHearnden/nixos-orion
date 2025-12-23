@@ -477,8 +477,8 @@ in
       '';
       extraInputRules = ''
         # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
-        meta l4proto {udp, tcp} th dport {55, 56} ip saddr @local_ip accept
-        meta l4proto {udp, tcp} th dport {55, 56} ip6 saddr @local_ip6 accept
+        meta l4proto {udp, tcp} th dport {55, 56, 5353} ip saddr @local_ip accept
+        meta l4proto {udp, tcp} th dport {55, 56, 5353} ip6 saddr @local_ip6 accept
         tcp dport 853 reject
       '';
       # Filter packets that would have been forwarded
@@ -516,6 +516,10 @@ in
       ruleset = ''
         # Add service specific filters
         table inet services {
+          set avahi {
+            type cgroupsv2
+          }
+
           set caddy {
             type cgroupsv2
           }
@@ -592,6 +596,8 @@ in
             iifname lo tcp dport 8080 socket cgroupv2 level 2 @unbound accept
             meta l4proto {udp, tcp} th dport 56 ip saddr == @local_ip socket cgroupv2 level 2 @dnsmasq accept
             meta l4proto {udp, tcp} th dport 56 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @dnsmasq accept
+            meta l4proto {udp, tcp} th dport 5353 ip saddr == @local_ip socket cgroupv2 level 2 @avahi accept
+            meta l4proto {udp, tcp} th dport 5353 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @avahi accept
 
             # Allow HTTP and HTTPS handled by caddy
             tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
@@ -819,7 +825,17 @@ in
     };
   };
   services = {
-    avahi.enable = false;
+    avahi = {
+      enable = true;
+      nssmdns6 = true;
+      publish = {
+        addresses = true;
+        domain = true;
+        enable = true;
+        workstation = true;
+      };
+      reflector = true;
+    };
     caddy = {
       enable = true;
       globalConfig = ''
@@ -2658,6 +2674,7 @@ in
       pkgs-unstable.${config.nixpkgs.system}.dnsdist
     ];
     services = {
+      avahi-daemon.serviceConfig.NFTSet = "cgroup:inet:services:avahi";
       caddy.serviceConfig = {
         # Allow Caddy to bind to port 80 and port 443
         CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE";
