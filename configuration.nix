@@ -2482,6 +2482,11 @@ in
               VLAN = "20";
             }
           ];
+          extraConfig = ''
+            [IPv6RoutePrefix]
+            Route=fd09:a389:7c1e:5::/64
+            Preference=low
+          '';
           ipv6SendRAConfig = {
             Managed = true;
             RouterLifetimeSec = 0;
@@ -2490,11 +2495,6 @@ in
             {
               Prefix = "fd09:a389:7c1e:5::/64";
               Assign = true;
-            }
-          ];
-          ipv6RoutePrefixes = [
-            {
-              Route = "fd09:a389:7c1e::/48";
             }
           ];
           linkConfig.RequiredForOnline = false;
