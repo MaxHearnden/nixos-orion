@@ -473,8 +473,7 @@ in
       allowedUDPPorts = [ 53 54 443 41641 ];
       allowedTCPPorts = [ 25 53 54 80 443 ];
       extraForwardRules = ''
-        # Allow packets from shadow-lan to reach the NAT64 interface
-        iifname "shadow-lan" oifname "plat" accept
+        iifname {guest, "shadow-lan", "bridge"} oifname {plat, guest, "shadow-lan"} accept
       '';
       extraInputRules = ''
         # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
@@ -490,7 +489,7 @@ in
 
         # Allow DHCP from managed networks
         web-vm.allowedUDPPorts = [ 67 ];
-        guest.allowedUDPPorts = [ 67 ];
+        guest.allowedUDPPorts = [ 67 547 ];
         "shadow-lan".allowedUDPPorts = [ 67 547 ];
 
         # Allow submissions and imaps from tailscale
@@ -599,7 +598,7 @@ in
 
             # Allow DHCP handled by dnsmasq
             udp dport 67 iifname { shadow-lan, guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
-            udp dport 547 iifname shadow-lan socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 547 iifname { shadow-lan, guest } socket cgroupv2 level 2 @dnsmasq accept
 
             iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
@@ -1468,10 +1467,18 @@ in
         # Set the router, ntp server and DNS server addresses.
         dhcp-option = [
           "tag:guest,option:router,192.168.5.1"
+          "tag:guest,option:static-route,192.168.1.0,192.168.5.201"
+          "tag:guest,option:static-route,192.168.4.0,192.168.5.201"
+          "tag:guest,option:classless-static-route,192.168.8.0/31,192.168.5.201"
+          "tag:guest,option:static-route,192.168.9.0/24,192.168.5.201"
           "tag:guest,option:ntp-server,192.168.5.1"
           "tag:guest,option:dns-server,192.168.5.201"
           "tag:shadow,option:router,192.168.4.1"
           "tag:shadow,option:dns-server,192.168.4.1"
+          "tag:shadow,option:static-route,192.168.1.0,192.168.4.1"
+          "tag:shadow,option:static-route,192.168.4.0,192.168.4.1"
+          "tag:shadow,option:classless-static-route,192.168.8.0/31,192.168.4.1"
+          "tag:shadow,option:static-route,192.168.9.0,192.168.4.1"
           "tag:web-vm,option:router,192.168.2.1"
           "tag:web-vm,option:dns-server,192.168.2.1"
         ];
@@ -1480,6 +1487,7 @@ in
           "set:guest,192.168.5.2,192.168.5.199,10m"
           "set:shadow,192.168.4.2,192.168.4.199,10m"
           "set:shadow,fd09:a389:7c1e:1::,fd09:a389:7c1e:1:ffff:ffff:ffff:ffff,64,10m"
+          "set:guest,fd09:a389:7c1e:4::,fd09:a389:7c1e:4:ffff:ffff:ffff:ffff,64,10m"
           "set:web-vm,192.168.2.2,static"
         ];
         # Enable DHCP rapid commit (allows for a two message DHCP exchange)
@@ -2471,12 +2479,22 @@ in
               VLAN = "20";
             }
           ];
-          linkConfig = {
-            # AllMulticast = true;
-            RequiredForOnline = false;
-          };
+          ipv6SendRAConfig.RouterLifetimeSec = 0;
+          ipv6Prefixes = [
+            {
+              Prefix = "fd09:a389:7c1e:5::/64";
+              Assign = true;
+            }
+          ];
+          ipv6RoutePrefixes = [
+            {
+              Route = "fd09:a389:7c1e::/48";
+            }
+          ];
+          linkConfig.RequiredForOnline = false;
           name = "bridge";
           networkConfig = {
+            IPv6SendRA = true;
             IPv6AcceptRA = true;
             IPv6PrivacyExtensions = false;
           };
@@ -2495,11 +2513,38 @@ in
           address = [ "192.168.5.201/24" ];
 
           ipv6AcceptRAConfig.RouteMetric = 2048;
+          ipv6SendRAConfig = {
+            DNS = "_link_local";
+            EmitDNS = true;
+            Managed = true;
+            RouterPreference = "low";
+          };
+          ipv6Prefixes = [
+            {
+              Prefix = "fd09:a389:7c1e:4::/64";
+              Assign = true;
+            }
+          ];
+          ipv6RoutePrefixes = [
+            {
+              Route = "fd09:a389:7c1e::/48";
+            }
+          ];
+
+          # Advertise NAT64 prefixes
+          ipv6PREF64Prefixes = [
+            {
+              Prefix = "fd09:a389:7c1e:3::/64";
+            }
+          ];
 
           # Don't wait for this interface to be configured
           linkConfig.RequiredForOnline = false;
           name = "guest";
-          networkConfig.IPv6AcceptRA = true;
+          networkConfig = {
+            IPv6AcceptRA = true;
+            IPv6SendRA = true;
+          };
         };
         "10-enp1s0" = {
           bridge = [ "bridge" ];
@@ -2575,6 +2620,7 @@ in
             DNS = "_link_local";
             EmitDNS = true;
             Managed = true;
+            RouterPreference = "low";
           };
 
           # Advertise NAT64 prefixes
