@@ -639,7 +639,7 @@ in
               iifname { plat, guest, "shadow-lan" } oifname "bridge" masquerade
 
               # NAT packets for router
-              iifname { plat, guest, "shadow-lan" } oifname guest ip daddr 192.168.5.1 masquerade
+              iifname { plat, guest, "shadow-lan" } oifname guest ip daddr {192.168.5.1, 192.168.6.0/24} masquerade
             }
           '';
         };
@@ -1493,22 +1493,14 @@ in
         # Set the router, ntp server and DNS server addresses.
         dhcp-option = [
           "tag:has-routes,tag:guest,option:router,192.168.5.1"
-          "tag:has-routes,tag:guest,option:static-route,192.168.1.0,192.168.5.201"
-          "tag:has-routes,tag:guest,option:static-route,192.168.4.0,192.168.5.201"
-          "tag:has-routes,tag:guest,option:static-route,192.168.6.0,192.168.5.201"
-          "tag:has-routes,tag:guest,option:classless-static-route,192.168.8.0/31,192.168.5.201"
-          "tag:has-routes,tag:guest,option:static-route,192.168.9.0/24,192.168.5.201"
+          "tag:has-routes,tag:guest,option:static-route,192.168.1.0,192.168.5.201,192.168.4.0,192.168.5.201,192.168.6.0,192.168.5.201,192.168.8.0,192.168.5.201,192.168.9.0,192.168.5.201"
           "tag:has-routes,tag:guest,option:ntp-server,192.168.5.1"
           "tag:guest,option:dns-server,192.168.5.201"
           "tag:!has-routes,tag:guest,option:router,192.168.6.1"
           "tag:!has-routes,tag:guest,option:ntp-server,192.168.5.1"
           "tag:shadow,option:router,192.168.4.1"
           "tag:shadow,option:dns-server,192.168.4.1"
-          "tag:shadow,option:static-route,192.168.1.0,192.168.4.1"
-          "tag:shadow,option:static-route,192.168.5.0,192.168.4.1"
-          "tag:shadow,option:static-route,192.168.6.0,192.168.6.1"
-          "tag:shadow,option:classless-static-route,192.168.8.0/31,192.168.4.1"
-          "tag:shadow,option:static-route,192.168.9.0,192.168.4.1"
+          "tag:shadow,option:static-route,192.168.1.0,192.168.4.1,192.168.5.0,192.168.4.1,192.168.6.0,192.168.4.1,192.168.8.0,192.168.4.1,192.168.9.0,192.168.4.1"
           "tag:web-vm,option:router,192.168.2.1"
           "tag:web-vm,option:dns-server,192.168.2.1"
           "option:domain-search,orion.home.arpa,home.arpa"
