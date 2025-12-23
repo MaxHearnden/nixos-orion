@@ -486,6 +486,7 @@ in
       interfaces = {
         # Allow the TP-link WAP to send logs
         "\"bridge\"".allowedTCPPorts = [ 465 ];
+        "\"bridge\"".allowedUDPPorts = [ 547 ];
 
         # Allow DHCP from managed networks
         web-vm.allowedUDPPorts = [ 67 ];
@@ -598,7 +599,7 @@ in
 
             # Allow DHCP handled by dnsmasq
             udp dport 67 iifname { shadow-lan, guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
-            udp dport 547 iifname { shadow-lan, guest } socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 547 iifname { shadow-lan, guest, "bridge" } socket cgroupv2 level 2 @dnsmasq accept
 
             iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
@@ -1485,9 +1486,10 @@ in
         # Enable DHCP and allocate from a suitable IP address range
         dhcp-range = [
           "set:guest,192.168.5.2,192.168.5.199,10m"
+          "set:guest,fd09:a389:7c1e:4::,fd09:a389:7c1e:4:ffff:ffff:ffff:ffff,64,10m"
           "set:shadow,192.168.4.2,192.168.4.199,10m"
           "set:shadow,fd09:a389:7c1e:1::,fd09:a389:7c1e:1:ffff:ffff:ffff:ffff,64,10m"
-          "set:guest,fd09:a389:7c1e:4::,fd09:a389:7c1e:4:ffff:ffff:ffff:ffff,64,10m"
+          "fd09:a389:7c1e:5::,fd09:a389:7c1e:5:ffff:ffff:ffff:ffff,64,10m"
           "set:web-vm,192.168.2.2,static"
         ];
         # Enable DHCP rapid commit (allows for a two message DHCP exchange)
@@ -1498,6 +1500,7 @@ in
 
         # Enable DHCP operation on C-VLAN 10, S-VLAN 20 and the web-vm TAP interface
         interface = [
+          "bridge"
           "guest"
           "shadow-lan"
           "web-vm"
@@ -2479,7 +2482,10 @@ in
               VLAN = "20";
             }
           ];
-          ipv6SendRAConfig.RouterLifetimeSec = 0;
+          ipv6SendRAConfig = {
+            Managed = true;
+            RouterLifetimeSec = 0;
+          };
           ipv6Prefixes = [
             {
               Prefix = "fd09:a389:7c1e:5::/64";
