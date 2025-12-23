@@ -328,6 +328,8 @@ in
         _acme-challenge.imap cname _acme-challenge.mail
         smtp cname local-tailscale
         _acme-challenge.smtp cname _acme-challenge.mail
+        smtp-local cname local
+        _acme-challenge.smtp-local cname _acme-challenge.mail
         cardgames cname @
         _acme-challenge.cardgames cname _acme-challenge
         mta-sts cname @
