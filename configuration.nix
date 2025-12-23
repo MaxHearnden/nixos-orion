@@ -40,6 +40,8 @@ in
     initrd.systemd.enable = true;
 
     kernel.sysctl = {
+      "net.ipv4.conf.all.forwarding" = true;
+      "net.ipv4.conf.default.forwarding" = true;
       # Enable Explicit Congestion Notification
       "net.ipv4.tcp_ecn" = 1;
       # Enable TCP Fast Open
@@ -473,7 +475,7 @@ in
       allowedUDPPorts = [ 53 54 443 41641 ];
       allowedTCPPorts = [ 25 53 54 80 443 ];
       extraForwardRules = ''
-        iifname {guest, "shadow-lan", "bridge"} oifname {plat, guest, "shadow-lan"} accept
+        iifname {guest, "shadow-lan", "bridge"} oifname {plat, guest, "shadow-lan", "bridge"} accept
       '';
       extraInputRules = ''
         # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
@@ -499,13 +501,6 @@ in
     };
     fqdn = "local.zandoodle.me.uk";
     hostName = "orion";
-    nat = {
-      # Translate network addresses from local interfaces to the internet
-      enable = true;
-      enableIPv6 = true;
-      externalInterface = "bridge";
-      internalInterfaces = [ "shadow-lan" "plat" "guest" ];
-    };
     nftables = {
       # Disable checking the ruleset using lkl as cgroups are not enabled in lkl
       checkRuleset = false;
@@ -634,6 +629,20 @@ in
         destroy set inet services local_ip6
       '';
       tables = {
+        local-nat = {
+          family = "inet";
+          content = ''
+            chain post {
+              type nat hook postrouting priority srcnat; policy accept;
+              # Don't nat packets which don't need it
+              iifname { plat, guest, "shadow-lan", "bridge" } ip6 daddr == fd09:a389:7c1e::/48 accept
+              iifname { plat, guest, "shadow-lan" } oifname "bridge" masquerade
+
+              # NAT packets for router
+              iifname { plat, guest, "shadow-lan" } oifname guest ip daddr 192.168.5.1 masquerade
+            }
+          '';
+        };
         dns = {
           family = "inet";
           content = ''
@@ -1483,25 +1492,32 @@ in
 
         # Set the router, ntp server and DNS server addresses.
         dhcp-option = [
-          "tag:guest,option:router,192.168.5.1"
-          "tag:guest,option:static-route,192.168.1.0,192.168.5.201"
-          "tag:guest,option:static-route,192.168.4.0,192.168.5.201"
-          "tag:guest,option:classless-static-route,192.168.8.0/31,192.168.5.201"
-          "tag:guest,option:static-route,192.168.9.0/24,192.168.5.201"
-          "tag:guest,option:ntp-server,192.168.5.1"
+          "tag:has-routes,tag:guest,option:router,192.168.5.1"
+          "tag:has-routes,tag:guest,option:static-route,192.168.1.0,192.168.5.201"
+          "tag:has-routes,tag:guest,option:static-route,192.168.4.0,192.168.5.201"
+          "tag:has-routes,tag:guest,option:static-route,192.168.6.0,192.168.5.201"
+          "tag:has-routes,tag:guest,option:classless-static-route,192.168.8.0/31,192.168.5.201"
+          "tag:has-routes,tag:guest,option:static-route,192.168.9.0/24,192.168.5.201"
+          "tag:has-routes,tag:guest,option:ntp-server,192.168.5.1"
           "tag:guest,option:dns-server,192.168.5.201"
+          "tag:!has-routes,tag:guest,option:router,192.168.6.1"
+          "tag:!has-routes,tag:guest,option:ntp-server,192.168.5.1"
           "tag:shadow,option:router,192.168.4.1"
           "tag:shadow,option:dns-server,192.168.4.1"
           "tag:shadow,option:static-route,192.168.1.0,192.168.4.1"
-          "tag:shadow,option:static-route,192.168.4.0,192.168.4.1"
+          "tag:shadow,option:static-route,192.168.5.0,192.168.4.1"
+          "tag:shadow,option:static-route,192.168.6.0,192.168.6.1"
           "tag:shadow,option:classless-static-route,192.168.8.0/31,192.168.4.1"
           "tag:shadow,option:static-route,192.168.9.0,192.168.4.1"
           "tag:web-vm,option:router,192.168.2.1"
           "tag:web-vm,option:dns-server,192.168.2.1"
+          "option:domain-search,orion.home.arpa,home.arpa"
         ];
+        dhcp-match = "set:has-routes,55,!";
         # Enable DHCP and allocate from a suitable IP address range
         dhcp-range = [
-          "set:guest,192.168.5.2,192.168.5.199,10m"
+          "tag:has-routes,set:guest,192.168.5.2,192.168.5.199,10m"
+          "tag:!has-routes,set:guest,192.168.6.2,192.168.6.199,10m"
           "set:guest,fd09:a389:7c1e:4::,fd09:a389:7c1e:4:ffff:ffff:ffff:ffff,64,10m"
           "set:shadow,192.168.4.2,192.168.4.199,10m"
           "set:shadow,fd09:a389:7c1e:1::,fd09:a389:7c1e:1:ffff:ffff:ffff:ffff,64,10m"
@@ -1531,6 +1547,7 @@ in
 
         log-debug = true;
         log-queries = true;
+        log-dhcp = true;
 
         no-hosts = true;
 
@@ -2500,7 +2517,7 @@ in
           ];
           extraConfig = ''
             [IPv6RoutePrefix]
-            Route=fd09:a389:7c1e:5::/64
+            Route=fd09:a389:7c1e::/48
             Preference=low
           '';
           ipv6SendRAConfig = {
@@ -2532,7 +2549,7 @@ in
         };
         # configure the guest interface
         "10-guest" = {
-          address = [ "192.168.5.201/24" ];
+          address = [ "192.168.5.201/24" "192.168.6.1/24" ];
 
           ipv6AcceptRAConfig.RouteMetric = 2048;
           ipv6SendRAConfig = {
