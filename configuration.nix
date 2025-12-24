@@ -639,7 +639,7 @@ in
               iifname { plat, guest, "shadow-lan" } oifname "bridge" masquerade
 
               # NAT packets for router
-              iifname { plat, guest, "shadow-lan" } oifname guest ip daddr {192.168.5.1, 192.168.6.0/24} masquerade
+              iifname { plat, guest, "shadow-lan" } oifname guest ip daddr 192.168.5.1 masquerade
             }
           '';
         };
@@ -1494,10 +1494,9 @@ in
         dhcp-option = [
           "tag:has-routes,tag:guest,option:router,192.168.5.1"
           "tag:has-routes,tag:guest,option:static-route,192.168.1.0,192.168.5.201,192.168.4.0,192.168.5.201,192.168.6.0,192.168.5.201,192.168.8.0,192.168.5.201,192.168.9.0,192.168.5.201"
-          "tag:has-routes,tag:guest,option:ntp-server,192.168.5.1"
+          "tag:guest,option:ntp-server,192.168.5.1"
           "tag:guest,option:dns-server,192.168.5.201"
           "tag:!has-routes,tag:guest,option:router,192.168.6.1"
-          "tag:!has-routes,tag:guest,option:ntp-server,192.168.5.1"
           "tag:shadow,option:router,192.168.4.1"
           "tag:shadow,option:dns-server,192.168.4.1"
           "tag:shadow,option:static-route,192.168.1.0,192.168.4.1,192.168.5.0,192.168.4.1,192.168.6.0,192.168.4.1,192.168.8.0,192.168.4.1,192.168.9.0,192.168.4.1"
@@ -1536,10 +1535,6 @@ in
           "orion-bridge.orion.home.arpa,bridge"
           "orion-shadow.orion.home.arpa,shadow-lan"
         ];
-
-        log-debug = true;
-        log-queries = true;
-        log-dhcp = true;
 
         no-hosts = true;
 
@@ -2548,7 +2543,6 @@ in
             DNS = "_link_local";
             EmitDNS = true;
             Managed = true;
-            RouterPreference = "low";
           };
           ipv6Prefixes = [
             {
