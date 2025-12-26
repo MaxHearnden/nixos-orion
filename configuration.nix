@@ -1552,18 +1552,16 @@ in
         "/run/credentials/knot.service/maddy"
       ];
       settings = {
-        acl = [
-          {
+        acl = {
+          caddy-acme = {
             # Allow caddy to modify TXT records in _acme-challenge domains
-            id = "caddy-acme";
             address = "::1";
             action = "update";
             key = "caddy";
             update-owner = "zone";
             update-type = "TXT";
-          }
-          {
-            id = "knot-ds";
+          };
+          knot-ds = {
             address = [
               "127.0.0.1"
               "::1"
@@ -1577,19 +1575,17 @@ in
               "_acme-challenge.mail"
             ];
             update-type = "DS";
-          }
-          {
+          };
+          maddy-acme = {
             # Allow maddy to modify TXT records in _acme-challenge domains
-            id = "maddy-acme";
             address = "::1";
             action = "update";
             key = "maddy";
             update-owner = "zone";
             update-type = "TXT";
-          }
-          {
+          };
+          transfer = {
             # Allow a zone transfer from local devices
-            id = "transfer";
             address = [
               "10.0.0.0/8"
               "100.64.0.0/10"
@@ -1602,156 +1598,120 @@ in
               "fe80::/10"
             ];
             action = "transfer";
-          }
+          };
+        };
+        mod-queryacl.local.address = [
+          "10.0.0.0/8"
+          "100.64.0.0/10"
+          "127.0.0.0/8"
+          "169.254.0.0/16"
+          "192.168.0.0/16"
+          "172.16.0.0/12"
+          "::1/128"
+          "fc00::/7"
+          "fe80::/10"
         ];
-        mod-queryacl = [
-          {
-            id = "local";
-            address = [
-              "10.0.0.0/8"
-              "100.64.0.0/10"
-              "127.0.0.0/8"
-              "169.254.0.0/16"
-              "192.168.0.0/16"
-              "172.16.0.0/12"
-              "::1/128"
-              "fc00::/7"
-              "fe80::/10"
-            ];
-          }
-        ];
-        policy = [
-          {
-            # Add a DNSSEC policy with DS verfiication using unbound
-            id = "porkbun";
-            ksk-submission = "unbound";
-            rrsig-refresh = "7d";
-            single-type-signing = true;
-          }
-          {
+        policy = {
+          acme-challenge = {
             # Add a policy for acme challenge zones
             ds-push = "knot-ds-push";
-            id = "acme-challenge";
             ksk-submission = "unbound";
             ksk-lifetime = "14d";
             propagation-delay = "1d";
             single-type-signing = true;
-          }
-        ];
-        remote = [
-          {
-            id = "b.root-servers.net";
+          };
+          porkbun = {
+            # Add a DNSSEC policy with DS verfiication using unbound
+            ksk-submission = "unbound";
+            rrsig-refresh = "7d";
+            single-type-signing = true;
+          };
+        };
+        remote = {
+          "b.root-servers.net" = {
             address = [
               "2001:500:200::b"
               "199.9.14.201"
             ];
             automatic-acl = false;
-          }
-          {
-            id = "c.root-servers.net";
+          };
+          "c.root-servers.net" = {
             address = [
               "2001:500:2::c"
               "192.33.4.12"
             ];
             automatic-acl = false;
-          }
-          {
-            id = "d.root-servers.net";
+          };
+          "d.root-servers.net" = {
             address = [
               "2001:500:2d::d"
               "199.7.91.13"
             ];
             automatic-acl = false;
-          }
-          {
-            id = "dnsmasq";
+          };
+          dnsmasq = {
             address = [
               "::1@56"
               "127.0.0.1@56"
             ];
             automatic-acl = false;
             block-notify-after-transfer = true;
-          }
-          {
-            id = "f.root-servers.net";
+          };
+          "f.root-servers.net" = {
             address = [
               "2001:500:2f::f"
               "192.5.5.241"
             ];
             automatic-acl = false;
-          }
-          {
-            id = "g.root-servers.net";
+          };
+          "g.root-servers.net" = {
             address = [
               "2001:500:12::d0d"
               "192.112.36.4"
             ];
             automatic-acl = false;
-          }
-          {
-            id = "ns1.first-ns.de";
-            address = [
-              "2a01:4f8:0:a101::a:1"
-            ];
-          }
-          {
-            id = "pc";
-            address = [
-              "fd7a:115c:a1e0::d2df:ec69@8053"
-              "100.95.236.105@8053"
-            ];
-          }
-          {
-            id = "robotns2.second-ns.de";
-            address = [
-              "2a01:4f8:0:1::5ddc:2"
-            ];
-          }
-          {
-            id = "robotns3.second-ns.com";
-            address = [
-              "2001:67c:192c::add:a3"
-            ];
-          }
-          {
-            id = "k.root-servers.net";
+          };
+          "ns1.first-ns.de".address = "2a01:4f8:0:a101::a:1";
+          pc.address = [
+            "fd7a:115c:a1e0::d2df:ec69@8053"
+            "100.95.236.105@8053"
+          ];
+          "robotns2.second-ns.de".address = "2a01:4f8:0:1::5ddc:2";
+          "robotns3.second-ns.com".address = "2001:67c:192c::add:a3";
+          "k.root-servers.net" = {
             address = [
               "2001:7fd::1"
               "193.0.14.129"
             ];
             automatic-acl = false;
-          }
-          {
-            id = "knot-ds-push";
+          };
+          knot-ds-push = {
             address = [
               "::1@54"
               "127.0.0.1@54"
             ];
             key = "knot-ds";
             automatic-acl = false;
-          }
-          {
-            id = "unbound";
+          };
+          unbound = {
             address = "::1@55";
             automatic-acl = false;
-          }
-          {
-            id = "xfr.cjr.dns.icann.org";
+          };
+          "xfr.cjr.dns.icann.org" = {
             address = [
               "2620:0:2830:202::132"
               "192.0.47.132"
             ];
             automatic-acl = false;
-          }
-          {
-            id = "xfr.lax.dns.icann.org";
+          };
+          "xfr.lax.dns.icann.org" = {
             address = [
               "2620:0:2d0:202::132"
               "192.0.32.132"
             ];
             automatic-acl = false;
-          }
-        ];
+          };
+        };
         remotes = [
           {
             id = "hetzner";
