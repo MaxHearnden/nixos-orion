@@ -915,6 +915,12 @@ in
         };
         "zandoodle.me.uk" = {
           extraConfig = ''
+            tls {
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile shortlived
+              }
+            }
             header {
               # Add a Cross Origin Resource Policy
               Cross-Origin-Resource-Policy same-origin
