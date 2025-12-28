@@ -300,6 +300,11 @@ in
         _imaps._tcp SRV 0 10 993 imap
         _submissions._tcp SRV 0 10 465 smtp
         _submission._tcp SRV 0 10 587 smtp
+        _kerberos uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
+        _kerberos uri 20 1 krb5srv:m:tcp:local.zandoodle.me.uk
+        _kerberos txt ZANDOODLE.ME.UK
+        _kerberos._udp srv 0 10 88 local
+        _kerberos._tcp srv 0 10 88 local
 
         _acme-challenge ns dns
 
@@ -472,8 +477,8 @@ in
   networking = {
     firewall = {
       # Allow DNS, HTTP and HTTPS
-      allowedUDPPorts = [ 53 54 443 41641 ];
-      allowedTCPPorts = [ 25 53 54 80 443 ];
+      allowedUDPPorts = [ 53 54 88 443 464 41641 ];
+      allowedTCPPorts = [ 25 53 54 80 88 443 464 749 ];
       extraForwardRules = ''
         iifname {plat, guest, "shadow-lan", "bridge"} oifname {plat, guest, "shadow-lan", "bridge"} accept
       '';
@@ -524,6 +529,14 @@ in
           }
 
           set dnsmasq {
+            type cgroupsv2
+          }
+
+          set kadmin {
+            type cgroupsv2
+          }
+
+          set kdc {
             type cgroupsv2
           }
 
@@ -601,6 +614,12 @@ in
             # Allow DHCP handled by dnsmasq
             udp dport 67 iifname { shadow-lan, guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
             udp dport 547 iifname { shadow-lan, guest, "bridge" } socket cgroupv2 level 2 @dnsmasq accept
+
+            # Allow Kerberos
+            meta l4proto {udp, tcp} th dport 88 ip saddr == @local_ip socket cgroupv2 level 4 @kdc accept
+            meta l4proto {udp, tcp} th dport 88 ip6 saddr == @local_ip6 socket cgroupv2 level 4 @kdc accept
+            meta l4proto {udp, tcp} th dport {464, 749} ip saddr == @local_ip socket cgroupv2 level 4 @kadmin accept
+            meta l4proto {udp, tcp} th dport {464, 749} ip6 saddr == @local_ip6 socket cgroupv2 level 4 @kadmin accept
 
             iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
@@ -821,8 +840,20 @@ in
   security = {
     doas.enable = true;
 
-    # Fix run0
-    pam.services.systemd-run0 = {};
+    krb5 = {
+      enable = true;
+      settings.libdefaults = {
+        default_realm = "ZANDOODLE.ME.UK";
+        dns_lookup_realm = true;
+        permitted_enctypes = "aes256-sha2";
+      };
+    };
+
+    pam = {
+      krb5.enable = false;
+      # Fix run0
+      services.systemd-run0 = {};
+    };
     polkit.enable = true;
     sudo.enable = false;
 
@@ -1548,6 +1579,17 @@ in
         port = 56;
       };
     };
+    kerberos_server = {
+      enable = true;
+      settings = {
+        realms = {
+          "ZANDOODLE.ME.UK" = {
+            supported_enctypes = "aes256-sha2:normal";
+            master_key_type = "aes256-sha2";
+          };
+        };
+      };
+    };
     knot = {
       enable = true;
 
@@ -2193,10 +2235,13 @@ in
     };
     openssh = {
       enable = true;
+      package = pkgs.opensshWithKerberos;
       settings = {
         # Disable password based authentication
         KbdInteractiveAuthentication = false;
         PasswordAuthentication = false;
+        GSSAPIAuthentication = true;
+        GSSAPIStrictAcceptorCheck = false;
       };
     };
     # Disable systemd-resolved
@@ -3052,6 +3097,8 @@ in
         '';
         unitConfig.StartLimitIntervalSec = "20m";
       };
+      kadmind.serviceConfig.NFTSet = "cgroup:inet:services:kadmin";
+      kdc.serviceConfig.NFTSet = "cgroup:inet:services:kdc";
       knot.serviceConfig = {
         # Get the TSIG credentials for caddy
         LoadCredential = [
