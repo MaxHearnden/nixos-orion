@@ -406,6 +406,11 @@ in
         workstation aaaa fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
         workstation IN SSHFP 1 2 bb26ac7d22088477cf1a3f701f702595025a569c7373306bbfb44d880202322f
         workstation IN SSHFP 4 2 7fa4a718df8a2c3fe600f3d9976d00ac825d56a1ca41b5b36026a279400642e8
+        _kerberos.workstation txt WORKSTATION.ZANDOODLE.ME.UK
+        _kerberos.workstation uri 10 1 krb5srv:m:udp:workstation.zandoodle.me.uk
+        _kerberos.workstation uri 20 1 krb5srv:m:tcp:workstation.zandoodle.me.uk
+        _kerberos._tcp.workstation srv 0 10 88 workstation
+        _kerberos._udp.workstation srv 0 10 88 workstation
 
         ; Google stuff
         @ TXT "google-site-verification=ZDVckD_owTCKFzcbI9VqqGQOoNfd_8C0tKNqRVkiK8I"
