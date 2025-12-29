@@ -411,6 +411,8 @@ in
         workstation aaaa fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
         workstation IN SSHFP 1 2 bb26ac7d22088477cf1a3f701f702595025a569c7373306bbfb44d880202322f
         workstation IN SSHFP 4 2 7fa4a718df8a2c3fe600f3d9976d00ac825d56a1ca41b5b36026a279400642e8
+        *.workstation cname workstation
+        _acme-challenge.workstation ns dns
         _kerberos.workstation txt WORKSTATION.ZANDOODLE.ME.UK
         _kerberos.workstation uri 10 1 krb5srv:m:tcp:workstation.zandoodle.me.uk
         _kerberos._tcp.workstation srv 0 10 88 workstation
@@ -1628,6 +1630,7 @@ in
         "/run/credentials/knot.service/caddy"
         "/run/credentials/knot.service/knot-ds"
         "/run/credentials/knot.service/maddy"
+        "/etc/knot/workstation.tsig"
       ];
       settings = {
         acl = {
@@ -1676,6 +1679,18 @@ in
               "fe80::/10"
             ];
             action = "transfer";
+          };
+          workstation = {
+            address = [
+              "100.91.224.22"
+              "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016"
+            ];
+            key = "workstation";
+            action = [ "query" "update" ];
+            update-owner = "name";
+            update-owner-match = "equal";
+            update-owner-name = "_acme-challenge.workstation";
+            update-type = "DS";
           };
         };
         mod-queryacl.local.address = [
@@ -1771,6 +1786,13 @@ in
             key = "knot-ds";
             automatic-acl = false;
           };
+          workstation = {
+            address = [
+              "100.91.224.22"
+              "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016"
+            ];
+            key = "workstation";
+          };
           unbound = {
             address = "::1@55";
             automatic-acl = false;
@@ -1790,29 +1812,23 @@ in
             automatic-acl = false;
           };
         };
-        remotes = [
-          {
-            id = "hetzner";
-            remote = [
-              "ns1.first-ns.de"
-              "robotns2.second-ns.de"
-              "robotns3.second-ns.com"
-            ];
-          }
-          {
-            id = "root-servers";
-            remote = [
-              "b.root-servers.net"
-              "c.root-servers.net"
-              "d.root-servers.net"
-              "f.root-servers.net"
-              "g.root-servers.net"
-              "k.root-servers.net"
-              "xfr.cjr.dns.icann.org"
-              "xfr.lax.dns.icann.org"
-            ];
-          }
-        ];
+        remotes = {
+          hetzner.remote = [
+            "ns1.first-ns.de"
+            "robotns2.second-ns.de"
+            "robotns3.second-ns.com"
+          ];
+          root-servers.remote = [
+            "b.root-servers.net"
+            "c.root-servers.net"
+            "d.root-servers.net"
+            "f.root-servers.net"
+            "g.root-servers.net"
+            "k.root-servers.net"
+            "xfr.cjr.dns.icann.org"
+            "xfr.lax.dns.icann.org"
+          ];
+        };
         server = {
           # Allow secondary servers to transfer zones from this server
           automatic-acl = true;
@@ -1832,17 +1848,11 @@ in
           # Open multiple TCP sockets
           tcp-reuseport = true;
         };
-        submission = [
-          {
-            # Check DS submittion using unbound
-            id = "unbound";
-            parent = "unbound";
-          }
-          {
-            id = "acme-challenge";
-            parent = [ "unbound" "knot-ds-push" "hetzner" ];
-          }
-        ];
+        submission = {
+          acme-challenge.parent = [ "unbound" "knot-ds-push" "hetzner" ];
+          # Check DS submittion using unbound
+          unbound.parent = "unbound";
+        };
         template = [
           {
             acl = [ "transfer" ];
@@ -1946,6 +1956,14 @@ in
             zonefile-sync = -1;
           }
           {
+            acl = [ "transfer" ];
+            dnssec-validation = true;
+            domain = "_acme-challenge.workstation.zandoodle.me.uk";
+            master = "workstation";
+            template = "local";
+            zonemd-verify = true;
+          }
+          {
             # Serve a copy of the root zone
             domain = "arpa";
             template = "root-servers";
@@ -2006,7 +2024,7 @@ in
             template = "dnsmasq";
           }
           {
-            acl = [ "knot-ds" "transfer" ];
+            acl = [ "knot-ds" "transfer" "workstation" ];
             catalog-group = "global";
             dnssec-policy = "porkbun";
             dnssec-signing = true;
