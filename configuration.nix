@@ -857,6 +857,7 @@ in
         default_realm = "ZANDOODLE.ME.UK";
         dns_lookup_realm = true;
         permitted_enctypes = "aes256-sha2";
+        spake_preauth_groups = "edwards25519";
       };
     };
 
@@ -1592,23 +1593,26 @@ in
     };
     kerberos_server = {
       enable = true;
-      settings.realms."ZANDOODLE.ME.UK" = {
-        acl = [
-          {
-            access = "all";
-            principal = "*/admin";
-          }
-          {
-            access = "all";
-            principal = "max/zandoodle.me.uk";
-          }
-          {
-            access = "all";
-            principal = "max/workstation.zandoodle.me.uk@WORKSTATION.ZANDOODLE.ME.UK";
-          }
-        ];
-        supported_enctypes = "aes256-sha2:normal";
-        master_key_type = "aes256-sha2";
+      settings = {
+        kdcdefaults.spake_preauth_kdc_challenge = "edwards25519";
+        realms."ZANDOODLE.ME.UK" = {
+          acl = [
+            {
+              access = "all";
+              principal = "*/admin";
+            }
+            {
+              access = "all";
+              principal = "max/zandoodle.me.uk";
+            }
+            {
+              access = "all";
+              principal = "max/workstation.zandoodle.me.uk@WORKSTATION.ZANDOODLE.ME.UK";
+            }
+          ];
+          supported_enctypes = "aes256-sha2:normal";
+          master_key_type = "aes256-sha2";
+        };
       };
     };
     knot = {
