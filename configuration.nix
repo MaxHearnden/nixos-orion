@@ -313,6 +313,7 @@ in
         $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include local-tailscale.zandoodle.me.uk.
         $INCLUDE /etc/knot/no-email.zone.include workstation.zandoodle.me.uk.
+        $INCLUDE /etc/knot/no-email.zone.include pc.zandoodle.me.uk.
         _spf txt "v=spf1 ?a:mail.zandoodle.me.uk -all"
 
         ; Setup DKIM for this domain
@@ -398,6 +399,13 @@ in
         ; Add a zero ttl record for testing DNS resolvers
         ttl-check 0 txt ttl\ check
         ttl-check 0 txt "v=spf1 -all"
+
+        pc a 100.95.236.105
+        pc aaaa fd7a:115c:a1e0::d2df:ec69
+        pc sshfp 1 2 ea259e9d2d355d9506919e56ed0c35fbb0476501524f6349cf9f6ef6dbe19c50
+        pc sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
+        _kerberos.pc txt WORKSTATION.ZANDOODLE.ME.UK
+
 
         workstation a 100.91.224.22
         workstation aaaa fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
