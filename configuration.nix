@@ -407,8 +407,7 @@ in
         workstation IN SSHFP 1 2 bb26ac7d22088477cf1a3f701f702595025a569c7373306bbfb44d880202322f
         workstation IN SSHFP 4 2 7fa4a718df8a2c3fe600f3d9976d00ac825d56a1ca41b5b36026a279400642e8
         _kerberos.workstation txt WORKSTATION.ZANDOODLE.ME.UK
-        _kerberos.workstation uri 10 1 krb5srv:m:udp:workstation.zandoodle.me.uk
-        _kerberos.workstation uri 20 1 krb5srv:m:tcp:workstation.zandoodle.me.uk
+        _kerberos.workstation uri 10 1 krb5srv:m:tcp:workstation.zandoodle.me.uk
         _kerberos._tcp.workstation srv 0 10 88 workstation
         _kerberos._udp.workstation srv 0 10 88 workstation
 
@@ -834,10 +833,17 @@ in
     # Enable nix-index as an alternative to command-not-found
     nix-index.enable = true;
 
-    # Verify host keys using DNS
-    ssh.extraConfig = ''
-      VerifyHostKeyDNS yes
-    '';
+    ssh = {
+      extraConfig = ''
+        # Verify host keys using DNS
+        VerifyHostKeyDNS yes
+
+        Host zandoodle.me.uk *.zandoodle.me.uk
+        GSSAPIAuthentication yes
+        StrictHostKeyChecking yes
+      '';
+      package = pkgs.opensshWithKerberos;
+    };
 
     # Enable wireshark and dumpcap
     wireshark.enable = true;
@@ -1586,13 +1592,23 @@ in
     };
     kerberos_server = {
       enable = true;
-      settings = {
-        realms = {
-          "ZANDOODLE.ME.UK" = {
-            supported_enctypes = "aes256-sha2:normal";
-            master_key_type = "aes256-sha2";
-          };
-        };
+      settings.realms."ZANDOODLE.ME.UK" = {
+        acl = [
+          {
+            access = "all";
+            principal = "*/admin";
+          }
+          {
+            access = "all";
+            principal = "max/zandoodle.me.uk";
+          }
+          {
+            access = "all";
+            principal = "max/workstation.zandoodle.me.uk@WORKSTATION.ZANDOODLE.ME.UK";
+          }
+        ];
+        supported_enctypes = "aes256-sha2:normal";
+        master_key_type = "aes256-sha2";
       };
     };
     knot = {
@@ -2240,7 +2256,6 @@ in
     };
     openssh = {
       enable = true;
-      package = pkgs.opensshWithKerberos;
       settings = {
         # Disable password based authentication
         KbdInteractiveAuthentication = false;
