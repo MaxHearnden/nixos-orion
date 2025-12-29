@@ -220,10 +220,7 @@ in
         $TTL 600
         @ soa local.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 1200 180 1209600 600
         @ ns local.zandoodle.me.uk.
-        max ns workstation.zerotier.max.home.arpa.
-        workstation.zerotier.max a 172.28.10.244
-        workstation.zerotier.max aaaa fd80:56c2:e21c:3d4b:c99:93c5:d88:e258
-        workstation.zerotier.max aaaa fc9c:6b89:eec5:d88:e258::1
+        max ns workstation.zandoodle.me.uk.
         ax3000 a 192.168.1.202
         orion ns local.zandoodle.me.uk.
         vodafone a 192.168.1.1
