@@ -1769,8 +1769,8 @@ in
           };
           "ns1.first-ns.de".address = "2a01:4f8:0:a101::a:1";
           pc.address = [
-            "fd7a:115c:a1e0::d2df:ec69@8053"
-            "100.95.236.105@8053"
+            "fd7a:115c:a1e0::d2df:ec69@54"
+            "100.95.236.105@54"
           ];
           "robotns2.second-ns.de".address = "2a01:4f8:0:1::5ddc:2";
           "robotns3.second-ns.com".address = "2001:67c:192c::add:a3";
