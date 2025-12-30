@@ -409,6 +409,9 @@ in
 
         workstation a 100.91.224.22
         workstation aaaa fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
+        workstation caa 128 issue "letsencrypt.org;validationmethods=dns-01"
+        workstation caa 0 issuemail ";"
+        workstation caa 0 issuevmc ";"
         workstation IN SSHFP 1 2 bb26ac7d22088477cf1a3f701f702595025a569c7373306bbfb44d880202322f
         workstation IN SSHFP 4 2 7fa4a718df8a2c3fe600f3d9976d00ac825d56a1ca41b5b36026a279400642e8
         *.workstation cname workstation
