@@ -400,6 +400,12 @@ in
         ttl-check 0 txt ttl\ check
         ttl-check 0 txt "v=spf1 -all"
 
+        chromebook a 100.69.85.70
+        chromebook aaaa fd7a:115c:a1e0::d401:5546
+        chromebook sshfp 1 2 dc6283b6624010239844b07c3c6e4691233ceb4a46c86c36402cfcfe3a1eceda
+        chromebook sshfp 4 2 522f2d5021c6d6250d99b77bea672fbfaac6c5b8a4ef6950d49267da9ecc11ee
+        _kerberos.chromebook txt WORKSTATION.ZANDOODLE.ME.UK
+
         pc a 100.95.236.105
         pc aaaa fd7a:115c:a1e0::d2df:ec69
         pc sshfp 1 2 ea259e9d2d355d9506919e56ed0c35fbb0476501524f6349cf9f6ef6dbe19c50
