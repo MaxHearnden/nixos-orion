@@ -406,6 +406,12 @@ in
         chromebook sshfp 4 2 522f2d5021c6d6250d99b77bea672fbfaac6c5b8a4ef6950d49267da9ecc11ee
         _kerberos.chromebook txt WORKSTATION.ZANDOODLE.ME.UK
 
+        laptop a 100.68.198.4
+        laptop aaaa fd7a:115c:a1e0::d601:c604
+        laptop sshfp 1 2 74f8b963573c943f69119ed3383dcf34471acc5ac61e6136cc7daddce57e9dad
+        laptop sshfp 4 2 af1162523e3f11a434bec1a78f6b8c5bf0b9f5c187391a08004afb8b5d7d8195
+        _kerberos.laptop txt WORKSTATION.ZANDOODLE.ME.UK
+
         pc a 100.95.236.105
         pc aaaa fd7a:115c:a1e0::d2df:ec69
         pc sshfp 1 2 ea259e9d2d355d9506919e56ed0c35fbb0476501524f6349cf9f6ef6dbe19c50
