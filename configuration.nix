@@ -1926,7 +1926,12 @@ in
             file = "/etc/knot/rDNS.zone";
             module = [ "mod-queryacl/local" ];
             notify = "pc";
-            reverse-generate = [ "home.arpa" "orion.home.arpa" ];
+            reverse-generate = [
+              "compsoc-dev.com"
+              "home.arpa"
+              "zandoodle.me.uk"
+              "orion.home.arpa"
+            ];
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
