@@ -2320,7 +2320,7 @@ in
             "home.arpa"
             "168.192.in-addr.arpa."
             "d.f.ip6.arpa"
-          ];
+          ] ++ lib.genList (i: "${toString (i+64)}.100.in-addr.arpa") 64;
 
           # Enable Extended DNS Errors
           ede = true;
@@ -2343,7 +2343,7 @@ in
             "home.arpa. nodefault"
             "168.192.in-addr.arpa. nodefault"
             "d.f.ip6.arpa. nodefault"
-          ];
+          ] ++ lib.genList (i: "${toString (i+64)}.100.in-addr.arpa nodefault") 64;
 
           log-servfail = true;
 
@@ -2444,7 +2444,11 @@ in
             stub-addr = "::1@54";
             stub-no-cache = true;
           }
-        ];
+        ] ++ lib.genList (i: {
+          name = "${toString (i+64)}.100.in-addr.arpa";
+          stub-addr = "::1@54";
+          stub-no-cache = true;
+        }) 64;
       };
     };
     # Use userborn for user management
