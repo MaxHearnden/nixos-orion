@@ -863,11 +863,21 @@ in
 
     krb5 = {
       enable = true;
-      settings.libdefaults = {
-        default_realm = "ZANDOODLE.ME.UK";
-        dns_lookup_realm = true;
-        permitted_enctypes = "aes256-sha2";
-        spake_preauth_groups = "edwards25519";
+      settings = {
+        libdefaults = {
+          default_realm = "ZANDOODLE.ME.UK";
+          dns_lookup_realm = true;
+          permitted_enctypes = "aes256-sha2";
+          spake_preauth_groups = "edwards25519";
+        };
+        realms = {
+          "ZANDOODLE.ME.UK" = {
+            disable_encrypted_timestamp = true;
+          };
+          "WORKSTATION.ZANDOODLE.ME.UK" = {
+            disable_encrypted_timestamp = true;
+          };
+        };
       };
     };
 
