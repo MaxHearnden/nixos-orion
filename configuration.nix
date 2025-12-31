@@ -1617,7 +1617,7 @@ in
             }
             {
               access = "all";
-              principal = "max/workstation.zandoodle.me.uk@WORKSTATION.ZANDOODLE.ME.UK";
+              principal = "max@WORKSTATION.ZANDOODLE.ME.UK";
             }
           ];
           supported_enctypes = "aes256-sha2:normal";
