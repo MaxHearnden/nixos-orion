@@ -1932,7 +1932,8 @@ in
             zonefile-sync = -1;
           };
         };
-        zone = {
+        zone = lib.genAttrs (lib.genList (i: "${toString (i+64)}.100.in-addr.arpa") 64) (_: {template = "rDNS";})
+        // {
           "." = {
             # Serve a copy of the root zone
             template = "root-servers";
