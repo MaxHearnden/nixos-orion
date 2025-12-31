@@ -1872,57 +1872,51 @@ in
           # Check DS submittion using unbound
           unbound.parent = "unbound";
         };
-        template = [
-          {
+        template = {
+          default = {
             acl = [ "transfer" ];
             catalog-role = "member";
             catalog-zone = "catz";
-            id = "default";
             # Add DNS cookies and rate limiting
             global-module = ["mod-cookies" "mod-rrl"];
             notify = "pc";
             semantic-checks = true;
-          }
-          {
+          };
+          catalog = {
             acl = [ "transfer" ];
             catalog-role = "generate";
-            id = "catalog";
             notify = "pc";
-          }
-          {
+          };
+          dnsmasq = {
             acl = [ "transfer" ];
             catalog-role = "member";
             catalog-zone = "catz";
-            id = "dnsmasq";
             ixfr-from-axfr = true;
             master = "dnsmasq";
             module = "mod-queryacl/local";
             notify = "pc";
             semantic-checks = true;
-          }
-          {
+          };
+          local = {
             # Template for zones that shouldn't be added to the catalog
             acl = [ "transfer" ];
-            id = "local";
             semantic-checks = true;
-          }
-          {
+          };
+          root-servers = {
             acl = [ "transfer" ];
             catalog-role = "member";
             catalog-zone = "catz";
             dnssec-validation = true;
-            id = "root-servers";
             ixfr-from-axfr = true;
             master = "root-servers";
             module = "mod-queryacl/local";
             notify = "pc";
             semantic-checks = true;
-          }
-          {
+          };
+          rDNS = {
             acl = [ "transfer" ];
             catalog-role = "member";
             catalog-zone = "catz";
-            id = "rDNS";
             file = "/etc/knot/rDNS.zone";
             module = [ "mod-queryacl/local" ];
             notify = "pc";
@@ -1936,25 +1930,20 @@ in
             journal-content = "all";
             zonefile-load = "difference-no-serial";
             zonefile-sync = -1;
-          }
-        ];
-        zone = [
-          {
+          };
+        };
+        zone = {
+          "." = {
             # Serve a copy of the root zone
-            domain = ".";
             template = "root-servers";
             zonemd-verify = true;
-          }
-          {
-            template = "rDNS";
-            domain = "168.192.in-addr.arpa";
-          }
-          {
+          };
+          "168.192.in-addr.arpa".template = "rDNS";
+          "_acme-challenge.mail.zandoodle.me.uk" = {
             # Add a zone for ACME challenges
             acl = [ "maddy-acme" "transfer" ];
             dnssec-policy = "acme-challenge";
             dnssec-signing = true;
-            domain = "_acme-challenge.mail.zandoodle.me.uk";
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
             semantic-checks = true;
             template = "local";
@@ -1963,13 +1952,12 @@ in
             zonefile-skip = "TXT";
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
-          }
-          {
+          };
+          "_acme-challenge.zandoodle.me.uk" = {
             # Add a zone for ACME challenges
             acl = [ "caddy-acme" "transfer" ];
             dnssec-policy = "acme-challenge";
             dnssec-signing = true;
-            domain = "_acme-challenge.zandoodle.me.uk";
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
             semantic-checks = true;
             template = "local";
@@ -1978,49 +1966,38 @@ in
             zonefile-skip = "TXT";
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
-          }
-          {
+          };
+          "_acme-challenge.workstation.zandoodle.me.uk" = {
             acl = [ "transfer" ];
             dnssec-validation = true;
-            domain = "_acme-challenge.workstation.zandoodle.me.uk";
             master = "workstation";
             template = "local";
             zonemd-verify = true;
-          }
-          {
-            # Serve a copy of the root zone
-            domain = "arpa";
-            template = "root-servers";
-          }
-          {
+          };
+          arpa.template = "root-servers"; # Serve a copy of the root zone
+          "bogus.zandoodle.me.uk" = {
             # Add a domain for DNSSEC testing
             acl = [ "transfer" ];
-            domain = "bogus.zandoodle.me.uk";
             file = "/etc/knot/bogus.zandoodle.me.uk.zone";
             journal-content = "all";
             zonefile-load = "difference-no-serial";
             zonefile-sync = -1;
-          }
-          {
+          };
+          "bogus-exists.zandoodle.me.uk" = {
             # Add a domain for DNSSEC testing
             acl = [ "transfer" ];
-            domain = "bogus-exists.zandoodle.me.uk";
             file = "/etc/knot/bogus.zandoodle.me.uk.zone";
             journal-content = "all";
             # Don't modify the zonefile
             zonefile-load = "difference-no-serial";
             zonefile-sync = -1;
-          }
-          {
-            domain = "catz";
-            template = "catalog";
-          }
-          {
+          };
+          catz.template = "catalog";
+          "compsoc-dev.com" = {
             acl = [ "transfer" ];
             catalog-group = "global";
             dnssec-policy = "porkbun";
             dnssec-signing = true;
-            domain = "compsoc-dev.com";
             file = "/etc/knot/compsoc-dev.com.zone";
             notify = [ "hetzner" "pc" ];
             semantic-checks = true;
@@ -2028,31 +2005,23 @@ in
             zonefile-load = "difference-no-serial";
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
-          }
-          {
-            template = "rDNS";
-            domain = "d.f.ip6.arpa";
-          }
-          {
+          };
+          "d.f.ip6.arpa".template = "rDNS";
+          "home.arpa" = {
             acl = [ "transfer" ];
-            domain = "home.arpa";
             file = "/etc/knot/home.arpa.zone";
             module = "mod-queryacl/local";
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
             zonefile-sync = -1;
-          }
-          {
-            domain = "orion.home.arpa";
-            template = "dnsmasq";
-          }
-          {
+          };
+          "orion.home.arpa".template = "dnsmasq";
+          "zandoodle.me.uk" = {
             acl = [ "knot-ds" "transfer" "workstation" ];
             catalog-group = "global";
             dnssec-policy = "porkbun";
             dnssec-signing = true;
-            domain = "zandoodle.me.uk";
             file = "/etc/knot/zandoodle.me.uk.zone";
             notify = [ "hetzner" "pc" ];
             semantic-checks = true;
@@ -2061,8 +2030,8 @@ in
             zonefile-skip = "DS";
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
-          }
-        ];
+          };
+        };
       };
     };
     maddy = {
