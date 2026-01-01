@@ -1733,15 +1733,15 @@ in
           acme-challenge = {
             # Add a policy for acme challenge zones
             ds-push = "knot-ds-push";
-            ksk-submission = "unbound";
+            ksk-submission = "acme-challenge";
             ksk-lifetime = "14d";
-            propagation-delay = "1d";
             single-type-signing = true;
           };
-          porkbun = {
+          global = {
             # Add a DNSSEC policy with DS verfiication using unbound
             ksk-submission = "unbound";
             rrsig-refresh = "7d";
+            propagation-delay = "1d";
             single-type-signing = true;
           };
         };
@@ -1876,7 +1876,10 @@ in
         submission = {
           acme-challenge.parent = [ "unbound" "knot-ds-push" "hetzner" ];
           # Check DS submittion using unbound
-          unbound.parent = "unbound";
+          unbound = {
+            parent = "unbound";
+            parent-delay = "48h";
+          };
         };
         template = {
           default = {
@@ -2003,7 +2006,7 @@ in
           "compsoc-dev.com" = {
             acl = [ "transfer" ];
             catalog-group = "global";
-            dnssec-policy = "porkbun";
+            dnssec-policy = "global";
             dnssec-signing = true;
             file = "/etc/knot/compsoc-dev.com.zone";
             notify = [ "hetzner" "pc" ];
@@ -2027,7 +2030,7 @@ in
           "zandoodle.me.uk" = {
             acl = [ "knot-ds" "transfer" "workstation" ];
             catalog-group = "global";
-            dnssec-policy = "porkbun";
+            dnssec-policy = "global";
             dnssec-signing = true;
             file = "/etc/knot/zandoodle.me.uk.zone";
             notify = [ "hetzner" "pc" ];
