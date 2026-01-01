@@ -3151,6 +3151,91 @@ in
         '';
         unitConfig.StartLimitIntervalSec = "20m";
       };
+      kadmind = {
+        confinement = {
+          enable = true;
+          packages = [
+            config.environment.etc."krb5kdc/kdc.conf".source
+            config.environment.etc."krb5.conf".source
+          ];
+        };
+        serviceConfig = {
+          AmbientCapabilities = "CAP_NET_BIND_SERVICE";
+          CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
+          BindReadOnlyPaths = [
+            "${config.environment.etc."krb5kdc/kdc.conf".source}:/etc/krb5kdc/kdc.conf"
+            "${config.environment.etc."krb5.conf".source}:/etc/krb5.conf"
+          ];
+          Group = "krb5";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          NFTSet = "cgroup:inet:services:kadmin";
+          NoNewPrivileges = true;
+          PrivateUsers = lib.mkForce false;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          ProtectSystem = "strict";
+          RemoveIPC = true;
+          RestrictAddressFamilies = "AF_INET AF_INET6 AF_UNIX";
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          RestrictNamespaces = true;
+          StateDirectory = "krb5kdc";
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          UMask = "077";
+          User = "krb5";
+        };
+      };
+      kdc = {
+        confinement = {
+          enable = true;
+          packages = [
+            config.environment.etc."krb5kdc/kdc.conf".source
+            config.environment.etc."krb5.conf".source
+          ];
+        };
+        serviceConfig = {
+          AmbientCapabilities = "CAP_NET_BIND_SERVICE";
+          CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
+          BindReadOnlyPaths = [
+            "${config.environment.etc."krb5kdc/kdc.conf".source}:/etc/krb5kdc/kdc.conf"
+            "${config.environment.etc."krb5.conf".source}:/etc/krb5.conf"
+          ];
+          ExecStart = lib.mkForce (utils.escapeSystemdExecArgs ([
+            (lib.getExe' config.security.krb5.package "krb5kdc")
+            "-n"
+          ] ++ config.services.kerberos_server.extraKDCArgs));
+          Group = "krb5";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          NFTSet = "cgroup:inet:services:kdc";
+          NoNewPrivileges = true;
+          PrivateUsers = lib.mkForce false;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          ProtectSystem = "strict";
+          RemoveIPC = true;
+          RestrictAddressFamilies = "AF_INET AF_INET6 AF_UNIX";
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          RestrictNamespaces = true;
+          StateDirectory = "krb5kdc";
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          Type = lib.mkForce "simple";
+          UMask = "077";
+          User = "krb5";
+        };
+      };
       kadmind.serviceConfig.NFTSet = "cgroup:inet:services:kadmin";
       kdc.serviceConfig.NFTSet = "cgroup:inet:services:kdc";
       knot.serviceConfig = {
