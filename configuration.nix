@@ -1,4 +1,4 @@
-{ config, inputs, lib, pkgs, pkgs-unstable, ... }:
+{ config, inputs, lib, pkgs, pkgs-unstable, utils, ... }:
 
 let
   compsoc-website = pkgs.callPackage "${inputs.compsoc-website}/package.nix" {};
@@ -3236,8 +3236,6 @@ in
           User = "krb5";
         };
       };
-      kadmind.serviceConfig.NFTSet = "cgroup:inet:services:kadmin";
-      kdc.serviceConfig.NFTSet = "cgroup:inet:services:kdc";
       knot.serviceConfig = {
         # Get the TSIG credentials for caddy
         LoadCredential = [
@@ -3656,6 +3654,7 @@ in
     groups = {
       ddns = {};
       dnsdist = {};
+      krb5 = {};
       nix-gc = {};
       tailscale = {};
       tayga = {};
@@ -3668,6 +3667,10 @@ in
       };
       dnsdist = {
         group = "dnsdist";
+        isSystemUser = true;
+      };
+      krb5 = {
+        group = "krb5";
         isSystemUser = true;
       };
       max = {
