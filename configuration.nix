@@ -117,218 +117,10 @@ in
       fsType = "vfat";
     };
   };
-  imports = [ ./dns.nix ];
+  imports = [ ./dns.nix ./firewall.nix ];
   networking = {
-    firewall = {
-      # Allow DNS, HTTP and HTTPS
-      allowedUDPPorts = [ 53 54 88 443 464 41641 ];
-      allowedTCPPorts = [ 25 53 54 80 88 443 464 749 ];
-      extraForwardRules = ''
-        iifname {plat, guest, "shadow-lan", "bridge"} oifname {plat, guest, "shadow-lan", "bridge"} accept
-      '';
-      extraInputRules = ''
-        # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
-        meta l4proto {udp, tcp} th dport {55, 56, 5353} ip saddr @local_ip accept
-        meta l4proto {udp, tcp} th dport {55, 56, 5353} ip6 saddr @local_ip6 accept
-        tcp dport 853 reject
-      '';
-      # Filter packets that would have been forwarded
-      filterForward = true;
-      interfaces = {
-        # Allow the TP-link WAP to send logs
-        "\"bridge\"".allowedTCPPorts = [ 465 ];
-        "\"bridge\"".allowedUDPPorts = [ 547 ];
-
-        # Allow DHCP from managed networks
-        web-vm.allowedUDPPorts = [ 67 ];
-        guest.allowedUDPPorts = [ 67 547 ];
-        "shadow-lan".allowedUDPPorts = [ 67 547 ];
-
-        # Allow submissions and imaps from tailscale
-        tailscale0.allowedTCPPorts = [ 465 587 993 ];
-      };
-    };
     fqdn = "local.zandoodle.me.uk";
     hostName = "orion";
-    nftables = {
-      # Disable checking the ruleset using lkl as cgroups are not enabled in lkl
-      checkRuleset = false;
-      enable = true;
-
-      # Don't flush the entire ruleset and instead delete specific tables
-      flushRuleset = false;
-      ruleset = ''
-        # Add service specific filters
-        table inet services {
-          set avahi {
-            type cgroupsv2
-          }
-
-          set caddy {
-            type cgroupsv2
-          }
-
-          set dnsdist {
-            type cgroupsv2
-          }
-
-          set dnsmasq {
-            type cgroupsv2
-          }
-
-          set kadmin {
-            type cgroupsv2
-          }
-
-          set kdc {
-            type cgroupsv2
-          }
-
-          set knot {
-            type cgroupsv2
-          }
-
-          set maddy {
-            type cgroupsv2
-          }
-
-          set ollama_socket {
-            type cgroupsv2
-          }
-
-          set sshd {
-            type cgroupsv2
-          }
-
-          set systemd_networkd {
-            type cgroupsv2
-          }
-
-          set tailscaled {
-            type cgroupsv2
-          }
-
-          set unbound {
-            type cgroupsv2
-          }
-
-          set local_ip {
-            type ipv4_addr; flags constant, interval;
-            elements = {
-              127.0.0.0/8,
-              10.0.0.0/8,
-              100.64.0.0/10,
-              169.254.0.0/16,
-              192.168.0.0/16,
-              172.16.0.0/12,
-            }
-          }
-
-          set local_ip6 {
-            type ipv6_addr; flags constant, interval;
-            elements = {
-              ::1/128,
-              fc00::/7,
-              fe80::/10,
-            }
-          }
-
-          chain input {
-            type filter hook input priority filter + 10; policy drop;
-            ct state vmap { invalid : drop, established : accept, related : accept }
-            # Allow SSH from local devices
-            tcp dport 22 ip saddr == @local_ip socket cgroupv2 level 2 @sshd accept
-            tcp dport 22 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @sshd accept
-
-            # Allow DNS handled by dnsdist, knot, unbound and dnsmasq
-            meta l4proto {udp, tcp} th dport 53 socket cgroupv2 level 2 @dnsdist accept
-            meta l4proto {udp, tcp} th dport 54 socket cgroupv2 level 2 @knot accept
-            meta l4proto {udp, tcp} th dport 55 ip saddr == @local_ip socket cgroupv2 level 2 @unbound accept
-            meta l4proto {udp, tcp} th dport 55 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @unbound accept
-            iifname lo tcp dport 8080 socket cgroupv2 level 2 @unbound accept
-            meta l4proto {udp, tcp} th dport 56 ip saddr == @local_ip socket cgroupv2 level 2 @dnsmasq accept
-            meta l4proto {udp, tcp} th dport 56 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @dnsmasq accept
-            meta l4proto {udp, tcp} th dport 5353 ip saddr == @local_ip socket cgroupv2 level 2 @avahi accept
-            meta l4proto {udp, tcp} th dport 5353 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @avahi accept
-
-            # Allow HTTP and HTTPS handled by caddy
-            tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
-            udp dport 443 socket cgroupv2 level 2 @caddy accept
-
-            # Allow DHCP handled by dnsmasq
-            udp dport 67 iifname { shadow-lan, guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
-            udp dport 547 iifname { shadow-lan, guest, "bridge" } socket cgroupv2 level 2 @dnsmasq accept
-
-            # Allow Kerberos
-            meta l4proto {udp, tcp} th dport 88 ip saddr == @local_ip socket cgroupv2 level 4 @kdc accept
-            meta l4proto {udp, tcp} th dport 88 ip6 saddr == @local_ip6 socket cgroupv2 level 4 @kdc accept
-            meta l4proto {udp, tcp} th dport {464, 749} ip saddr == @local_ip socket cgroupv2 level 4 @kadmin accept
-            meta l4proto {udp, tcp} th dport {464, 749} ip6 saddr == @local_ip6 socket cgroupv2 level 4 @kadmin accept
-
-            iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
-
-            udp dport 41641 socket cgroupv2 level 2 @tailscaled accept
-
-            tcp dport 25 socket cgroupv2 level 2 @maddy accept
-            iifname { lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
-            iifname "bridge" tcp dport {465, 587} ip saddr @local_ip socket cgroupv2 level 2 @maddy accept
-
-            icmpv6 type != { nd-redirect, 139 } accept
-            ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
-            icmp type echo-request accept comment "allow ping"
-            log prefix "CGroup Drop "
-          }
-        }
-      '';
-      extraDeletions = ''
-        # Initialise services table so that the input chain can be flushed
-        table inet services {
-          chain input {
-          }
-        }
-        flush chain inet services input
-        delete chain inet services input
-        destroy set inet services local_ip
-        destroy set inet services local_ip6
-      '';
-      tables = {
-        local-nat = {
-          family = "inet";
-          content = ''
-            chain post {
-              type nat hook postrouting priority srcnat; policy accept;
-              # Don't nat packets which don't need it
-              iifname { plat, guest, "shadow-lan", "bridge" } ip6 daddr == fd09:a389:7c1e::/48 accept
-              iifname { plat, guest, "shadow-lan" } oifname "bridge" masquerade
-
-              # NAT packets for router
-              iifname { plat, guest, "shadow-lan" } oifname guest ip daddr 192.168.5.1 masquerade
-            }
-          '';
-        };
-        nixos-fw.content = ''
-          set local_ip {
-            type ipv4_addr; flags constant, interval;
-            elements = {
-              127.0.0.0/8,
-              10.0.0.0/8,
-              100.64.0.0/10,
-              169.254.0.0/16,
-              192.168.0.0/16,
-              172.16.0.0/12,
-            }
-          }
-          set local_ip6 {
-            type ipv6_addr; flags constant, interval;
-            elements = {
-              ::1/128,
-              fc00::/7,
-              fe80::/10,
-            }
-          }
-        '';
-      };
-    };
     useNetworkd = true;
   };
   nix = {
@@ -1652,7 +1444,6 @@ in
       wait-online.enable = false;
     };
     services = {
-      avahi-daemon.serviceConfig.NFTSet = "cgroup:inet:services:avahi";
       caddy.serviceConfig = {
         # Allow Caddy to bind to port 80 and port 443
         CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE";
@@ -1665,9 +1456,6 @@ in
 
         # Don't allow W+X memory mappings
         MemoryDenyWriteExecute = true;
-
-        # Add this service's cgroup to the caddy set in the services table
-        NFTSet = "cgroup:inet:services:caddy";
 
         # Only allow Caddy to access pid files within /proc
         ProcSubset = "pid";
@@ -2081,7 +1869,6 @@ in
       };
       maddy.serviceConfig = {
         LoadCredential = "tsig.conf:/run/keymgr/maddy-config";
-        NFTSet = "cgroup:inet:services:maddy";
         SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
         ProcSubset = "pid";
         ProtectKernelLogs = true;
@@ -2325,9 +2112,7 @@ in
         wantedBy = [ "multi-user.target" ];
         wants = [ "sys-subsystem-net-devices-plat.device" ];
       };
-      sshd.serviceConfig.NFTSet = "cgroup:inet:services:sshd";
       systemd-machined.enable = false;
-      systemd-networkd.serviceConfig.NFTSet = "cgroup:inet:services:systemd_networkd";
       tailscaled = {
         after = [ "modprobe@tun.service" ];
         confinement = {
@@ -2365,7 +2150,6 @@ in
           RestrictRealtime = true;
           ProtectHome = true;
           CapabilityBoundingSet = "CAP_NET_RAW CAP_NET_ADMIN";
-          NFTSet = "cgroup:inet:services:tailscaled";
         };
         wants = [ "modprobe@tun.service" ];
       };
@@ -2407,24 +2191,17 @@ in
       kadmind = {
         listenDatagrams = [ "[::]:464" ];
         listenStreams = [ "[::]:464" "[::]:749" ];
-        socketConfig = {
-          NFTSet = "cgroup:inet:services:kadmin";
-          Slice = "system-kerberos-server.slice";
-        };
+        socketConfig.Slice = "system-kerberos-server.slice";
         wantedBy = [ "sockets.target" ];
       };
       kdc = {
         listenDatagrams = [ "[::]:88" ];
         listenStreams = [ "[::]:88" ];
-        socketConfig = {
-          NFTSet = "cgroup:inet:services:kdc";
-          Slice = "system-kerberos-server.slice";
-        };
+        socketConfig.Slice = "system-kerberos-server.slice";
         wantedBy = [ "sockets.target" ];
       };
       ollama-proxy = {
         listenStreams = [ "/run/ollama" "127.0.0.1:11434" "[::1]:11434" ];
-        socketConfig.NFTSet = "cgroup:inet:services:ollama_socket";
         wantedBy = [ "sockets.target" ];
       };
     };

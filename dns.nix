@@ -1106,9 +1106,6 @@
             "${lib.getExe pkgs-unstable.${config.nixpkgs.system}.dnsdist} --check-config --config /etc/dnsdist/dnsdist.conf"
           ];
 
-          # Add the dnsdist cgroup to the services table
-          NFTSet = "cgroup:inet:services:dnsdist";
-
           # Run as a dedicated user
           User = "dnsdist";
           Group = "dnsdist";
@@ -1136,8 +1133,6 @@
           Group = "dnsmasq";
           LockPersonality = true;
           MemoryDenyWriteExecute = true;
-          # Add the dnsmasq cgroup to the services table
-          NFTSet = "cgroup:inet:services:dnsmasq";
           NoNewPrivileges = true;
           PrivateDevices = true;
           PrivateUsers = lib.mkForce false;
@@ -1174,9 +1169,6 @@
 
         # Allow knot to open as many files as it wants
         LimitNOFILE = "infinity";
-
-        # Add the knot cgroup to the services firewall table
-        NFTSet = "cgroup:inet:services:knot";
       };
 
       # Reload knot after a zone change
@@ -1225,7 +1217,6 @@
         };
         wantedBy = [ "multi-user.target" ];
       };
-      unbound.serviceConfig.NFTSet = "cgroup:inet:services:unbound";
     };
     targets.knot-reload = {
       description = "Restart knot-reload service";
