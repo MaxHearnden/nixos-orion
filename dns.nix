@@ -1159,6 +1159,269 @@
           dnsmasq --test -C ${config.services.dnsmasq.configFile}
         '';
       };
+      # Generate a TSIG key for caddy and maddy
+      gen-tsig = {
+        # Generate the TSIG key before knot, caddy or maddy starts
+        before = [ "knot.service" "caddy.service" "maddy.service" ];
+        requiredBy = [ "knot.service" "caddy.service" "maddy.service" ];
+        # Create a mininal sandbox for gen-tsig
+        confinement.enable = true;
+        serviceConfig = {
+          # Don't allow gen-tsig to change the current system
+          CapabilityBoundingSet = "";
+
+          # Allocate the user on service start
+          DynamicUser = true;
+
+          # Use a dedicated group
+          Group = "keymgr";
+
+          # Don't allow gen-tsig to send or receive any packets
+          IPAddressDeny = "any";
+
+          # Don't allow gen-tsig to emulate Linux 2.6
+          LockPersonality = true;
+
+          # Don't allow gen-tsig to create W+X memory mappings
+          MemoryDenyWriteExecute = true;
+
+          # Don't allow gen-tsig to access the network
+          PrivateNetwork = true;
+
+          # Create a new user namespace with only keymgr mapped in to the namespace
+          PrivateUsers = true;
+
+          # Don't allow gen-tsig to view non process files within /proc
+          ProcSubset = "pid";
+
+          # Don't allow gen-tsig to change the date
+          ProtectClock = true;
+
+          # Don't allow gen-tsig to access /home
+          ProtectHome = true;
+
+          # Don't allow gen-tsig to change the hostname
+          ProtectHostname = true;
+
+          # Don't allow gen-tsig to read or write to the kernel logs
+          ProtectKernelLogs = true;
+
+          # Don't allow gen-tsig to view processes it can't ptrace
+          ProtectProc = "invisible";
+
+          # Mount / read only
+          ProtectSystem = "strict";
+
+          # Consider gen-tsig to still be active after the main process exits
+          RemainAfterExit = true;
+
+          # Don't allow gen-tsig to create sockets
+          RestrictAddressFamilies = "none";
+
+          # Don't allow gen-tsig to create namespaces
+          RestrictNamespaces = true;
+
+          # Don't allow gen-tsig to get realtime priority
+          RestrictRealtime = true;
+
+          # Create /run/keymgr
+          RuntimeDirectory = "keymgr";
+
+          # Keep /run/keymgr after the main process exits
+          RuntimeDirectoryPreserve = true;
+
+          # Only allow aarch64 syscalls
+          SystemCallArchitectures = "native";
+
+          # Only allow typical syscalls
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+
+          # This service will be considered started when the main process exits
+          Type = "oneshot";
+
+          # Make files accessible only by keymgr by default
+          UMask = "077";
+
+          # Use a dedicated user
+          User = "keymgr";
+        };
+        script = ''
+          for key in caddy knot-ds maddy; do
+            # Generate a TSIG key
+            ${lib.getExe' pkgs.knot-dns "keymgr"} -t $key >"/run/keymgr/$key"
+          done
+          for attr in id algorithm secret; do
+            # Split the elements of the key into seperate files for caddy
+            ${lib.getExe pkgs.yq} -r .key.[]."$attr" </run/keymgr/caddy >/run/keymgr/caddy-"$attr"
+          done
+
+          ${lib.getExe pkgs.yq} -r '"key_name " + .key.[].id' </run/keymgr/maddy >/run/keymgr/maddy-config
+          ${lib.getExe pkgs.yq} -r '"key " + .key.[].secret' </run/keymgr/maddy >>/run/keymgr/maddy-config
+          ${lib.getExe pkgs.yq} -r '"key_alg " + .key.[].algorithm' </run/keymgr/maddy >>/run/keymgr/maddy-config
+        '';
+      };
+      # Get the IP address from the router
+      get-IP-address = {
+        # Create a minimal sandbox for this service
+        confinement.enable = true;
+        # Reload the DNS zone after getting the IP address
+        onSuccess = [ "knot-reload.target" ];
+        serviceConfig = {
+          # Don't allow get-IP-address to change the system
+          CapabilityBoundingSet = "";
+
+          # Use a dedicated user
+          Group = "ddns";
+
+          # Allow get-IP-address to access the router
+          IPAddressAllow = "192.168.1.1";
+          IPAddressDeny = "any";
+
+          # Don't allow get-IP-address to emulate Linux 2.6
+          LockPersonality = true;
+
+          # Don't allow get-IP-address to create W+X memory mappings
+          MemoryDenyWriteExecute = true;
+
+          # Don't allow get-IP-address to get privileges through SUID programs
+          NoNewPrivileges = true;
+
+          # Don't allow get-IP-address to access non process files within /proc
+          ProcSubset = "pid";
+
+          # Don't allow get-IP-address to change the current date
+          ProtectClock = true;
+
+          # Don't allow get-IP-address to access /home
+          ProtectHome = true;
+
+          # Don't allow get-IP-address to change the current hostname
+          ProtectHostname = true;
+
+          # Don't allow get-IP-address to read or write to the kernel logs
+          ProtectKernelLogs = true;
+
+          # Don't allow get-IP-address to view process it can't ptrace
+          ProtectProc = "invisible";
+
+          # Mount / read only
+          ProtectSystem = "strict";
+
+          # Remove all IPC objects after exiting
+          RemoveIPC = true;
+
+          # Try again on failure
+          Restart = "on-failure";
+
+          # Add a progressive slowdown to retry attempts
+          RestartMaxDelaySec = "5m";
+          RestartSec = "10s";
+          RestartSteps = "10";
+          StartLimitBurst = "20";
+
+          # Allow get-IP-address to create netlink sockets (to get local IP
+          # addresses) and IPv4 sockets to access the router
+          RestrictAddressFamilies = "AF_NETLINK AF_INET";
+
+          # Don't allow get-IP-address to create namespaces
+          RestrictNamespaces = true;
+
+          # Don't allow get-IP-address to get realtime priority
+          RestrictRealtime = true;
+
+          # Don't allow get-IP-address to create SUID files
+          RestrictSUIDSGID = true;
+
+          # Create /run/ddns when this service starts
+          RuntimeDirectory = "ddns";
+
+          # Create /var/lib/ddns when this service starts
+          StateDirectory = "ddns";
+
+          # Only allow aarch64 syscalls
+          SystemCallArchitectures = "native";
+
+          # Only allow typical syscalls
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+
+          # Consider this process to have started when the main process exits
+          Type = "oneshot";
+
+          # Use a dedicated user
+          User = "ddns";
+        };
+        script = ''
+          # Enable verbose mode
+          set -x
+
+          # Get the IP address from the router
+          ${lib.getExe pkgs.curl} -o /run/ddns/login.lp -v \
+            http://192.168.1.1/login.lp?getSessionStatus=true
+
+          # Extract the IP address from the reply
+          ${lib.getExe pkgs.jq} -r .wanIPAddress /run/ddns/login.lp \
+            >/run/ddns/IPv4-address
+
+          # Turn it into a resource record
+          printf "@ A " | ${lib.getExe' pkgs.coreutils "cat"} - /run/ddns/IPv4-address >/run/ddns/zonefile
+
+          # Sanitize the data
+          ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/zonefile >/run/ddns/zonefile-canonical
+
+          # Verify that we only have one resource record
+          record_count=$(${lib.getExe' pkgs.coreutils "wc"} -l --total=only /run/ddns/zonefile-canonical)
+          if [ "$record_count" != 1 ]; then
+            echo "Potential attack detected" >&2
+            exit 1
+          fi
+
+          # Append the IPv6 records
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary | ${lib.getExe pkgs.jq} -r \
+            '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/zonefile
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary | ${lib.getExe pkgs.jq} -r \
+            '"@ AAAA " + (.[].addr_info.[].local // empty)' >/run/ddns/zonefile-ipv6-only
+
+          # Get the IP address for enp49s0
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -4 address show dev bridge | ${lib.getExe pkgs.jq} -r \
+            '"@ A " + (.[].addr_info.[].local // empty)' >/run/ddns/local-zonefile
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to fc00::/7 | ${lib.getExe pkgs.jq} -r \
+            '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/local-zonefile
+
+          # Check the zonefile is valid
+          ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-zonefile
+
+          # Get the IP address for guest
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -4 address show dev guest | ${lib.getExe pkgs.jq} -r \
+            '"@ A " + (.[].addr_info.[].local // empty)' >/run/ddns/local-guest-zonefile
+
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev guest to fc00::/7 | ${lib.getExe pkgs.jq} -r \
+            '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/local-guest-zonefile
+
+          # Get the IP address for tailscale
+          ${lib.getExe' pkgs.iproute2 "ip"} -json address show dev tailscale0 | ${lib.getExe pkgs.jq} -r \
+            '.[].addr_info.[]
+              | if .family == "inet" then
+                "@ A " + .local
+              elif (.family == "inet6") and (.scope != "link") then
+                "@ AAAA " + .local
+              else
+                empty
+              end' >/run/ddns/local-tailscale-zonefile
+
+          # Check the zonefile is valid
+          ${lib.getExe' pkgs.ldns.examples "ldns-read-zone"} -c /run/ddns/local-guest-zonefile
+
+          # Record differences in the public IP address
+          if ! ${lib.getExe' pkgs.diffutils "diff"} /run/ddns/zonefile /var/lib/ddns/zonefile; then
+            cp --backup=numbered /run/ddns/zonefile "/var/lib/ddns/zonefile-$(date --iso-8601=seconds)"
+          fi
+
+          # Move the verified data from /run/ddns to /var/lib/ddns
+          ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
+            /run/ddns/zonefile /run/ddns/local-zonefile /run/ddns/local-guest-zonefile /run/ddns/zonefile-ipv6-only /run/ddns/local-tailscale-zonefile /var/lib/ddns/
+        '';
+        unitConfig.StartLimitIntervalSec = "20m";
+      };
       knot.serviceConfig = {
         # Get the TSIG credentials for caddy
         LoadCredential = [
@@ -1223,6 +1486,14 @@
       conflicts = [ "knot-reload.service" ];
       unitConfig.StopWhenUnneeded = true;
       onSuccess = [ "knot-reload.service" ];
+    };
+    timers.get-IP-address = {
+      timerConfig = {
+        # Start the unit on boot
+        OnBootSec = "0";
+        OnUnitActiveSec = "1h";
+      };
+      wantedBy = [ "timers.target" ];
     };
   };
   users = {
