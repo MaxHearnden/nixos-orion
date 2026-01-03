@@ -22,6 +22,14 @@ let
         pkgs.writeText "CSP.yaml" source
     } $out
   '';
+  pythonPkgs = pkgs.python3Packages;
+  inherit (pythonPkgs) python;
+  kdcproxy = pythonPkgs.callPackage ./kdcproxy.nix {};
+  kdcproxy_python = pythonPkgs.python.buildEnv.override {
+    extraLibs = [
+      kdcproxy
+    ];
+  };
 in
 
 {
@@ -451,6 +459,28 @@ in
             file_server
           '';
         };
+        "kkdcp.zandoodle.me.uk".extraConfig = ''
+          tls {
+            issuer acme {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile shortlived
+            }
+          }
+          @denied not {
+            client_ip private_ranges fe80::/10
+            not client_ip 192.168.1.1
+          }
+          abort @denied
+          header {
+            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+            X-Content-Type-Options nosniff
+            Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+            Cross-Origin-Resource-Policy same-origin
+            X-Frame-Options DENY
+            Referrer-Policy no-referrer
+          }
+          reverse_proxy unix//run/kdcproxy
+        '';
         "local.zandoodle.me.uk" = {
           extraConfig = ''
             tls {
@@ -728,6 +758,28 @@ in
         # Set the default umask
         UMask = "077";
       };
+      kdcproxy = {
+        after = [ "kdcproxy.socket" ];
+        confinement = {
+          enable = true;
+          packages = [
+            kdcproxy_python
+          ];
+        };
+        environment.PYTHONPATH = "${kdcproxy_python}/${python.sitePackages}/";
+        requires = [ "kdcproxy.socket" ];
+        serviceConfig = {
+          CapabilityBoundingSet = "";
+          DynamicUser = true;
+          ExecStart = "${lib.getExe pythonPkgs.gunicorn} kdcproxy";
+          Group = "kdcproxy";
+          NoNewPrivileges = true;
+          ProtectSystem = "strict";
+          Type = "exec";
+          UMask = "077";
+          User = "kdcproxy";
+        };
+      };
       ollama = {
         postStart = ''
           for i in $(seq 60); do
@@ -809,9 +861,15 @@ in
         wantedBy = [ "multi-user.target" ];
       };
     };
-    sockets.ollama-proxy = {
-      listenStreams = [ "/run/ollama" "127.0.0.1:11434" "[::1]:11434" ];
-      wantedBy = [ "sockets.target" ];
+    sockets = {
+      kdcproxy = {
+        listenStreams = [ "/run/kdcproxy" ];
+        wantedBy = [ "sockets.target" ];
+      };
+      ollama-proxy = {
+        listenStreams = [ "/run/ollama" "127.0.0.1:11434" "[::1]:11434" ];
+        wantedBy = [ "sockets.target" ];
+      };
     };
   };
   users = {

@@ -238,6 +238,7 @@
       _imaps._tcp SRV 0 10 993 imap
       _submissions._tcp SRV 0 10 465 smtp
       _submission._tcp SRV 0 10 587 smtp
+      _kerberos uri 5 1 krb5srv:m:kkdcp:https://kkdcp.zandoodle.me.uk/
       _kerberos uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
       _kerberos uri 20 1 krb5srv:m:tcp:local.zandoodle.me.uk
       _kerberos txt ZANDOODLE.ME.UK
@@ -278,6 +279,8 @@
       _acme-challenge.smtp-local cname _acme-challenge.mail
       cardgames cname @
       _acme-challenge.cardgames cname _acme-challenge
+      kkdcp cname local
+      _acme-challenge.kkdcp cname _acme-challenge
       mta-sts cname @
       _acme-challenge.mta-sts cname _acme-challenge
       mta-sts.mail cname @
