@@ -244,6 +244,11 @@
       _kerberos txt ZANDOODLE.ME.UK
       _kerberos._udp srv 0 10 88 local
       _kerberos._tcp srv 0 10 88 local
+      _kerberos._udp.tailscale._sites srv 0 10 88 local-tailscale
+      _kerberos._tcp.tailscale._sites srv 0 10 88 local-tailscale
+      _kerberos.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://kkdcp-tailscale.zandoodle.me.uk/
+      _kerberos.tailscale._sites uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
+      _kerberos.tailscale._sites uri 20 1 krb5srv:m:tcp:local.zandoodle.me.uk
 
       _acme-challenge ns dns
 
@@ -281,6 +286,8 @@
       _acme-challenge.cardgames cname _acme-challenge
       kkdcp cname local
       _acme-challenge.kkdcp cname _acme-challenge
+      kkdcp-tailscale cname local-tailscale
+      _acme-challenge.kkdcp-tailscale cname _acme-challenge
       mta-sts cname @
       _acme-challenge.mta-sts cname _acme-challenge
       mta-sts.mail cname @
