@@ -74,6 +74,8 @@
           QClassRule(DNSClass.CHAOS),
         }),
         PoolAction("auth"))
+
+      addAction(AllRule(), RCodeAction(DNSRCode.NOTAUTH, {ra = false}))
     '';
     "dnsmasq.conf".source = config.services.dnsmasq.configFile;
     "knot/acme-challenge.zandoodle.me.uk.zone".text = ''
