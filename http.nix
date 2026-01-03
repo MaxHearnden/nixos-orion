@@ -33,6 +33,9 @@ let
 in
 
 {
+  environment.etc."kdcproxy.conf".text = ''
+    [*ZANDOODLE.ME.UK]
+  '';
   services = {
     caddy = {
       enable = true;
@@ -769,6 +772,10 @@ in
         environment.PYTHONPATH = "${kdcproxy_python}/${python.sitePackages}/";
         requires = [ "kdcproxy.socket" ];
         serviceConfig = {
+          BindReadOnlyPaths = [
+            "${config.environment.etc."resolv.conf".source}:/etc/resolv.conf"
+            "${config.environment.etc."kdcproxy.conf".source}:/etc/kdcproxy.conf"
+          ];
           CapabilityBoundingSet = "";
           DynamicUser = true;
           ExecStart = "${lib.getExe pythonPkgs.gunicorn} kdcproxy";
