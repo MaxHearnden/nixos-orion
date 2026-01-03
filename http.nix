@@ -723,7 +723,7 @@ in
         SystemCallArchitectures = "native";
 
         # Only allow typical syscalls
-        SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+        SystemCallFilter = [ "@system-service" "~@privileged @resources" "fchownat" ];
 
         # Set the default umask
         UMask = "077";
