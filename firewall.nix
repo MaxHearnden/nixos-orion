@@ -155,7 +155,6 @@
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
             icmp type echo-request accept comment "allow ping"
-            log prefix "CGroup Drop "
           }
         }
       '';
