@@ -380,6 +380,7 @@
       *.workstation cname workstation
       _acme-challenge.workstation ns dns
       _kerberos.workstation txt WORKSTATION.ZANDOODLE.ME.UK
+      _kerberos.workstation uri 5 1 krb5srv:m:kkdcp:https://kkdcp.workstation.zandoodle.me.uk/
       _kerberos.workstation uri 10 1 krb5srv:m:tcp:workstation.zandoodle.me.uk
       _kerberos._tcp.workstation srv 0 10 88 workstation
       _kerberos._udp.workstation srv 0 10 88 workstation
