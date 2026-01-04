@@ -4,9 +4,12 @@
       enable = true;
       settings = {
         libdefaults = {
+          default_ccache_name = "FILE:/run/user/%{uid}/krb5cc_%{uid}";
           default_realm = "ZANDOODLE.ME.UK";
+          dns_canonicalize_hostname = "fallback";
           dns_lookup_realm = true;
           permitted_enctypes = "aes256-sha2";
+          rdns = false;
           spake_preauth_groups = "edwards25519";
         };
         realms = {
