@@ -267,7 +267,6 @@ in
         "10-bridge" = {
           bridgeConfig = {
             MulticastIGMPVersion = 3;
-            MulticastQuerier = true;
             STP = true;
             VLANFiltering = true;
           };
