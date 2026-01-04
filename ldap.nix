@@ -44,6 +44,7 @@
         olcSuffix: dc=zandoodle,dc=me,dc=uk
         olcDbDirectory: /var/lib/slapd
         olcDbIndex: objectClass eq
+        olcRootDN: uid=max@WORKSTATION.ZANDOODLE.ME.UK,cn=gssapi,cn=auth
       '';
     };
     systemPackages = [pkgs.openldap];
