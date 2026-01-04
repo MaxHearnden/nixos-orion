@@ -502,6 +502,8 @@
           "tag:shadow,option:static-route,192.168.1.0,192.168.4.1,192.168.5.0,192.168.4.1,192.168.6.0,192.168.4.1,192.168.8.0,192.168.4.1,192.168.9.0,192.168.4.1"
           "tag:web-vm,option:router,192.168.2.1"
           "tag:web-vm,option:dns-server,192.168.2.1"
+          "tag:guest,option6:dns-server,fd09:a389:7c1e:4:7006:83ff:feff:5d0c"
+          "tag:shadow,option6:dns-server,fd09:a389:7c1e:1::1"
           "option:domain-search,orion.home.arpa,home.arpa"
         ];
         dhcp-match = "set:has-routes,55,!";
