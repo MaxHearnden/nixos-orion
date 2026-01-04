@@ -3,7 +3,7 @@
     firewall = {
       # Allow DNS, HTTP and HTTPS
       allowedUDPPorts = [ 53 54 88 443 464 41641 ];
-      allowedTCPPorts = [ 25 53 54 80 88 443 464 749 ];
+      allowedTCPPorts = [ 25 53 54 80 88 389 443 464 749 ];
       extraForwardRules = ''
         iifname {plat, guest, "shadow-lan", "bridge"} oifname {plat, guest, "shadow-lan", "bridge"} accept
       '';
@@ -75,6 +75,10 @@
             type cgroupsv2
           }
 
+          set slapd {
+            type cgroupsv2
+          }
+
           set sshd {
             type cgroupsv2
           }
@@ -143,6 +147,10 @@
             meta l4proto {udp, tcp} th dport 88 ip6 saddr == @local_ip6 socket cgroupv2 level 4 @kdc accept
             meta l4proto {udp, tcp} th dport {464, 749} ip saddr == @local_ip socket cgroupv2 level 4 @kadmin accept
             meta l4proto {udp, tcp} th dport {464, 749} ip6 saddr == @local_ip6 socket cgroupv2 level 4 @kadmin accept
+
+            # Allow LDAP
+            meta l4proto tcp th dport 389 ip saddr == @local_ip socket cgroupv2 level 2 @slapd accept
+            meta l4proto tcp th dport 389 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @slapd accept
 
             iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
@@ -244,6 +252,7 @@
           Group = "nft";
         };
       };
+      slapd.serviceConfig.NFTSet = "cgroup:inet:services:slapd";
       sshd.serviceConfig.NFTSet = "cgroup:inet:services:sshd";
       systemd-networkd.serviceConfig.NFTSet = "cgroup:inet:services:systemd_networkd";
       tailscaled.serviceConfig.NFTSet = "cgroup:inet:services:tailscaled";

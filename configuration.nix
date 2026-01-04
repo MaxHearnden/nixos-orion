@@ -101,6 +101,7 @@ in
     ./firewall.nix
     ./http.nix
     ./kerberos.nix
+    ./ldap.nix
     ./mail.nix
     ./nix.nix
   ];
