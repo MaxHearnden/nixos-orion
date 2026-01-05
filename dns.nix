@@ -104,40 +104,8 @@
     "knot/compsoc-dev.com.zone".text = ''
       $TTL 600
       @ soa dns.zandoodle.me.uk. hostmaster 0 14400 3600 604800 86400
-
-      ; Advertise DANE
-      _tcp dname _tcp.zandoodle.me.uk.
-      _tls dname _tls.zandoodle.me.uk.
-
-      ; Setup mail for this domain
-      @ mx 10 mail.zandoodle.me.uk.
-      @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
-      _dmarc cname _dmarc.zandoodle.me.uk.
-      _mta-sts cname _mta-sts.zandoodle.me.uk.
-      _mta-sts.mail cname _mta-sts.zandoodle.me.uk.
-      mail mx 10 mail.zandoodle.me.uk.
-      mail txt "v=spf1 mx -all"
-      _tls.mail dname _tls.zandoodle.me.uk.
-      mta-sts.mail cname @
-      _acme-challenge.mta-sts.mail cname _acme-challenge.zandoodle.me.uk.
-
       ; Advertise our public IP address as the IP address for compsoc-dev.com
       $INCLUDE /var/lib/ddns/zonefile
-      mta-sts cname @
-      _acme-challenge.mta-sts cname _acme-challenge.zandoodle.me.uk.
-      ollama cname local-tailscale.zandoodle.me.uk.
-      _acme-challenge.ollama cname _acme-challenge.zandoodle.me.uk.
-      _tcp.ollama dname _tcp.zandoodle.me.uk.
-
-      ; Setup certificate authority restrictions
-      @ CAA 0 issuemail ";"
-      @ CAA 0 issuevmc ";"
-      @ CAA 0 issuewild ";"
-      ; Only Let's Encrypt can issue for this domain and only using the dns-01 validation method
-      @ CAA 128 issue "letsencrypt.org;validationmethods=dns-01"
-
-      ; Advertise HTTP/2 and HTTP/3 support
-      @ HTTPS 1 . alpn=h3,h2
 
       ; Advertise the authoritative nameserver
       @ ns dns.zandoodle.me.uk.
@@ -146,16 +114,54 @@
       @ ns robotns2.second-ns.de.
       @ ns robotns3.second-ns.com.
 
+      ; Setup mail for this domain
+      @ mx 10 mail.zandoodle.me.uk.
+      @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
+
+      ; Add google site verification
+      @ txt "google-site-verification=oZJUabY5f9TzTiPw8Ml-k8GrRILLRbITIEF8eamsLY4"
+
+      ; Advertise HTTP/2 and HTTP/3 support
+      @ HTTPS 1 . alpn=h3,h2
+
+      ; Setup certificate authority restrictions
+      @ caa 0 issuemail ";"
+      @ caa 0 issuevmc ";"
+      @ caa 0 issuewild ";"
+      ; Only Let's Encrypt can issue for this domain and only using the dns-01 validation method
+      @ caa 128 issue "letsencrypt.org;validationmethods=dns-01"
+
+      _acme-challenge cname _acme-challenge.zandoodle.me.uk.
+      _dmarc cname _dmarc.zandoodle.me.uk.
+
       default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs9i5JfSz0iOz0L5xG9OwO8N9bdhY+YT+Hq3AVCupqZmp487NTem0yoPEgfZDqVxGaTFVdCxAMhHHvv08jo6U5Cmubumo8HHGzwvYJux9CCWcbUFlr3994Avs04O5sDSXmeDDuG9rGZmepy0r+Gly0brAKEv6UxM2l1HnBB2qabkCzYUamc9TyH8BUM9PIj3RWVEO/FHo8XjYxwrMLd22inHQ8wAORc3ERXqEEe/XgaxnWmD4ledoqRF8imcmqClXN+2f7+WvsJo+/ovi5Oh7+8WfLyx9KVWwjWHPgd6a9Dm/ArSjiZbzR+DpynQZi+AvUXIxBpeQXlvofl0W+479pwIDAQAB"
-      default._domainkey.mail txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw+wMyRqY5sX/bHyuyYlSHM3N0tEqoCV6zQnSjMwCrxoETQsBx6ceXvFmEW1JCE9rp2l+DVDFk9IUVhvMUqHfC+NBKDojqX7PX4gNHrP+E6wkmPRuNzff07dHMSRat1pugpleP9oJgffJBjpGh/YpROsDbpOhlggd5gQjkgP2hH6JsrEwPtdRA/VBqGi6fonSpP9aWB19GVEKAx1xnpaZy991mzcpPSGhXXlOLXM6tgDthBEk0KCcJ3nKoIzbiDRc9oWRlyBxfOND2DYiDMVV02D2ykswCGb5GKhJ4Dy6KbFr9jbUo4h8zdN765P52Phd+tddDOVCbA9xyUI4rTZmkwIDAQAB"
+
+      _mta-sts cname _mta-sts.zandoodle.me.uk.
+
+      ; Advertise DANE
+      _tcp dname _tcp.zandoodle.me.uk.
+
+      _tls dname _tls.zandoodle.me.uk.
 
       flag-0be5c4b29b type65534 \# 0
       flag-0be5c4b29b txt "v=spf1 -all"
 
-      ; Add google site verification
-      @ TXT "google-site-verification=oZJUabY5f9TzTiPw8Ml-k8GrRILLRbITIEF8eamsLY4"
+      mail mx 10 mail.zandoodle.me.uk.
+      mail txt "v=spf1 mx -all"
 
-      _acme-challenge cname _acme-challenge.zandoodle.me.uk.
+      default._domainkey.mail txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw+wMyRqY5sX/bHyuyYlSHM3N0tEqoCV6zQnSjMwCrxoETQsBx6ceXvFmEW1JCE9rp2l+DVDFk9IUVhvMUqHfC+NBKDojqX7PX4gNHrP+E6wkmPRuNzff07dHMSRat1pugpleP9oJgffJBjpGh/YpROsDbpOhlggd5gQjkgP2hH6JsrEwPtdRA/VBqGi6fonSpP9aWB19GVEKAx1xnpaZy991mzcpPSGhXXlOLXM6tgDthBEk0KCcJ3nKoIzbiDRc9oWRlyBxfOND2DYiDMVV02D2ykswCGb5GKhJ4Dy6KbFr9jbUo4h8zdN765P52Phd+tddDOVCbA9xyUI4rTZmkwIDAQAB"
+
+      _mta-sts.mail cname _mta-sts.zandoodle.me.uk.
+      _tls.mail dname _tls.zandoodle.me.uk.
+
+      mta-sts.mail cname @
+      _acme-challenge.mta-sts.mail cname _acme-challenge.zandoodle.me.uk.
+
+      mta-sts cname @
+      _acme-challenge.mta-sts cname _acme-challenge.zandoodle.me.uk.
+      ollama cname local-tailscale.zandoodle.me.uk.
+      _acme-challenge.ollama cname _acme-challenge.zandoodle.me.uk.
+      _tcp.ollama dname _tcp.zandoodle.me.uk.
     '';
     "knot/home.arpa.zone".text = ''
       $TTL 600
