@@ -209,104 +209,7 @@
     "knot/zandoodle.me.uk.zone".text = ''
       $TTL 600
       @ SOA dns hostmaster 0 14400 3600 604800 86400
-
-      ; Setup DANE for this domain
-      $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _25._tcp.mail.zandoodle.me.uk.
-
-      _tcp.local dname _tcp
-
-      ; Setup SPF and DMARC for this domain
-      @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
-      _dmarc txt "v=DMARC1;p=reject;aspf=s;adkim=s;fo=d;rua=mailto:dmarc-reports@zandoodle.me.uk;ruf=mailto:dmarc-reports@zandoodle.me.uk"
-      compsoc-dev.com._report._dmarc txt "v=DMARC1;"
-      mail txt "v=spf1 a -all"
-
-      ; Setup mail exchanges for this domain
-      @ mx 10 mail
-      mail mx 10 mail
-
-      ; Setup MTA-STS for this domain
-      _mta-sts txt "v=STSv1; id=1"
-      _mta-sts.mail cname _mta-sts
-
-      ; Setup TLSRPT
-      _tls.mail dname _tls
-      _smtp._tls txt "v=TLSRPTv1;rua=mailto:tlsrpt@zandoodle.me.uk"
-
-      ; Advertise imaps and submissions
-      _imaps._tcp SRV 0 10 993 imap
-      _submissions._tcp SRV 0 10 465 smtp
-      _submission._tcp SRV 0 10 587 smtp
-      _kerberos uri 5 1 krb5srv:m:kkdcp:https://kkdcp.zandoodle.me.uk/
-      _kerberos uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
-      _kerberos uri 20 1 krb5srv:m:tcp:local.zandoodle.me.uk
-      _kerberos txt ZANDOODLE.ME.UK
-      _kerberos._udp srv 0 10 88 local
-      _kerberos._tcp srv 0 10 88 local
-      _kerberos._udp.tailscale._sites srv 0 10 88 local-tailscale
-      _kerberos._tcp.tailscale._sites srv 0 10 88 local-tailscale
-      _kerberos.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://kkdcp-tailscale.zandoodle.me.uk/
-      _kerberos.tailscale._sites uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
-      _kerberos.tailscale._sites uri 20 1 krb5srv:m:tcp:local.zandoodle.me.uk
-
-      _acme-challenge ns dns
-
-      _acme-challenge.mail ns dns
-
-      $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
-      $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
-      $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
-      $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
-      $INCLUDE /etc/knot/no-email.zone.include local-tailscale.zandoodle.me.uk.
-      $INCLUDE /etc/knot/no-email.zone.include workstation.zandoodle.me.uk.
-      $INCLUDE /etc/knot/no-email.zone.include pc.zandoodle.me.uk.
-      _spf txt "v=spf1 ?a:mail.zandoodle.me.uk -all"
-
-      ; Setup DKIM for this domain
-      default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwCuGmFxA7aupe8x7tmSolntpa5qBxyQnGkgsfjyjD57doP55a57KXTxEo6t7buBpua/W6dktcw2zpLp9338yg1wA/9RJwhZclzrH5Kv4gNbMHHvhBbygnoJqbrwFH8+VDNG4NKUl5WKFRiITJXd8Y0xqpPhFwfmd2nITjc8wleGv4eQXmB5ytP8Nj2fE6pd4fGpF7sydnOo5BTBSeb0QtmgbQcReQ05CqwMGEAyKOQFnKMzEAOEtvyXUFyG7hFt4ZsngpRGDM/1d4rI/Kh7oCFfzuhR+ENhZkLqYz9xZ0QZ3GWVon7mXfiVvJL5GBfb9cwLjAGp5QhgN2El2yc/3/QIDAQAB"
-      default._domainkey.mail txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1VJx8wBBOAQWOk+6i7MuJel5lV7glADvBG3g+UcW5wn/mbGJdsyGpoI33694ZSBth4y3OHeVP11ydIznHY0fuBviAKVyLQZN94j5Nw4rH4xZXGhHXxUqBcMuHKHrj5jp2cd/rgtCX18W8YkSYEU6yZpbjle8NoMFRK5OFuLNeni7jOtPGE3P7JyfzY0umkiLemVn5w/HREf0i6un7DJ/iq3OG3Pd3MWxbcIYwRf3+zpRybjOTwgBhfHXNysJ8QZiz5fg3wCYzEYy2AyXbhF2PZNqZrId3oaFiGGhX13ffUSVGdR7VS9zwmIQoEG+jrOitMocywf8X1HIeB5m8zfHWwIDAQAB"
-
-      ; Advertise IP addresses for this domain
-      $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
-      $INCLUDE /var/lib/ddns/local-guest-zonefile local-guest.zandoodle.me.uk.
-      $INCLUDE /var/lib/ddns/local-tailscale-zonefile local-tailscale.zandoodle.me.uk.
       $INCLUDE /var/lib/ddns/zonefile
-      ; NS and MX targets musn't be an alias
-      $INCLUDE /var/lib/ddns/zonefile-ipv6-only dns.zandoodle.me.uk.
-      $INCLUDE /var/lib/ddns/zonefile mail.zandoodle.me.uk.
-
-      imap cname local-tailscale
-      _acme-challenge.imap cname _acme-challenge.mail
-      smtp cname local-tailscale
-      _acme-challenge.smtp cname _acme-challenge.mail
-      smtp-local cname local
-      _acme-challenge.smtp-local cname _acme-challenge.mail
-      cardgames cname @
-      _acme-challenge.cardgames cname _acme-challenge
-      kkdcp cname local
-      _acme-challenge.kkdcp cname _acme-challenge
-      kkdcp-tailscale cname local-tailscale
-      _acme-challenge.kkdcp-tailscale cname _acme-challenge
-      mta-sts cname @
-      _acme-challenge.mta-sts cname _acme-challenge
-      mta-sts.mail cname @
-      _acme-challenge.mta-sts.mail cname _acme-challenge
-      recursive.dns cname local
-      _acme-challenge.recursive.dns cname _acme-challenge
-      wss.cardgames cname @
-      _acme-challenge.wss.cardgames cname _acme-challenge
-      _acme-challenge.local cname _acme-challenge
-
-      ; Setup certificate authority restrictions for this domain
-      @ CAA 0 issuemail ";"
-      @ CAA 0 issuevmc ";"
-      @ CAA 0 issuewild ";"
-      ; Only Let's Encrypt can issue for this domain and only using the dns-01 validation method
-      @ CAA 128 issue "letsencrypt.org;validationmethods=dns-01"
-
-      ; Advertise HTTP/2 and HTTP/3 support for zandoodle.me.uk
-      @ HTTPS 1 . alpn=h3,h2
 
       ; Advertise the primary DNS server
       @ ns dns
@@ -315,11 +218,103 @@
       @ ns robotns2.second-ns.de.
       @ ns robotns3.second-ns.com.
 
+      ; Setup mail exchanges for this domain
+      @ mx 10 mail
+
+      ; Google stuff
+      @ txt "google-site-verification=ZDVckD_owTCKFzcbI9VqqGQOoNfd_8C0tKNqRVkiK8I"
+
+      ; Setup SPF and DMARC for this domain
+      @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
+
+      ; Advertise HTTP/2 and HTTP/3 support for zandoodle.me.uk
+      @ https 1 . alpn=h3,h2
+
+      ; Setup certificate authority restrictions for this domain
+      @ caa 0 issuemail ";"
+      @ caa 0 issuevmc ";"
+      @ caa 0 issuewild ";"
+      ; Only Let's Encrypt can issue for this domain and only using the dns-01 validation method
+      @ caa 128 issue "letsencrypt.org;validationmethods=dns-01"
+
+      _acme-challenge ns dns
+
+      ; Setup DMARC
+      _dmarc txt "v=DMARC1;p=reject;aspf=s;adkim=s;fo=d;rua=mailto:dmarc-reports@zandoodle.me.uk;ruf=mailto:dmarc-reports@zandoodle.me.uk"
+      compsoc-dev.com._report._dmarc txt "v=DMARC1;"
+
+      ; Setup DKIM for this domain
+      default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwCuGmFxA7aupe8x7tmSolntpa5qBxyQnGkgsfjyjD57doP55a57KXTxEo6t7buBpua/W6dktcw2zpLp9338yg1wA/9RJwhZclzrH5Kv4gNbMHHvhBbygnoJqbrwFH8+VDNG4NKUl5WKFRiITJXd8Y0xqpPhFwfmd2nITjc8wleGv4eQXmB5ytP8Nj2fE6pd4fGpF7sydnOo5BTBSeb0QtmgbQcReQ05CqwMGEAyKOQFnKMzEAOEtvyXUFyG7hFt4ZsngpRGDM/1d4rI/Kh7oCFfzuhR+ENhZkLqYz9xZ0QZ3GWVon7mXfiVvJL5GBfb9cwLjAGp5QhgN2El2yc/3/QIDAQAB"
+
+      _kerberos uri 5 1 krb5srv:m:kkdcp:https://kkdcp.zandoodle.me.uk/
+      _kerberos uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
+      _kerberos uri 20 1 krb5srv:m:tcp:local.zandoodle.me.uk
+      _kerberos txt ZANDOODLE.ME.UK
+
+      ; Setup MTA-STS for this domain
+      _mta-sts txt "v=STSv1; id=1"
+
+      _kerberos.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://kkdcp-tailscale.zandoodle.me.uk/
+      _kerberos.tailscale._sites uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
+      _kerberos.tailscale._sites uri 20 1 krb5srv:m:tcp:local.zandoodle.me.uk
+      _kerberos._tcp.tailscale._sites srv 0 10 88 local-tailscale
+      _kerberos._udp.tailscale._sites srv 0 10 88 local-tailscale
+
+      _spf txt "v=spf1 ?a:mail.zandoodle.me.uk -all"
+
+      ; Setup DANE for this domain
+      $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
+
+      ; Setup SRV records
+      _imaps._tcp SRV 0 10 993 imap
+      _kerberos._tcp srv 0 10 88 local
+      _submissions._tcp SRV 0 10 465 smtp
+      _submission._tcp SRV 0 10 587 smtp
+
+      ; Setup TLSRPT
+      _smtp._tls txt "v=TLSRPTv1;rua=mailto:tlsrpt@zandoodle.me.uk"
+
+      _kerberos._udp srv 0 10 88 local
+
       ; Setup an extant domain for DNSSEC testing
       bogus-exists TYPE65534 \# 0
 
+      cardgames cname @
+      _acme-challenge.cardgames cname _acme-challenge
+      wss.cardgames cname @
+      _acme-challenge.wss.cardgames cname _acme-challenge
+
+      chromebook a 100.69.85.70
+      chromebook aaaa fd7a:115c:a1e0::d401:5546
+      chromebook sshfp 1 2 dc6283b6624010239844b07c3c6e4691233ceb4a46c86c36402cfcfe3a1eceda
+      chromebook sshfp 4 2 522f2d5021c6d6250d99b77bea672fbfaac6c5b8a4ef6950d49267da9ecc11ee
+      _kerberos.chromebook txt WORKSTATION.ZANDOODLE.ME.UK
+
+      ; NS targets musn't be an alias
+      $INCLUDE /var/lib/ddns/zonefile-ipv6-only dns.zandoodle.me.uk.
+      $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
+
+      recursive.dns cname local
+      _acme-challenge.recursive.dns cname _acme-challenge
+
       dot-check\. txt dot\ check
       dot-check\. txt "v=spf1 -all"
+
+      imap cname local-tailscale
+      _acme-challenge.imap cname _acme-challenge.mail
+      kkdcp cname local
+      _acme-challenge.kkdcp cname _acme-challenge
+      kkdcp-tailscale cname local-tailscale
+      _acme-challenge.kkdcp-tailscale cname _acme-challenge
+
+      laptop a 100.68.198.4
+      laptop aaaa fd7a:115c:a1e0::d601:c604
+      laptop sshfp 1 2 74f8b963573c943f69119ed3383dcf34471acc5ac61e6136cc7daddce57e9dad
+      laptop sshfp 4 2 af1162523e3f11a434bec1a78f6b8c5bf0b9f5c187391a08004afb8b5d7d8195
+      _kerberos.laptop txt WORKSTATION.ZANDOODLE.ME.UK
+
+      $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
+      $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
 
       ; Advertise HTTP/2 and HTTP/3 support for local.zandoodle.me.uk
       local HTTPS 1 . alpn=h3,h2
@@ -327,15 +322,46 @@
       ; Public SSH key fingerprints for local domains
       local IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
       local IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
+      _acme-challenge.local cname _acme-challenge
+      _tcp.local dname _tcp
+
+      $INCLUDE /var/lib/ddns/local-guest-zonefile local-guest.zandoodle.me.uk.
+      $INCLUDE /etc/knot/no-email.zone.include local-guest.zandoodle.me.uk.
       local-guest IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
       local-guest IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
-      local-shadow IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
-      local-shadow IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
-      local-tailscale IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
-      local-tailscale IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
 
       local-shadow A 192.168.4.1
       local-shadow AAAA fd09:a389:7c1e:1::1
+      $INCLUDE /etc/knot/no-email.zone.include local-shadow.zandoodle.me.uk.
+      local-shadow IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
+      local-shadow IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
+
+      ; Advertise IP addresses for this domain
+      $INCLUDE /var/lib/ddns/local-tailscale-zonefile local-tailscale.zandoodle.me.uk.
+      $INCLUDE /etc/knot/no-email.zone.include local-tailscale.zandoodle.me.uk.
+      ; Public SSH key fingerprints for local domains
+      local-tailscale IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
+      local-tailscale IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
+
+      ; MX targets musn't be an alias
+      $INCLUDE /var/lib/ddns/zonefile mail.zandoodle.me.uk.
+      mail mx 10 mail
+      mail txt "v=spf1 a -all"
+
+      _acme-challenge.mail ns dns
+
+      default._domainkey.mail txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1VJx8wBBOAQWOk+6i7MuJel5lV7glADvBG3g+UcW5wn/mbGJdsyGpoI33694ZSBth4y3OHeVP11ydIznHY0fuBviAKVyLQZN94j5Nw4rH4xZXGhHXxUqBcMuHKHrj5jp2cd/rgtCX18W8YkSYEU6yZpbjle8NoMFRK5OFuLNeni7jOtPGE3P7JyfzY0umkiLemVn5w/HREf0i6un7DJ/iq3OG3Pd3MWxbcIYwRf3+zpRybjOTwgBhfHXNysJ8QZiz5fg3wCYzEYy2AyXbhF2PZNqZrId3oaFiGGhX13ffUSVGdR7VS9zwmIQoEG+jrOitMocywf8X1HIeB5m8zfHWwIDAQAB"
+
+      _mta-sts.mail cname _mta-sts
+
+      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _25._tcp.mail.zandoodle.me.uk.
+
+      _tls.mail dname _tls
+
+      mta-sts.mail cname @
+      _acme-challenge.mta-sts.mail cname _acme-challenge
+      mta-sts cname @
+      _acme-challenge.mta-sts cname _acme-challenge
 
       multi-string-check TXT string 1 string 2
       multi-string-check txt "v=spf1 -all"
@@ -347,36 +373,30 @@
       ; Check that null bytes within domains are handled correctly
       null-domain-check\000 TXT "null domain check"
 
-      ; Add a zero ttl record for testing DNS resolvers
-      ttl-check 0 txt ttl\ check
-      ttl-check 0 txt "v=spf1 -all"
-
-      chromebook a 100.69.85.70
-      chromebook aaaa fd7a:115c:a1e0::d401:5546
-      chromebook sshfp 1 2 dc6283b6624010239844b07c3c6e4691233ceb4a46c86c36402cfcfe3a1eceda
-      chromebook sshfp 4 2 522f2d5021c6d6250d99b77bea672fbfaac6c5b8a4ef6950d49267da9ecc11ee
-      _kerberos.chromebook txt WORKSTATION.ZANDOODLE.ME.UK
-
-      laptop a 100.68.198.4
-      laptop aaaa fd7a:115c:a1e0::d601:c604
-      laptop sshfp 1 2 74f8b963573c943f69119ed3383dcf34471acc5ac61e6136cc7daddce57e9dad
-      laptop sshfp 4 2 af1162523e3f11a434bec1a78f6b8c5bf0b9f5c187391a08004afb8b5d7d8195
-      _kerberos.laptop txt WORKSTATION.ZANDOODLE.ME.UK
-
       pc a 100.95.236.105
+      $INCLUDE /etc/knot/no-email.zone.include pc.zandoodle.me.uk.
       pc aaaa fd7a:115c:a1e0::d2df:ec69
       pc sshfp 1 2 ea259e9d2d355d9506919e56ed0c35fbb0476501524f6349cf9f6ef6dbe19c50
       pc sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
       _kerberos.pc txt WORKSTATION.ZANDOODLE.ME.UK
 
+      smtp cname local-tailscale
+      _acme-challenge.smtp cname _acme-challenge.mail
+      smtp-local cname local
+      _acme-challenge.smtp-local cname _acme-challenge.mail
+
+      ; Add a zero ttl record for testing DNS resolvers
+      ttl-check 0 txt ttl\ check
+      ttl-check 0 txt "v=spf1 -all"
 
       workstation a 100.91.224.22
+      $INCLUDE /etc/knot/no-email.zone.include workstation.zandoodle.me.uk.
       workstation aaaa fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
+      workstation IN SSHFP 1 2 bb26ac7d22088477cf1a3f701f702595025a569c7373306bbfb44d880202322f
+      workstation IN SSHFP 4 2 7fa4a718df8a2c3fe600f3d9976d00ac825d56a1ca41b5b36026a279400642e8
       workstation caa 128 issue "letsencrypt.org;validationmethods=dns-01"
       workstation caa 0 issuemail ";"
       workstation caa 0 issuevmc ";"
-      workstation IN SSHFP 1 2 bb26ac7d22088477cf1a3f701f702595025a569c7373306bbfb44d880202322f
-      workstation IN SSHFP 4 2 7fa4a718df8a2c3fe600f3d9976d00ac825d56a1ca41b5b36026a279400642e8
       *.workstation cname workstation
       _acme-challenge.workstation ns dns
       _kerberos.workstation txt WORKSTATION.ZANDOODLE.ME.UK
@@ -384,9 +404,6 @@
       _kerberos.workstation uri 10 1 krb5srv:m:tcp:workstation.zandoodle.me.uk
       _kerberos._tcp.workstation srv 0 10 88 workstation
       _kerberos._udp.workstation srv 0 10 88 workstation
-
-      ; Google stuff
-      @ TXT "google-site-verification=ZDVckD_owTCKFzcbI9VqqGQOoNfd_8C0tKNqRVkiK8I"
     '';
     "resolv.conf".text = ''
       # Use the local DNS resolver
