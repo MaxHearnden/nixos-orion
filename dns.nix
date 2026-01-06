@@ -252,7 +252,7 @@
       ; Setup DKIM for this domain
       default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwCuGmFxA7aupe8x7tmSolntpa5qBxyQnGkgsfjyjD57doP55a57KXTxEo6t7buBpua/W6dktcw2zpLp9338yg1wA/9RJwhZclzrH5Kv4gNbMHHvhBbygnoJqbrwFH8+VDNG4NKUl5WKFRiITJXd8Y0xqpPhFwfmd2nITjc8wleGv4eQXmB5ytP8Nj2fE6pd4fGpF7sydnOo5BTBSeb0QtmgbQcReQ05CqwMGEAyKOQFnKMzEAOEtvyXUFyG7hFt4ZsngpRGDM/1d4rI/Kh7oCFfzuhR+ENhZkLqYz9xZ0QZ3GWVon7mXfiVvJL5GBfb9cwLjAGp5QhgN2El2yc/3/QIDAQAB"
 
-      _kerberos uri 5 1 krb5srv:m:kkdcp:https://kkdcp.zandoodle.me.uk/
+      _kerberos uri 5 1 krb5srv:m:kkdcp:https://zandoodle.me.uk/KdcProxy
       _kerberos uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
       _kerberos uri 20 1 krb5srv:m:tcp:local.zandoodle.me.uk
       _kerberos txt ZANDOODLE.ME.UK
@@ -260,9 +260,9 @@
       ; Setup MTA-STS for this domain
       _mta-sts txt "v=STSv1; id=1"
 
-      _kerberos.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://kkdcp-tailscale.zandoodle.me.uk/
-      _kerberos.tailscale._sites uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
-      _kerberos.tailscale._sites uri 20 1 krb5srv:m:tcp:local.zandoodle.me.uk
+      _kerberos.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://zandoodle.me.uk/KdcProxy
+      _kerberos.tailscale._sites uri 10 1 krb5srv:m:udp:local-tailscale.zandoodle.me.uk
+      _kerberos.tailscale._sites uri 20 1 krb5srv:m:tcp:local-tailscale.zandoodle.me.uk
       _kerberos._tcp.tailscale._sites srv 0 10 88 local-tailscale
       _kerberos._udp.tailscale._sites srv 0 10 88 local-tailscale
 
