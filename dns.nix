@@ -828,6 +828,17 @@
             notify = "pc";
             semantic-checks = true;
           };
+          icann = {
+            acl = [ "transfer" ];
+            catalog-role = "member";
+            catalog-zone = "catz";
+            dnssec-validation = true;
+            ixfr-from-axfr = true;
+            master = ["xfr.cjr.dns.icann.org" "xfr.lax.dns.icann.org"];
+            module = "mod-queryacl/local";
+            notify = "pc";
+            semantic-checks = true;
+          };
           local = {
             # Template for zones that shouldn't be added to the catalog
             acl = [ "transfer" ];
@@ -948,7 +959,13 @@
             zonefile-load = "difference-no-serial";
             zonefile-sync = -1;
           };
+          "in-addr.arpa".template = "icann";
+          "ip6.arpa".template = "icann";
           "orion.home.arpa".template = "dnsmasq";
+          "root-servers.net" = {
+            dnssec-validation = false;
+            template = "root-servers";
+          };
           "zandoodle.me.uk" = {
             acl = [ "knot-ds" "transfer" "workstation" ];
             catalog-group = "global";
@@ -996,6 +1013,7 @@
             "home.arpa"
             "168.192.in-addr.arpa."
             "d.f.ip6.arpa"
+            "root-servers.net"
           ] ++ lib.genList (i: "${toString (i+64)}.100.in-addr.arpa") 64;
 
           # Enable Extended DNS Errors
@@ -1119,6 +1137,21 @@
             name = "d.f.ip6.arpa";
             stub-addr = "::1@54";
             stub-no-cache = true;
+          }
+          {
+            name = "in-addr.arpa";
+            stub-addr = "::1@54";
+            stub-first = true;
+          }
+          {
+            name = "ip6.arpa";
+            stub-addr = "::1@54";
+            stub-first = true;
+          }
+          {
+            name = "root-servers.net";
+            stub-addr = "::1@54";
+            stub-first = true;
           }
         ] ++ lib.genList (i: {
           name = "${toString (i+64)}.100.in-addr.arpa";
