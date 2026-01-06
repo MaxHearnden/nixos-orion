@@ -360,7 +360,10 @@ in
           address = [ "192.168.5.201/24" "192.168.6.1/24" ];
 
           ipv6AcceptRAConfig.RouteMetric = 2048;
-          ipv6SendRAConfig.Managed = true;
+          ipv6SendRAConfig = {
+            Managed = true;
+            RouterPreference = "low";
+          };
           ipv6Prefixes = [
             {
               Prefix = "fd09:a389:7c1e:4::/64";
