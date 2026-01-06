@@ -256,6 +256,8 @@
       _kerberos uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
       _kerberos uri 20 1 krb5srv:m:tcp:local.zandoodle.me.uk
       _kerberos txt ZANDOODLE.ME.UK
+      _kerberos-adm uri 5 1 krb5srv:m:kkdcp:https://zandoodle.me.uk/KdcProxy
+      _kerberos-adm uri 10 1 krb5srv:m:tcp:local.zandoodle.me.uk
 
       ; Setup MTA-STS for this domain
       _mta-sts txt "v=STSv1; id=1"
@@ -263,7 +265,10 @@
       _kerberos.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://zandoodle.me.uk/KdcProxy
       _kerberos.tailscale._sites uri 10 1 krb5srv:m:udp:local-tailscale.zandoodle.me.uk
       _kerberos.tailscale._sites uri 20 1 krb5srv:m:tcp:local-tailscale.zandoodle.me.uk
+      _kerberos-adm.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://zandoodle.me.uk/KdcProxy
+      _kerberos-adm.tailscale._sites uri 20 1 krb5srv:m:tcp:local-tailscale.zandoodle.me.uk
       _kerberos._tcp.tailscale._sites srv 0 10 88 local-tailscale
+      _kerberos-adm._tcp.tailscale._sites srv 0 10 749 local-tailscale
       _kerberos._udp.tailscale._sites srv 0 10 88 local-tailscale
 
       _spf txt "v=spf1 ?a:mail.zandoodle.me.uk -all"
@@ -274,6 +279,7 @@
       ; Setup SRV records
       _imaps._tcp SRV 0 10 993 imap
       _kerberos._tcp srv 0 10 88 local
+      _kerberos-adm._tcp srv 0 10 749 local
       _submissions._tcp SRV 0 10 465 smtp
       _submission._tcp SRV 0 10 587 smtp
 
