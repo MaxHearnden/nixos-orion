@@ -133,7 +133,11 @@ in
               Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
             }
 
-            respond "This is a test of config ${inputs.self}"
+            route {
+              reverse_proxy /KdcProxy unix//run/kdcproxy
+
+              respond "This is a test of config ${inputs.self}"
+            }
           '';
         };
         "wss.cardgames.zandoodle.me.uk" = {
