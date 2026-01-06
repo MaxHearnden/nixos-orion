@@ -466,50 +466,6 @@ in
             file_server
           '';
         };
-        "kkdcp.zandoodle.me.uk".extraConfig = ''
-          tls {
-            issuer acme {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile shortlived
-            }
-          }
-          @denied not {
-            client_ip private_ranges fe80::/10
-            not client_ip 192.168.1.1
-          }
-          abort @denied
-          header {
-            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-            X-Content-Type-Options nosniff
-            Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-            Cross-Origin-Resource-Policy same-origin
-            X-Frame-Options DENY
-            Referrer-Policy no-referrer
-          }
-          reverse_proxy unix//run/kdcproxy
-        '';
-        "kkdcp-tailscale.zandoodle.me.uk".extraConfig = ''
-          tls {
-            issuer acme {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile shortlived
-            }
-          }
-          @denied not {
-            client_ip private_ranges fe80::/10
-            not client_ip 192.168.1.1
-          }
-          abort @denied
-          header {
-            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-            X-Content-Type-Options nosniff
-            Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
-            Cross-Origin-Resource-Policy same-origin
-            X-Frame-Options DENY
-            Referrer-Policy no-referrer
-          }
-          reverse_proxy unix//run/kdcproxy
-        '';
         "local.zandoodle.me.uk" = {
           extraConfig = ''
             tls {

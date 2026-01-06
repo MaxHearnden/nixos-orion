@@ -308,10 +308,6 @@
 
       imap cname local-tailscale
       _acme-challenge.imap cname _acme-challenge.mail
-      kkdcp cname local
-      _acme-challenge.kkdcp cname _acme-challenge
-      kkdcp-tailscale cname local-tailscale
-      _acme-challenge.kkdcp-tailscale cname _acme-challenge
 
       laptop a 100.68.198.4
       laptop aaaa fd7a:115c:a1e0::d601:c604
