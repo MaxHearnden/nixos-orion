@@ -487,7 +487,10 @@ in
               X-Frame-Options DENY
               Referrer-Policy no-referrer
             }
-            respond "This is a test of config ${inputs.self}"
+            route {
+              reverse_proxy /dns-query h2c://[::1]:8080
+              respond "This is a test of config ${inputs.self}"
+            }
           '';
         };
         "mta-sts.compsoc-dev.com" = {
