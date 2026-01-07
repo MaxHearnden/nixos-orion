@@ -173,6 +173,34 @@
       vodafone a 192.168.1.1
       vodafone-guest a 192.168.5.1
     '';
+    "knot/int.zandoodle.me.uk.zone".text = ''
+      @ soa local-tailscale.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3600 604800 86400
+      @ ns dns.zandoodle.me.uk.
+      @ txt "This is meant to be public, this is just for stuff where I don't care about being able to resolve it over IPv4"
+
+      bogus-exists type65534 \# 0
+
+      chromebook a 100.69.85.70
+      $INCLUDE /etc/knot/no-email.zone.include chromebook.int.zandoodle.me.uk.
+      chromebook aaaa fd7a:115c:a1e0::d401:5546
+      chromebook sshfp 1 2 dc6283b6624010239844b07c3c6e4691233ceb4a46c86c36402cfcfe3a1eceda
+      chromebook sshfp 4 2 522f2d5021c6d6250d99b77bea672fbfaac6c5b8a4ef6950d49267da9ecc11ee
+      _kerberos.chromebook txt WORKSTATION.ZANDOODLE.ME.UK
+
+      laptop a 100.68.198.4
+      $INCLUDE /etc/knot/no-email.zone.include laptop.int.zandoodle.me.uk.
+      laptop aaaa fd7a:115c:a1e0::d601:c604
+      laptop sshfp 1 2 74f8b963573c943f69119ed3383dcf34471acc5ac61e6136cc7daddce57e9dad
+      laptop sshfp 4 2 af1162523e3f11a434bec1a78f6b8c5bf0b9f5c187391a08004afb8b5d7d8195
+      _kerberos.laptop txt WORKSTATION.ZANDOODLE.ME.UK
+
+      pc a 100.95.236.105
+      $INCLUDE /etc/knot/no-email.zone.include pc.int.zandoodle.me.uk.
+      pc aaaa fd7a:115c:a1e0::d2df:ec69
+      pc sshfp 1 2 ea259e9d2d355d9506919e56ed0c35fbb0476501524f6349cf9f6ef6dbe19c50
+      pc sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
+      _kerberos.pc txt WORKSTATION.ZANDOODLE.ME.UK
+    '';
     "knot/letsencrypt.zone.include".source =
       pkgs.callPackage ./gen-TLSA.nix {
         names = [ "ISRG_Root_X1" "ISRG_Root_X2" ];
@@ -296,12 +324,6 @@
       wss.cardgames cname @
       _acme-challenge.wss.cardgames cname _acme-challenge
 
-      chromebook a 100.69.85.70
-      chromebook aaaa fd7a:115c:a1e0::d401:5546
-      chromebook sshfp 1 2 dc6283b6624010239844b07c3c6e4691233ceb4a46c86c36402cfcfe3a1eceda
-      chromebook sshfp 4 2 522f2d5021c6d6250d99b77bea672fbfaac6c5b8a4ef6950d49267da9ecc11ee
-      _kerberos.chromebook txt WORKSTATION.ZANDOODLE.ME.UK
-
       ; NS targets musn't be an alias
       $INCLUDE /var/lib/ddns/zonefile-ipv6-only dns.zandoodle.me.uk.
       $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
@@ -312,11 +334,7 @@
       imap cname local-tailscale
       _acme-challenge.imap cname _acme-challenge.mail
 
-      laptop a 100.68.198.4
-      laptop aaaa fd7a:115c:a1e0::d601:c604
-      laptop sshfp 1 2 74f8b963573c943f69119ed3383dcf34471acc5ac61e6136cc7daddce57e9dad
-      laptop sshfp 4 2 af1162523e3f11a434bec1a78f6b8c5bf0b9f5c187391a08004afb8b5d7d8195
-      _kerberos.laptop txt WORKSTATION.ZANDOODLE.ME.UK
+      int ns dns
 
       $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
       $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
@@ -378,13 +396,6 @@
       ; Check that null bytes within domains are handled correctly
       null-domain-check\000 TXT "null domain check"
 
-      pc a 100.95.236.105
-      $INCLUDE /etc/knot/no-email.zone.include pc.zandoodle.me.uk.
-      pc aaaa fd7a:115c:a1e0::d2df:ec69
-      pc sshfp 1 2 ea259e9d2d355d9506919e56ed0c35fbb0476501524f6349cf9f6ef6dbe19c50
-      pc sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
-      _kerberos.pc txt WORKSTATION.ZANDOODLE.ME.UK
-
       smtp cname local-tailscale
       _acme-challenge.smtp cname _acme-challenge.mail
 
@@ -405,7 +416,10 @@
       _kerberos.workstation txt WORKSTATION.ZANDOODLE.ME.UK
       _kerberos.workstation uri 5 1 krb5srv:m:kkdcp:https://kkdcp.workstation.zandoodle.me.uk/
       _kerberos.workstation uri 10 1 krb5srv:m:tcp:workstation.zandoodle.me.uk
+      _kerberos-adm.workstation uri 5 1 krb5srv:m:kkdcp:https://kkdcp.workstation.zandoodle.me.uk/
+      _kerberos-adm.workstation uri 20 1 krb5srv:m:tcp:workstation.zandoodle.me.uk
       _kerberos._tcp.workstation srv 0 10 88 workstation
+      _kerberos-adm._tcp.workstation srv 0 10 749 workstation
       _kerberos._udp.workstation srv 0 10 88 workstation
     '';
     "resolv.conf".text = ''
@@ -596,6 +610,7 @@
             update-owner-name = [
               "_acme-challenge"
               "_acme-challenge.mail"
+              "int"
             ];
             update-type = "DS";
           };
@@ -647,10 +662,10 @@
           "fe80::/10"
         ];
         policy = {
-          acme-challenge = {
+          subdomain = {
             # Add a policy for acme challenge zones
             ds-push = "knot-ds-push";
-            ksk-submission = "acme-challenge";
+            ksk-submission = "subdomain";
             ksk-lifetime = "14d";
             single-type-signing = true;
           };
@@ -791,7 +806,7 @@
           tcp-reuseport = true;
         };
         submission = {
-          acme-challenge.parent = [ "unbound" "knot-ds-push" "hetzner" ];
+          subdomain.parent = [ "unbound" "knot-ds-push" "hetzner" ];
           # Check DS submittion using unbound
           unbound = {
             parent = "unbound";
@@ -860,6 +875,7 @@
             reverse-generate = [
               "compsoc-dev.com"
               "home.arpa"
+              "int.zandoodle.me.uk"
               "zandoodle.me.uk"
               "orion.home.arpa"
             ];
@@ -880,7 +896,7 @@
           "_acme-challenge.mail.zandoodle.me.uk" = {
             # Add a zone for ACME challenges
             acl = [ "maddy-acme" "transfer" ];
-            dnssec-policy = "acme-challenge";
+            dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
             semantic-checks = true;
@@ -894,7 +910,7 @@
           "_acme-challenge.zandoodle.me.uk" = {
             # Add a zone for ACME challenges
             acl = [ "caddy-acme" "transfer" ];
-            dnssec-policy = "acme-challenge";
+            dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
             semantic-checks = true;
@@ -955,6 +971,17 @@
             zonefile-sync = -1;
           };
           "in-addr.arpa".template = "icann";
+          "int.zandoodle.me.uk" = {
+            acl = [ "transfer" ];
+            dnssec-policy = "subdomain";
+            dnssec-signing = true;
+            file = "/etc/knot/int.zandoodle.me.uk.zone";
+            semantic-checks = true;
+            template = "local";
+            journal-content = "all";
+            zonefile-load = "difference-no-serial";
+            zonefile-sync = -1;
+          };
           "ip6.arpa".template = "icann";
           "orion.home.arpa".template = "dnsmasq";
           "root-servers.net" = {
@@ -1512,6 +1539,7 @@
           "bogus.zandoodle.me.uk.zone"
           "compsoc-dev.com.zone"
           "home.arpa.zone"
+          "int.zandoodle.me.uk.zone"
           "letsencrypt.zone.include"
           "letsencrypt-dane.zone.include"
           "no-email.zone.include"
