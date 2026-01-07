@@ -204,6 +204,7 @@ in
   };
   services = {
     avahi = {
+      allowInterfaces = [ "bridge" "shadow-lan" "guest" ];
       enable = true;
       nssmdns6 = true;
       publish = {
