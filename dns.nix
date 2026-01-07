@@ -178,6 +178,7 @@
       @ ns dns.zandoodle.me.uk.
       @ txt "This is meant to be public, this is just for stuff where I don't care about being able to resolve it over IPv4"
 
+      ; Setup an extant domain for DNSSEC testing
       bogus-exists type65534 \# 0
 
       chromebook a 100.69.85.70
@@ -315,9 +316,6 @@
       _smtp._tls txt "v=TLSRPTv1;rua=mailto:tlsrpt@zandoodle.me.uk"
 
       _kerberos._udp srv 0 10 88 local
-
-      ; Setup an extant domain for DNSSEC testing
-      bogus-exists TYPE65534 \# 0
 
       cardgames cname @
       _acme-challenge.cardgames cname _acme-challenge
@@ -929,7 +927,7 @@
             zonemd-verify = true;
           };
           arpa.template = "root-servers"; # Serve a copy of the root zone
-          "bogus.zandoodle.me.uk" = {
+          "bogus.int.zandoodle.me.uk" = {
             # Add a domain for DNSSEC testing
             acl = [ "transfer" ];
             file = "/etc/knot/bogus.zandoodle.me.uk.zone";
@@ -937,7 +935,7 @@
             zonefile-load = "difference-no-serial";
             zonefile-sync = -1;
           };
-          "bogus-exists.zandoodle.me.uk" = {
+          "bogus-exists.int.zandoodle.me.uk" = {
             # Add a domain for DNSSEC testing
             acl = [ "transfer" ];
             file = "/etc/knot/bogus.zandoodle.me.uk.zone";
