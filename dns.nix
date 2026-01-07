@@ -306,9 +306,6 @@
       $INCLUDE /var/lib/ddns/zonefile-ipv6-only dns.zandoodle.me.uk.
       $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
 
-      recursive.dns cname local
-      _acme-challenge.recursive.dns cname _acme-challenge
-
       dot-check\. txt dot\ check
       dot-check\. txt "v=spf1 -all"
 
@@ -390,8 +387,6 @@
 
       smtp cname local-tailscale
       _acme-challenge.smtp cname _acme-challenge.mail
-      smtp-local cname local
-      _acme-challenge.smtp-local cname _acme-challenge.mail
 
       ; Add a zero ttl record for testing DNS resolvers
       ttl-check 0 txt ttl\ check
