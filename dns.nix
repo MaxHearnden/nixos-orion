@@ -330,7 +330,7 @@
       dot-check\. txt "v=spf1 -all"
 
       imap cname local-tailscale
-      _acme-challenge.imap cname _acme-challenge.mail
+      _acme-challenge.imap cname mail._acme-challenge
 
       int ns dns
 
@@ -369,7 +369,7 @@
       mail mx 10 mail
       mail txt "v=spf1 a -all"
 
-      _acme-challenge.mail ns dns
+      _acme-challenge.mail cname mail._acme-challenge
 
       default._domainkey.mail txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1VJx8wBBOAQWOk+6i7MuJel5lV7glADvBG3g+UcW5wn/mbGJdsyGpoI33694ZSBth4y3OHeVP11ydIznHY0fuBviAKVyLQZN94j5Nw4rH4xZXGhHXxUqBcMuHKHrj5jp2cd/rgtCX18W8YkSYEU6yZpbjle8NoMFRK5OFuLNeni7jOtPGE3P7JyfzY0umkiLemVn5w/HREf0i6un7DJ/iq3OG3Pd3MWxbcIYwRf3+zpRybjOTwgBhfHXNysJ8QZiz5fg3wCYzEYy2AyXbhF2PZNqZrId3oaFiGGhX13ffUSVGdR7VS9zwmIQoEG+jrOitMocywf8X1HIeB5m8zfHWwIDAQAB"
 
@@ -395,7 +395,7 @@
       null-domain-check\000 TXT "null domain check"
 
       smtp cname local-tailscale
-      _acme-challenge.smtp cname _acme-challenge.mail
+      _acme-challenge.smtp cname mail._acme-challenge
 
       ; Add a zero ttl record for testing DNS resolvers
       ttl-check 0 txt ttl\ check
@@ -607,7 +607,6 @@
             update-owner-match = "equal";
             update-owner-name = [
               "_acme-challenge"
-              "_acme-challenge.mail"
               "int"
             ];
             update-type = "DS";
@@ -617,7 +616,11 @@
             address = "::1";
             action = "update";
             key = "maddy";
-            update-owner = "zone";
+            update-owner = "name";
+            update-owner-match = "equal";
+            update-owner-name = [
+              "mail"
+            ];
             update-type = "TXT";
           };
           transfer = {
@@ -891,23 +894,9 @@
             zonemd-verify = true;
           };
           "168.192.in-addr.arpa".template = "rDNS";
-          "_acme-challenge.mail.zandoodle.me.uk" = {
-            # Add a zone for ACME challenges
-            acl = [ "maddy-acme" "transfer" ];
-            dnssec-policy = "subdomain";
-            dnssec-signing = true;
-            file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
-            semantic-checks = true;
-            template = "local";
-            journal-content = "all";
-            zonefile-load = "difference-no-serial";
-            zonefile-skip = "TXT";
-            zonemd-generate = "zonemd-sha512";
-            zonefile-sync = -1;
-          };
           "_acme-challenge.zandoodle.me.uk" = {
             # Add a zone for ACME challenges
-            acl = [ "caddy-acme" "transfer" ];
+            acl = [ "caddy-acme" "maddy-acme" "transfer" ];
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";

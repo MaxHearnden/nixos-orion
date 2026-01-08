@@ -10,6 +10,7 @@
             server "[::1]:54"
           }
           hostname mail.zandoodle.me.uk
+          override_domain mail._acme-challenge.zandoodle.me.uk
         }
         protocols tls1.2 tls1.3
       }
@@ -21,7 +22,7 @@
           server "[::1]:54"
         }
         hostname imap.zandoodle.me.uk
-        override_domain _acme-challenge.mail.zandoodle.me.uk
+        override_domain mail._acme-challenge.zandoodle.me.uk
       }
       tls.loader.acme smtp {
         agreed
@@ -31,7 +32,7 @@
           server "[::1]:54"
         }
         hostname smtp.zandoodle.me.uk
-        override_domain _acme-challenge.mail.zandoodle.me.uk
+        override_domain mail._acme-challenge.zandoodle.me.uk
       }
       auth.pass_table local_authdb {
         table sql_table {
