@@ -58,7 +58,10 @@ in
         key_type p384
 
         # Prefer the smallest chain (X2)
-        preferred_chains smallest
+        # preferred_chains smallest
+        preferred_chains {
+          root_common_name "ISRG Root X2"
+        }
       '';
       logFormat = "level INFO";
       package = pkgs.caddy.withPlugins {
