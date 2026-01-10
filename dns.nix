@@ -188,6 +188,13 @@
       chromebook sshfp 4 2 522f2d5021c6d6250d99b77bea672fbfaac6c5b8a4ef6950d49267da9ecc11ee
       _kerberos.chromebook txt WORKSTATION.ZANDOODLE.ME.UK
 
+      dell a 100.70.43.93
+      $INCLUDE /etc/knot/no-email.zone.include dell.int.zandoodle.me.uk.
+      dell aaaa fd7a:115c:a1e0::4cc6:2b5d
+      dell sshfp 1 2 067c422d29d32b2c540b2428a45deeab53baa930dab328a7f6836b5876e6eb97
+      dell sshfp 4 2 75c4d82ea3be8b5385f5a2a89b97f1677dfc77c2830b71ee39de7944d3d6ed9f
+      _kerberos.dell txt WORKSTATION.ZANDOODLE.ME.UK
+
       laptop a 100.68.198.4
       $INCLUDE /etc/knot/no-email.zone.include laptop.int.zandoodle.me.uk.
       laptop aaaa fd7a:115c:a1e0::d601:c604
