@@ -63,7 +63,6 @@ in
           root_common_name "ISRG Root X2"
         }
       '';
-      logFormat = "level INFO";
       package = pkgs.caddy.withPlugins {
         plugins = [ "github.com/caddy-dns/rfc2136@v1.0.0" ];
         hash = "sha256-tVJf4lxv00TxdtCAoJhNs8tgRWiXw3poN4S+NlPhGwU=";
