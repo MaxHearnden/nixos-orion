@@ -1,4 +1,4 @@
-{ config, lib, pkgs, pkgs-unstable, ... }:
+{ config, lib, pkgs, pkgs-unstable, utils, ... }:
 {
   environment.etc = {
     "dnsdist/dnsdist.conf".text = ''
@@ -1532,7 +1532,17 @@
         serviceConfig = {
           BindReadOnlyPaths = "/run/knot/knot.sock";
           CapabilityBoundingSet = "";
-          ExecStart = "${lib.getExe' pkgs.knot-dns "knotc"} zone-reload";
+          ExecStart = utils.escapeSystemdExecArgs [
+            "${lib.getExe' pkgs.knot-dns "knotc"}"
+            "zone-reload"
+            "_acme-challenge.zandoodle.me.uk"
+            "bogus.int.zandoodle.me.uk"
+            "bogus-exists.int.zandoodle.me.uk"
+            "compsoc-dev.com"
+            "home.arpa"
+            "int.zandoodle.me.uk"
+            "zandoodle.me.uk"
+          ];
           Group = "knot";
           IPAddressDeny = "any";
           LockPersonality = true;
