@@ -217,20 +217,9 @@
       pkgs.callPackage ./gen-TLSA.nix {
         names = [
           "e7-cross.der"
-          "e7.der"
           "e8-cross.der"
-          "e8.der"
           "e9-cross.der"
-          "e9.der"
-          "int-ye1.der"
-          "int-ye2.der"
-          "int-ye3.der"
-          "int-yr1.der"
-          "int-yr2.der"
-          "int-yr3.der"
-          "r12.der"
-          "r13.der"
-          "r14.der"
+          "root-x2-by-x1.der"
         ];
         bundle = ./intermediates;
         bundle_subdir = ".";
