@@ -537,12 +537,12 @@
         dhcp-match = "set:has-routes,55,!";
         # Enable DHCP and allocate from a suitable IP address range
         dhcp-range = [
-          "tag:has-routes,set:guest,192.168.5.2,192.168.5.199,10m"
-          "tag:!has-routes,set:guest,192.168.6.2,192.168.6.199,10m"
-          "set:guest,fd09:a389:7c1e:4::,fd09:a389:7c1e:4:ffff:ffff:ffff:ffff,64,10m"
-          "set:shadow,192.168.4.2,192.168.4.199,10m"
-          "set:shadow,fd09:a389:7c1e:1::,fd09:a389:7c1e:1:ffff:ffff:ffff:ffff,64,10m"
-          "fd09:a389:7c1e:5::,fd09:a389:7c1e:5:ffff:ffff:ffff:ffff,64,10m"
+          "tag:has-routes,set:guest,192.168.5.2,192.168.5.199,1d"
+          "tag:!has-routes,set:guest,192.168.6.2,192.168.6.199,1d"
+          "set:guest,fd09:a389:7c1e:4::,fd09:a389:7c1e:4:ffff:ffff:ffff:ffff,64,1d"
+          "set:shadow,192.168.4.2,192.168.4.199,1d"
+          "set:shadow,fd09:a389:7c1e:1::,fd09:a389:7c1e:1:ffff:ffff:ffff:ffff,64,1d"
+          "fd09:a389:7c1e:5::,fd09:a389:7c1e:5:ffff:ffff:ffff:ffff,64,1d"
           "set:web-vm,192.168.2.2,static"
         ];
         # Enable DHCP rapid commit (allows for a two message DHCP exchange)
