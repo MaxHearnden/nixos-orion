@@ -668,6 +668,7 @@
           };
           global = {
             # Add a DNSSEC policy with DS verfiication using unbound
+            ksk-lifetime = "30d";
             ksk-submission = "unbound";
             rrsig-refresh = "7d";
             propagation-delay = "1d";
