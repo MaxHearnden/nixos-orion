@@ -647,6 +647,7 @@
             update-type = "DS";
           };
         };
+        log.syslog.any = "notice";
         mod-queryacl.local.address = [
           "10.0.0.0/8"
           "100.64.0.0/10"
