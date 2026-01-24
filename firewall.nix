@@ -37,6 +37,7 @@
       # Don't flush the entire ruleset and instead delete specific tables
       flushRuleset = false;
       ruleset = ''
+        include "/etc/no_mdns.nft"
         # Add service specific filters
         table inet services {
           set avahi {
@@ -116,6 +117,10 @@
             }
           }
 
+          set no_mdns {
+            type ether_addr; flags constant;
+          }
+
           chain input {
             type filter hook input priority filter + 10; policy drop;
             ct state vmap { invalid : drop, established : accept, related : accept }
@@ -131,8 +136,8 @@
             iifname lo tcp dport 8080 socket cgroupv2 level 2 @unbound accept
             meta l4proto {udp, tcp} th dport 56 ip saddr == @local_ip socket cgroupv2 level 2 @dnsmasq accept
             meta l4proto {udp, tcp} th dport 56 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @dnsmasq accept
-            meta l4proto {udp, tcp} th dport 5353 ip saddr == @local_ip socket cgroupv2 level 2 @avahi accept
-            meta l4proto {udp, tcp} th dport 5353 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @avahi accept
+            meta l4proto {udp, tcp} th dport 5353 ip saddr == @local_ip ether saddr != @no_mdns socket cgroupv2 level 2 @avahi accept
+            meta l4proto {udp, tcp} th dport 5353 ip6 saddr == @local_ip6 ether saddr != @no_mdns socket cgroupv2 level 2 @avahi accept
 
             # Allow HTTP and HTTPS handled by caddy
             tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
@@ -176,6 +181,7 @@
         delete chain inet services input
         destroy set inet services local_ip
         destroy set inet services local_ip6
+        destroy set inet services no_mdns
       '';
       tables = {
         local-nat = {
@@ -254,6 +260,7 @@
           packages = [ pkgs.coreutils ];
         };
         serviceConfig = {
+          BindReadOnlyPaths = [ "/etc/no_mdns.nft" ];
           DynamicUser = true;
           AmbientCapabilities = "CAP_NET_ADMIN";
           CapabilityBoundingSet = "CAP_NET_ADMIN";
