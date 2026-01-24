@@ -590,6 +590,7 @@
             action = "update";
             key = "caddy";
             update-owner = "zone";
+            update-owner-match = "equal";
             update-type = "TXT";
           };
           knot-ds = {
