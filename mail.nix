@@ -257,6 +257,7 @@
         serviceConfig = {
           BindReadOnlyPaths =
             "/var/run/nscd /etc/ssl/certs/ca-certificates.crt";
+          CapabilityBoundingSet = "";
           DynamicUser = true;
           ExecStart = lib.join " " [
             "${lib.getExe pkgs.msmtp}"
@@ -272,11 +273,25 @@
           ];
           Group = "mail-notification";
           LoadCredential = "mail_password:/etc/mail-notification/mail_password";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          RestrictAddressFamilies = "AF_INET AF_INET6 AF_NETLINK AF_UNIX";
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
           StandardInputText = [
             "From: failure-notification@zandoodle.me.uk"
             "To: failure-notification-mail@zandoodle.me.uk"
             "Subject: Service %i failed\n"
           ];
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@resources @privileged" ];
+          UMask = "077";
           User = "mail-notification";
         };
       };
