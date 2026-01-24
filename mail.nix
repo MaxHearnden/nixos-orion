@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ lib, pkgs, ... }: {
   services.maddy = {
     config = ''
       tls {
@@ -233,13 +233,53 @@
     primaryDomain = "zandoodle.me.uk";
     tls.loader = null;
   };
-  systemd.services.maddy.serviceConfig = {
-    LoadCredential = "tsig.conf:/run/keymgr/maddy-config";
-    SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
-    ProcSubset = "pid";
-    ProtectKernelLogs = true;
-    ProtectProc = "invisible";
-    RemoveIPC = true;
-    SystemCallArchitectures = "native";
+  systemd = {
+    packages = [
+      (pkgs.writeTextDir "lib/systemd/system/service.d/50-mailer.conf" ''
+        [Unit]
+        OnFailure=mail-notification@%N.service
+      '')
+      (pkgs.writeTextDir "lib/systemd/system/mail-notification@.service.d/50-mailer.conf" ''
+      '')
+    ];
+    services = {
+      maddy.serviceConfig = {
+        LoadCredential = "tsig.conf:/run/keymgr/maddy-config";
+        SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+        ProcSubset = "pid";
+        ProtectKernelLogs = true;
+        ProtectProc = "invisible";
+        RemoveIPC = true;
+        SystemCallArchitectures = "native";
+      };
+      "mail-notification@" = {
+        confinement.enable = true;
+        serviceConfig = {
+          BindReadOnlyPaths =
+            "/var/run/nscd /etc/ssl/certs/ca-certificates.crt";
+          DynamicUser = true;
+          ExecStart = lib.join " " [
+            "${lib.getExe pkgs.msmtp}"
+            "--auth=on"
+            "--host=smtp.zandoodle.me.uk"
+            "--passwordeval=cat\\x20%d/mail_password"
+            "--port=465"
+            "--read-envelope-from"
+            "--tls-starttls=off"
+            "--tls=on"
+            "--user=failure-notification@zandoodle.me.uk"
+            "-t"
+          ];
+          Group = "mail-notification";
+          LoadCredential = "mail_password:/etc/mail-notification/mail_password";
+          StandardInputText = [
+            "From: failure-notification@zandoodle.me.uk"
+            "To: failure-notification-mail@zandoodle.me.uk"
+            "Subject: Service %i failed\n"
+          ];
+          User = "mail-notification";
+        };
+      };
+    };
   };
 }
