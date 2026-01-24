@@ -1347,6 +1347,11 @@
         # Reload the DNS zone after getting the IP address
         onSuccess = [ "knot-reload.target" ];
         serviceConfig = {
+          BindReadOnlyPaths = [
+            "/var/run/nscd"
+            "/etc/ssl/certs/ca-certificates.crt"
+          ];
+
           # Don't allow get-IP-address to change the system
           CapabilityBoundingSet = "";
 
@@ -1354,8 +1359,10 @@
           Group = "ddns";
 
           # Allow get-IP-address to access the router
-          IPAddressAllow = "192.168.1.1";
+          IPAddressAllow = "192.168.1.1 100.122.82.8 fd7a:115c:a1e0::1a01:5208";
           IPAddressDeny = "any";
+
+          LoadCredential = "mail_password:/etc/ddns/mail_password";
 
           # Don't allow get-IP-address to emulate Linux 2.6
           LockPersonality = true;
@@ -1401,7 +1408,7 @@
 
           # Allow get-IP-address to create netlink sockets (to get local IP
           # addresses) and IPv4 sockets to access the router
-          RestrictAddressFamilies = "AF_NETLINK AF_INET";
+          RestrictAddressFamilies = "AF_NETLINK AF_INET AF_INET6 AF_UNIX";
 
           # Don't allow get-IP-address to create namespaces
           RestrictNamespaces = true;
@@ -1460,6 +1467,8 @@
             '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/zonefile
           ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary | ${lib.getExe pkgs.jq} -r \
             '"@ AAAA " + (.[].addr_info.[].local // empty)' >/run/ddns/zonefile-ipv6-only
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary | ${lib.getExe pkgs.jq} -r \
+            '.[].addr_info.[].local // empty' >/run/ddns/IPv6-address
 
           # Get the IP address for enp49s0
           ${lib.getExe' pkgs.iproute2 "ip"} -json -4 address show dev bridge | ${lib.getExe pkgs.jq} -r \
@@ -1494,6 +1503,15 @@
           # Record differences in the public IP address
           if ! ${lib.getExe' pkgs.diffutils "diff"} /run/ddns/zonefile /var/lib/ddns/zonefile; then
             cp --backup=numbered /run/ddns/zonefile "/var/lib/ddns/zonefile-$(date --iso-8601=seconds)"
+            ${lib.getExe' pkgs.dos2unix "unix2dos"} <<EOF | ${lib.getExe' pkgs.msmtp "sendmail"} --user=ddns@zandoodle.me.uk --read-envelope-from --passwordeval="cat /run/credentials/get-IP-address.service/mail_password" --tls=on --tls-starttls=off --host=smtp.zandoodle.me.uk --port=465 --auth=on -t
+          From: ddns@zandoodle.me.uk
+          To: ddns-mail@zandoodle.me.uk
+          Subject: DDNS update to $(</run/ddns/IPv6-address)
+
+          Your public zonefile has been updated to:
+          $(</run/ddns/zonefile)
+
+          EOF
           fi
 
           # Move the verified data from /run/ddns to /var/lib/ddns
