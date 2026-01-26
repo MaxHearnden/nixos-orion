@@ -415,6 +415,11 @@
       _kerberos._tcp.workstation srv 0 10 88 workstation
       _kerberos-adm._tcp.workstation srv 0 10 749 workstation
       _kerberos._udp.workstation srv 0 10 88 workstation
+      test.workstation cname workstation
+      _kerberos.test.workstation uri 5 1 krb5srv:m:kkdcp:https://kkdcp.workstation.zandoodle.me.uk/
+      _kerberos.test.workstation uri 10 1 krb5srv:m:tcp:workstation.zandoodle.me.uk:8088
+      _kerberos._tcp.test.workstation srv 0 10 8088 workstation
+      _kerberos._udp.test.workstation srv 0 10 8088 workstation
     '';
     "resolv.conf".text = ''
       # Use the local DNS resolver
