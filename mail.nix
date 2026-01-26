@@ -287,7 +287,7 @@
           StandardInputText = [
             "From: failure-notification@zandoodle.me.uk"
             "To: failure-notification-mail@zandoodle.me.uk"
-            "Subject: Service %i failed\n"
+            "Subject: Service %i failed"
           ];
           SystemCallArchitectures = "native";
           SystemCallFilter = [ "@system-service" "~@resources @privileged" ];
