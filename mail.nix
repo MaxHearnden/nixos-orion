@@ -262,10 +262,11 @@
           ExecStart = lib.join " " [
             "${lib.getExe pkgs.msmtp}"
             "--auth=on"
-            "--host=smtp.zandoodle.me.uk"
+            "--host=::1"
             "--passwordeval=cat\\x20%d/mail_password"
             "--port=465"
             "--read-envelope-from"
+            "--tls-host-override=smtp.zandoodle.me.uk"
             "--tls-starttls=off"
             "--tls=on"
             "--user=failure-notification@zandoodle.me.uk"
