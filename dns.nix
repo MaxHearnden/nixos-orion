@@ -1348,6 +1348,7 @@
       };
       # Get the IP address from the router
       get-IP-address = {
+        after = [ "network-online.target" "tailscale.service" ];
         # Create a minimal sandbox for this service
         confinement.enable = true;
         # Reload the DNS zone after getting the IP address
@@ -1525,6 +1526,7 @@
             /run/ddns/zonefile /run/ddns/local-zonefile /run/ddns/local-guest-zonefile /run/ddns/zonefile-ipv6-only /run/ddns/local-tailscale-zonefile /var/lib/ddns/
         '';
         unitConfig.StartLimitIntervalSec = "20m";
+        wants = [ "network-online.target" "tailscale.service" ];
       };
       knot.serviceConfig = {
         # Get the TSIG credentials for caddy
