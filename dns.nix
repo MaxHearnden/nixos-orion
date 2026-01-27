@@ -202,6 +202,8 @@
       laptop sshfp 4 2 af1162523e3f11a434bec1a78f6b8c5bf0b9f5c187391a08004afb8b5d7d8195
       _kerberos.laptop txt WORKSTATION.ZANDOODLE.ME.UK
 
+      orion cname local-tailscale.zandoodle.me.uk.
+
       pc a 100.95.236.105
       $INCLUDE /etc/knot/no-email.zone.include pc.int.zandoodle.me.uk.
       pc aaaa fd7a:115c:a1e0::d2df:ec69
