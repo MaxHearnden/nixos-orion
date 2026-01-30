@@ -227,32 +227,32 @@
       avahi-daemon = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:avahi";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       caddy = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:caddy";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       dnsdist = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:dnsdist";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       dnsmasq = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:dnsmasq";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       knot = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:knot";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       maddy = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:maddy";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       nftables = {
         confinement = {
@@ -286,44 +286,44 @@
       slapd = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:slapd";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       sshd = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:sshd";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       systemd-networkd = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:systemd_networkd";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       tailscaled = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:tailscaled";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       unbound = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:unbound";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
     };
     sockets = {
       kadmind = {
         after = [ "nftables.service" ];
         socketConfig.NFTSet = "cgroup:inet:services:kadmin";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       kdc = {
         after = [ "nftables.service" ];
         socketConfig.NFTSet = "cgroup:inet:services:kdc";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
       ollama-proxy = {
         after = [ "nftables.service" ];
         socketConfig.NFTSet = "cgroup:inet:services:ollama_socket";
-        requires = [ "nftables.service" ];
+        wants = [ "nftables.service" ];
       };
     };
   };
