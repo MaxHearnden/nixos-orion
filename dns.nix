@@ -1053,6 +1053,7 @@
             "168.192.in-addr.arpa. nodefault"
             "d.f.ip6.arpa. nodefault"
             "corp.nai.org. deny"
+            "92.94.80.in-addr.arpa. refuse"
           ] ++ lib.genList (i: "${toString (i+64)}.100.in-addr.arpa nodefault") 64;
 
           log-servfail = true;
