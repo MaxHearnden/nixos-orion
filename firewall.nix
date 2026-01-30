@@ -5,7 +5,7 @@
       allowedUDPPorts = [ 53 54 88 443 464 41641 ];
       allowedTCPPorts = [ 25 53 54 80 88 389 443 464 749 ];
       extraForwardRules = ''
-        iifname {plat, guest, "shadow-lan", "bridge"} oifname {plat, guest, "shadow-lan", "bridge"} accept
+        iifname {plat, guest, "shadow-lan", "bridge", "tailscale0"} oifname {plat, guest, "shadow-lan", "bridge"} accept
       '';
       extraInputRules = ''
         # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
