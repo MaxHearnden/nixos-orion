@@ -172,6 +172,7 @@
       orion ns local.zandoodle.me.uk.
       vodafone a 192.168.1.1
       vodafone-guest a 192.168.5.1
+      workstation ns workstation.zandoodle.me.uk.
     '';
     "knot/int.zandoodle.me.uk.zone".text = ''
       @ soa local-tailscale.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3600 604800 86400
