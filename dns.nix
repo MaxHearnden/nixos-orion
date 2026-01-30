@@ -886,6 +886,7 @@
               "int.zandoodle.me.uk"
               "zandoodle.me.uk"
               "orion.home.arpa"
+              "workstation.home.arpa"
             ];
             semantic-checks = true;
             journal-content = "all";
@@ -970,6 +971,7 @@
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/int.zandoodle.me.uk.zone";
+            notify = "workstation";
             semantic-checks = true;
             template = "local";
             journal-content = "all";
@@ -981,6 +983,11 @@
           "root-servers.net" = {
             dnssec-validation = false;
             template = "root-servers";
+          };
+          "workstation.home.arpa" = {
+            master = "workstation";
+            module = "mod-queryacl/local";
+            notify = "pc";
           };
           "zandoodle.me.uk" = {
             acl = [ "knot-ds" "transfer" "workstation" ];
