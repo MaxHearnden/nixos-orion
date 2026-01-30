@@ -752,8 +752,8 @@
           };
           workstation = {
             address = [
-              "100.91.224.22"
-              "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016"
+              "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016@54"
+              "100.91.224.22@54"
             ];
             key = "workstation";
           };
@@ -827,13 +827,13 @@
             catalog-zone = "catz";
             # Add DNS cookies and rate limiting
             global-module = ["mod-cookies" "mod-rrl"];
-            notify = "pc";
+            notify = [ "pc" "workstation" ];
             semantic-checks = true;
           };
           catalog = {
             acl = [ "transfer" ];
             catalog-role = "generate";
-            notify = "pc";
+            notify = [ "pc" "workstation" ];
           };
           dnsmasq = {
             acl = [ "transfer" ];
@@ -842,7 +842,7 @@
             ixfr-from-axfr = true;
             master = "dnsmasq";
             module = "mod-queryacl/local";
-            notify = "pc";
+            notify = [ "pc" "workstation" ];
             semantic-checks = true;
           };
           icann = {
@@ -853,7 +853,7 @@
             ixfr-from-axfr = true;
             master = ["xfr.cjr.dns.icann.org" "xfr.lax.dns.icann.org"];
             module = "mod-queryacl/local";
-            notify = "pc";
+            notify = [ "pc" "workstation" ];
             semantic-checks = true;
           };
           local = {
@@ -869,7 +869,7 @@
             ixfr-from-axfr = true;
             master = "root-servers";
             module = "mod-queryacl/local";
-            notify = "pc";
+            notify = [ "pc" "workstation" ];
             semantic-checks = true;
           };
           rDNS = {
@@ -878,7 +878,7 @@
             catalog-zone = "catz";
             file = "/etc/knot/rDNS.zone";
             module = [ "mod-queryacl/local" ];
-            notify = "pc";
+            notify = [ "pc" "workstation" ];
             reverse-generate = [
               "compsoc-dev.com"
               "home.arpa"
@@ -946,7 +946,7 @@
             dnssec-policy = "global";
             dnssec-signing = true;
             file = "/etc/knot/compsoc-dev.com.zone";
-            notify = [ "hetzner" "pc" ];
+            notify = [ "hetzner" "pc" "workstation" ];
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
@@ -987,7 +987,7 @@
             dnssec-policy = "global";
             dnssec-signing = true;
             file = "/etc/knot/zandoodle.me.uk.zone";
-            notify = [ "hetzner" "pc" ];
+            notify = [ "hetzner" "pc" "workstation" ];
             semantic-checks = true;
             journal-content = "all";
             zonefile-load = "difference-no-serial";
