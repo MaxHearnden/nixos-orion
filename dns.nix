@@ -1131,37 +1131,31 @@
             # Query knot for zandoodle.me.uk
             name = "zandoodle.me.uk";
             stub-addr = "::1@54";
-            stub-no-cache = true;
           }
           {
             # Query knot for compsoc-dev.com
             name = "compsoc-dev.com";
             stub-addr = "::1@54";
-            stub-no-cache = true;
           }
           {
             # Query the home router for broadband
             name = "broadband";
             stub-addr = "192.168.1.1";
-            stub-no-cache = true;
           }
           {
             # Query knot for home.arpa
             name = "home.arpa";
             stub-addr = "::1@54";
-            stub-no-cache = true;
           }
           {
             # Query knot for 168.192.in-addr.arpa (192.168.0.0/16)
             name = "168.192.in-addr.arpa";
             stub-addr = "::1@54";
-            stub-no-cache = true;
           }
           {
             # Query knot for d.f.ip6.arpa (fd00::/8)
             name = "d.f.ip6.arpa";
             stub-addr = "::1@54";
-            stub-no-cache = true;
           }
           {
             name = "in-addr.arpa";
@@ -1181,7 +1175,6 @@
         ] ++ lib.genList (i: {
           name = "${toString (i+64)}.100.in-addr.arpa";
           stub-addr = "::1@54";
-          stub-no-cache = true;
         }) 64;
       };
     };
