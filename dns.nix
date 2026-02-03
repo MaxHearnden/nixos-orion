@@ -1000,6 +1000,7 @@
             template = "local";
             journal-content = "all";
             zonefile-load = "difference-no-serial";
+            zonefile-skip = "DS";
             zonefile-sync = -1;
           };
           "ip6.arpa".template = "icann";
