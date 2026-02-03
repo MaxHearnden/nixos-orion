@@ -210,6 +210,7 @@
       pc aaaa fd7a:115c:a1e0::d2df:ec69
       pc sshfp 1 2 ea259e9d2d355d9506919e56ed0c35fbb0476501524f6349cf9f6ef6dbe19c50
       pc sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
+      _acme-challenge.pc ns dns.zandoodle.me.uk.
       _kerberos.pc txt WORKSTATION.ZANDOODLE.ME.UK
     '';
     "knot/letsencrypt.zone.include".source =
@@ -588,6 +589,7 @@
         "/run/credentials/knot.service/caddy"
         "/run/credentials/knot.service/knot-ds"
         "/run/credentials/knot.service/maddy"
+        "/etc/knot/pc.tsig"
         "/etc/knot/workstation.tsig"
       ];
       settings = {
@@ -627,6 +629,18 @@
               "mail"
             ];
             update-type = "TXT";
+          };
+          pc = {
+            address = [
+              "100.95.236.105"
+              "fd7a:115c:a1e0::d2df:ec69"
+            ];
+            key = "pc";
+            action = [ "query" "update" ];
+            update-owner = "name";
+            update-owner-match = "equal";
+            update-owner-name = "_acme-challenge.pc";
+            update-type = "DS";
           };
           transfer = {
             # Allow a zone transfer from local devices
@@ -730,10 +744,13 @@
             automatic-acl = false;
           };
           "ns1.first-ns.de".address = "2a01:4f8:0:a101::a:1";
-          pc.address = [
-            "fd7a:115c:a1e0::d2df:ec69@54"
-            "100.95.236.105@54"
-          ];
+          pc = {
+            address = [
+              "fd7a:115c:a1e0::d2df:ec69@54"
+              "100.95.236.105@54"
+            ];
+            key = "pc";
+          };
           "robotns2.second-ns.de".address = "2a01:4f8:0:1::5ddc:2";
           "robotns3.second-ns.com".address = "2001:67c:192c::add:a3";
           "k.root-servers.net" = {
@@ -916,6 +933,13 @@
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
           };
+          "_acme-challenge.pc.int.zandoodle.me.uk" = {
+            acl = [ "transfer" ];
+            dnssec-validation = true;
+            master = "pc";
+            template = "local";
+            zonemd-verify = true;
+          };
           "_acme-challenge.workstation.zandoodle.me.uk" = {
             acl = [ "transfer" ];
             dnssec-validation = true;
@@ -967,7 +991,7 @@
           };
           "in-addr.arpa".template = "icann";
           "int.zandoodle.me.uk" = {
-            acl = [ "transfer" ];
+            acl = [ "pc" "transfer" ];
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/int.zandoodle.me.uk.zone";
