@@ -874,11 +874,6 @@
             notify = [ "pc" "workstation" ];
             semantic-checks = true;
           };
-          local = {
-            # Template for zones that shouldn't be added to the catalog
-            acl = [ "transfer" ];
-            semantic-checks = true;
-          };
           root-servers = {
             acl = [ "transfer" ];
             catalog-role = "member";
@@ -926,7 +921,6 @@
             dnssec-signing = true;
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
             semantic-checks = true;
-            template = "local";
             journal-content = "all";
             zonefile-load = "difference-no-serial";
             zonefile-skip = "TXT";
@@ -937,14 +931,14 @@
             acl = [ "transfer" ];
             dnssec-validation = true;
             master = "pc";
-            template = "local";
+            notify = "workstation";
             zonemd-verify = true;
           };
           "_acme-challenge.workstation.zandoodle.me.uk" = {
             acl = [ "transfer" ];
             dnssec-validation = true;
             master = "workstation";
-            template = "local";
+            notify = "pc";
             zonemd-verify = true;
           };
           arpa.template = "root-servers"; # Serve a copy of the root zone
@@ -995,9 +989,7 @@
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/int.zandoodle.me.uk.zone";
-            notify = "workstation";
             semantic-checks = true;
-            template = "local";
             journal-content = "all";
             zonefile-load = "difference-no-serial";
             zonefile-skip = "DS";
