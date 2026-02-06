@@ -366,6 +366,8 @@
       local-tailscale IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
       local-tailscale IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
 
+      _acme-challenge.local-tailscale cname _acme-challenge
+
       ; MX targets musn't be an alias
       $INCLUDE /var/lib/ddns/zonefile mail.zandoodle.me.uk.
       mail mx 10 mail
