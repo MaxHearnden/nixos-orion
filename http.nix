@@ -62,6 +62,7 @@ in
             @local {
               remote_ip private_ranges
               not tls sni dns.zandoodle.me.uk
+              tls alpn dot
             }
             route @local {
               tls {
@@ -73,7 +74,8 @@ in
               proxy [::1]:53
             }
 
-            route {
+            @dot tls alpn dot
+            route @dot {
               tls {
                 connection_policy {
                   alpn dot
@@ -499,6 +501,15 @@ in
             file_server
           '';
         };
+        "dns.zandoodle.me.uk".extraConfig = ''
+          tls {
+            issuer acme {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile shortlived
+            }
+          }
+          abort
+        '';
         "local.zandoodle.me.uk" = {
           extraConfig = ''
             tls {

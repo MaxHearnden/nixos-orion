@@ -326,6 +326,8 @@
       $INCLUDE /var/lib/ddns/zonefile-ipv6-only dns.zandoodle.me.uk.
       $INCLUDE /etc/knot/no-email.zone.include dns.zandoodle.me.uk.
 
+      _acme-challenge.dns cname _acme-challenge
+
       dot-check\. txt dot\ check
       dot-check\. txt "v=spf1 -all"
 
