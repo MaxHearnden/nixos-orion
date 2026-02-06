@@ -140,7 +140,7 @@
             meta l4proto {udp, tcp} th dport 5353 ip6 saddr == @local_ip6 ether saddr != @no_mdns socket cgroupv2 level 2 @avahi accept
 
             # Allow HTTP and HTTPS handled by caddy
-            tcp dport { 80, 443 } socket cgroupv2 level 2 @caddy accept
+            tcp dport { 80, 443, 853 } socket cgroupv2 level 2 @caddy accept
             udp dport 443 socket cgroupv2 level 2 @caddy accept
 
             # Allow DHCP handled by dnsmasq

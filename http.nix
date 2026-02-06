@@ -57,6 +57,34 @@ in
         # Use (marginally) more secure public keys
         key_type p384
 
+        layer4 {
+          :853 {
+            @local {
+              remote_ip private_ranges
+              not tls sni dns.zandoodle.me.uk
+            }
+            route @local {
+              tls {
+                connection_policy {
+                  alpn dot
+                  default_sni local.zandoodle.me.uk
+                }
+              }
+              proxy [::1]:53
+            }
+
+            route {
+              tls {
+                connection_policy {
+                  alpn dot
+                  default_sni dns.zandoodle.me.uk
+                }
+              }
+              proxy [::1]:54
+            }
+          }
+        }
+
         # Prefer the smallest chain (X2)
         # preferred_chains smallest
         preferred_chains {
@@ -64,8 +92,11 @@ in
         }
       '';
       package = pkgs.caddy.withPlugins {
-        plugins = [ "github.com/caddy-dns/rfc2136@v1.0.0" ];
-        hash = "sha256-tVJf4lxv00TxdtCAoJhNs8tgRWiXw3poN4S+NlPhGwU=";
+        plugins = [
+          "github.com/caddy-dns/rfc2136@v1.0.0"
+          "github.com/mholt/caddy-l4@v0.0.0-20260127203130-040d25cc886a"
+        ];
+        hash = "sha256-IdbVnix3dgkaVdPLOWoJdmFxr5nFi/HvdufYXcAX2xU=";
       };
       virtualHosts = {
         "compsoc-dev.com" = {
