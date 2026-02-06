@@ -62,7 +62,6 @@ in
             @local {
               remote_ip private_ranges
               not tls sni dns.zandoodle.me.uk
-              tls alpn dot
             }
             route @local {
               tls {
@@ -74,8 +73,7 @@ in
               proxy [::1]:53
             }
 
-            @dot tls alpn dot
-            route @dot {
+            route {
               tls {
                 connection_policy {
                   alpn dot
