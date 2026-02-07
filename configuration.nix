@@ -558,7 +558,7 @@ in
         serviceConfig = {
           UMask = "077";
           BindPaths = "/dev/net/tun";
-          BindReadOnlyPaths = "/etc/resolv.conf /etc/ssl /run/dbus/system_bus_socket";
+          BindReadOnlyPaths = "/etc/resolv.conf /etc/ssl /run/dbus/system_bus_socket /run/systemd/journal";
           User = "tailscale";
           Group = "tailscale";
           DeviceAllow = "/dev/net/tun";
@@ -574,6 +574,7 @@ in
           ProtectHostname = true;
           ProtectSystem = lib.mkForce "strict";
           LockPersonality = true;
+          LogNamespace = "tailscale";
           RestrictAddressFamilies = "AF_NETLINK AF_UNIX AF_INET AF_INET6";
           ProtectClock = true;
           ProtectKernelLogs = true;
