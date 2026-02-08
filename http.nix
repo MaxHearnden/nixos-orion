@@ -60,7 +60,7 @@ in
         layer4 {
           :853 {
             @local {
-              remote_ip private_ranges
+              remote_ip private_ranges 100.64.0.0/10
               not tls sni dns.zandoodle.me.uk
             }
             route @local {
