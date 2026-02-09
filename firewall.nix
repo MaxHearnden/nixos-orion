@@ -120,23 +120,37 @@
             type ether_addr; flags constant;
           }
 
+          chain local_input {
+            # Allow SSH from local devices
+            tcp dport 22 socket cgroupv2 level 2 @sshd accept
+
+            meta l4proto {udp, tcp} th dport 55 socket cgroupv2 level 2 @unbound accept
+            meta l4proto {udp, tcp} th dport 56 socket cgroupv2 level 2 @dnsmasq accept
+            meta l4proto {udp, tcp} th dport 5353 ether saddr != @no_mdns socket cgroupv2 level 2 @avahi accept
+
+            # Allow Kerberos
+            meta l4proto {udp, tcp} th dport 88 socket cgroupv2 level 4 @kdc accept
+            meta l4proto {udp, tcp} th dport {464, 749} socket cgroupv2 level 4 @kadmin accept
+
+            # Allow LDAP
+            meta l4proto tcp th dport 389 socket cgroupv2 level 2 @slapd accept
+
+            iifname { "bridge", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
+
+            tcp dport { 22, 55, 56, 88, 389, 464, 465, 587, 749, 993 } reject
+            udp dport { 55, 56, 88, 464, 749 } reject
+          }
+
           chain input {
             type filter hook input priority filter + 10; policy drop;
             ct state vmap { invalid : drop, established : accept, related : accept }
-            # Allow SSH from local devices
-            tcp dport 22 ip saddr == @local_ip socket cgroupv2 level 2 @sshd accept
-            tcp dport 22 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @sshd accept
+            ip saddr == @local_ip jump local_input
+            ip6 saddr == @local_ip6 jump local_input
 
             # Allow DNS handled by dnsdist, knot, unbound and dnsmasq
             meta l4proto {udp, tcp} th dport 53 socket cgroupv2 level 2 @dnsdist accept
             meta l4proto {udp, tcp} th dport 54 socket cgroupv2 level 2 @knot accept
-            meta l4proto {udp, tcp} th dport 55 ip saddr == @local_ip socket cgroupv2 level 2 @unbound accept
-            meta l4proto {udp, tcp} th dport 55 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @unbound accept
             iifname lo tcp dport 8080 socket cgroupv2 level 2 @unbound accept
-            meta l4proto {udp, tcp} th dport 56 ip saddr == @local_ip socket cgroupv2 level 2 @dnsmasq accept
-            meta l4proto {udp, tcp} th dport 56 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @dnsmasq accept
-            meta l4proto {udp, tcp} th dport 5353 ip saddr == @local_ip ether saddr != @no_mdns socket cgroupv2 level 2 @avahi accept
-            meta l4proto {udp, tcp} th dport 5353 ip6 saddr == @local_ip6 ether saddr != @no_mdns socket cgroupv2 level 2 @avahi accept
 
             # Allow HTTP and HTTPS handled by caddy
             tcp dport { 80, 443, 853 } socket cgroupv2 level 2 @caddy accept
@@ -146,38 +160,33 @@
             udp dport 67 iifname { shadow-lan, guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
             udp dport 547 iifname { shadow-lan, guest, "bridge" } socket cgroupv2 level 2 @dnsmasq accept
 
-            # Allow Kerberos
-            meta l4proto {udp, tcp} th dport 88 ip saddr == @local_ip socket cgroupv2 level 4 @kdc accept
-            meta l4proto {udp, tcp} th dport 88 ip6 saddr == @local_ip6 socket cgroupv2 level 4 @kdc accept
-            meta l4proto {udp, tcp} th dport {464, 749} ip saddr == @local_ip socket cgroupv2 level 4 @kadmin accept
-            meta l4proto {udp, tcp} th dport {464, 749} ip6 saddr == @local_ip6 socket cgroupv2 level 4 @kadmin accept
-
-            # Allow LDAP
-            meta l4proto tcp th dport 389 ip saddr == @local_ip socket cgroupv2 level 2 @slapd accept
-            meta l4proto tcp th dport 389 ip6 saddr == @local_ip6 socket cgroupv2 level 2 @slapd accept
-
             iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
             udp dport 41641 socket cgroupv2 level 2 @tailscaled accept
 
             tcp dport 25 socket cgroupv2 level 2 @maddy accept
-            iifname { lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
-            iifname "bridge" tcp dport {465, 587} ip saddr @local_ip socket cgroupv2 level 2 @maddy accept
 
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
             icmp type echo-request accept comment "allow ping"
+
+            tcp dport {25, 53, 54, 80, 443, 853} reject
+            udp dport {53, 54, 67, 443, 547, 41641} reject
           }
         }
       '';
       extraDeletions = ''
         # Initialise services table so that the input chain can be flushed
         table inet services {
+          chain local_input {
+          }
           chain input {
           }
         }
         flush chain inet services input
         delete chain inet services input
+        flush chain inet services local_input
+        delete chain inet services local_input
         destroy set inet services local_ip
         destroy set inet services local_ip6
         destroy set inet services no_mdns
