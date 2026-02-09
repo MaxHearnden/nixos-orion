@@ -823,7 +823,7 @@
           identity = "dns.zandoodle.me.uk";
 
           # Listen on all IPv4 and IPv6 addresses
-          listen = ["0.0.0.0@54" "::@54"];
+          listen = ["0.0.0.0@54" "::@54" "/run/knot/global_query"];
 
           # Set an identity for NSID
           nsid = "dns.zandoodle.me.uk";

@@ -80,7 +80,7 @@ in
                   default_sni dns.zandoodle.me.uk
                 }
               }
-              proxy [::1]:54
+              proxy /run/knot/global_query
             }
           }
         }
