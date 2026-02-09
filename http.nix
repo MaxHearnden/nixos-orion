@@ -544,7 +544,7 @@ in
               }
             }
             @denied not {
-              client_ip private_ranges fe80::/10
+              client_ip private_ranges fe80::/10 100.64.0.0/10
               not client_ip 192.168.1.1
             }
             abort @denied
