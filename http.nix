@@ -557,6 +557,7 @@ in
               Referrer-Policy no-referrer
             }
             route {
+              reverse_proxy /KdcProxy unix//run/kdcproxy
               reverse_proxy /dns-query h2c://[::1]:8080
               respond "This is a test of config ${inputs.self}"
             }

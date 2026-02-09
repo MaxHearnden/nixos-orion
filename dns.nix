@@ -291,10 +291,10 @@
       ; Setup MTA-STS for this domain
       _mta-sts txt "v=STSv1; id=1"
 
-      _kerberos.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://zandoodle.me.uk/KdcProxy
+      _kerberos.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://local-tailscale.zandoodle.me.uk/KdcProxy
       _kerberos.tailscale._sites uri 10 1 krb5srv:m:udp:local-tailscale.zandoodle.me.uk
       _kerberos.tailscale._sites uri 20 1 krb5srv:m:tcp:local-tailscale.zandoodle.me.uk
-      _kerberos-adm.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://zandoodle.me.uk/KdcProxy
+      _kerberos-adm.tailscale._sites uri 5 1 krb5srv:m:kkdcp:https://local-tailscale.zandoodle.me.uk/KdcProxy
       _kerberos-adm.tailscale._sites uri 20 1 krb5srv:m:tcp:local-tailscale.zandoodle.me.uk
       _kerberos._tcp.tailscale._sites srv 0 10 88 local-tailscale
       _kerberos-adm._tcp.tailscale._sites srv 0 10 749 local-tailscale
