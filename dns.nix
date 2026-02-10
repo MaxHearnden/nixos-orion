@@ -1139,11 +1139,13 @@
             # Query knot for zandoodle.me.uk
             name = "zandoodle.me.uk";
             stub-addr = "::1@54";
+            stub-first = true;
           }
           {
             # Query knot for compsoc-dev.com
             name = "compsoc-dev.com";
             stub-addr = "::1@54";
+            stub-first = true;
           }
           {
             # Query the home router for broadband
