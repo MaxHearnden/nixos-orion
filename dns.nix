@@ -635,12 +635,8 @@
             update-type = "TXT";
           };
           pc = {
-            address = [
-              "100.95.236.105"
-              "fd7a:115c:a1e0::d2df:ec69"
-            ];
-            key = "pc";
             action = [ "query" "update" ];
+            remote = "pc";
             update-owner = "name";
             update-owner-match = "equal";
             update-owner-name = "_acme-challenge.pc";
@@ -662,12 +658,8 @@
             action = "transfer";
           };
           workstation = {
-            address = [
-              "100.91.224.22"
-              "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016"
-            ];
-            key = "workstation";
             action = [ "query" "update" ];
+            remote = "workstation";
             update-owner = "name";
             update-owner-match = "equal";
             update-owner-name = "_acme-challenge.workstation";
@@ -749,10 +741,7 @@
           };
           "ns1.first-ns.de".address = "2a01:4f8:0:a101::a:1";
           pc = {
-            address = [
-              "fd7a:115c:a1e0::d2df:ec69@54"
-              "100.95.236.105@54"
-            ];
+            address = "fd7a:115c:a1e0::d2df:ec69@54";
             key = "pc";
           };
           "robotns2.second-ns.de".address = "2a01:4f8:0:1::5ddc:2";
@@ -773,10 +762,7 @@
             automatic-acl = false;
           };
           workstation = {
-            address = [
-              "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016@54"
-              "100.91.224.22@54"
-            ];
+            address = "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016@54";
             key = "workstation";
           };
           unbound = {
