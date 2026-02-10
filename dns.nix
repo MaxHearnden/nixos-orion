@@ -1142,6 +1142,22 @@
             stub-first = true;
           }
           {
+            name = "int.zandoodle.me.uk";
+            stub-addr = "::1@54";
+          }
+          {
+            name = "_acme-challenge.zandoodle.me.uk";
+            stub-addr = "::1@54";
+          }
+          {
+            name = "_acme-challenge.workstation.zandoodle.me.uk";
+            stub-addr = "::1@54";
+          }
+          {
+            name = "_acme-challenge.pc.int.zandoodle.me.uk";
+            stub-addr = "::1@54";
+          }
+          {
             # Query knot for compsoc-dev.com
             name = "compsoc-dev.com";
             stub-addr = "::1@54";
