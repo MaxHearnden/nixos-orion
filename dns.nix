@@ -525,6 +525,8 @@
         # Respect any DHCP lease (Allows clients to change DHCP server after T2 rather than lease expirey)
         dhcp-authoritative = true;
 
+        dhcp-fqdn = true;
+
         # Generate hostnames for hosts which don't provide one
         dhcp-generate-names = true;
 
