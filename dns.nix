@@ -434,6 +434,8 @@
       nameserver ::1
       nameserver 127.0.0.1
 
+      search int.zandoodle.me.uk zandoodle.me.uk home.arpa orion.home.arpa
+
       # Trust the AD (authentic data) flag and use EDNS(0)
       options trust-ad edns0
     '';
