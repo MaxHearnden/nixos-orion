@@ -339,7 +339,6 @@ in
               Assign = true;
             }
           ];
-          linkConfig.RequiredForOnline = false;
           name = "bridge";
           networkConfig = {
             IPv6SendRA = true;
