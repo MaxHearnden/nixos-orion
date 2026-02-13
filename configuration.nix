@@ -296,7 +296,7 @@ in
             Name = "plat";
           };
           # Allow tayga to use the interface without needing root
-          tapConfig = {
+          tunConfig = {
             User = "tayga";
             Group = "tayga";
           };
