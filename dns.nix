@@ -1,4 +1,6 @@
 { config, lib, pkgs, pkgs-unstable, utils, ... }:
+
+let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
 {
   environment.etc = {
     "dnsdist/dnsdist.conf".text = ''
@@ -1228,7 +1230,7 @@
   systemd = {
     packages = [
       # Add the dnsdist service
-      pkgs-unstable.${config.nixpkgs.system}.dnsdist
+      dnsdist
     ];
     services = {
       dnsdist = {
@@ -1236,11 +1238,11 @@
           # Override the dnsdist service to use /etc/dnsdist/dnsdist.conf
           ExecStart = [
             ""
-            "${lib.getExe pkgs-unstable.${config.nixpkgs.system}.dnsdist} --supervised --disable-syslog --config /etc/dnsdist/dnsdist.conf"
+            "${lib.getExe dnsdist} --supervised --disable-syslog --config /etc/dnsdist/dnsdist.conf"
           ];
           ExecStartPre = [
             ""
-            "${lib.getExe pkgs-unstable.${config.nixpkgs.system}.dnsdist} --check-config --config /etc/dnsdist/dnsdist.conf"
+            "${lib.getExe dnsdist} --check-config --config /etc/dnsdist/dnsdist.conf"
           ];
 
           # Run as a dedicated user
