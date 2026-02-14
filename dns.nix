@@ -1136,7 +1136,8 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
 
           response-ip = [
             "fd09:a389:7c1e:3::/64 redirect"
-            "fd09:a389:7c1e:3:c0:a801::/96 always_transparent"
+            "fd09:a389:7c1e:3:c0:0:aa00::/103 always_transparent"
+            "fd09:a389:7c1e:3:c0:a800::/88 always_transparent"
           ];
 
           # Serve expired records if a new answer can't be found
