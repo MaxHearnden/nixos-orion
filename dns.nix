@@ -995,6 +995,10 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             zonefile-sync = -1;
           };
           "ip6.arpa".template = "icann";
+          "ipv4only.arpa" = {
+            dnssec-validation = false;
+            template = "icann";
+          };
           "orion.home.arpa".template = "dnsmasq";
           "root-servers.net" = {
             dnssec-validation = false;
@@ -1218,6 +1222,11 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           }
           {
             name = "root-servers.net";
+            stub-addr = "::1@54";
+            stub-first = true;
+          }
+          {
+            name = "ipv4only.arpa";
             stub-addr = "::1@54";
             stub-first = true;
           }
