@@ -125,7 +125,9 @@
             tcp dport 22 socket cgroupv2 level 2 @sshd accept
 
             meta l4proto {udp, tcp} th dport 55 socket cgroupv2 level 2 @unbound accept
+            iifname lo meta l4proto {udp, tcp} th dport 57 socket cgroupv2 level 2 @unbound accept
             meta l4proto {udp, tcp} th dport 56 socket cgroupv2 level 2 @dnsmasq accept
+            iifname lo meta l4proto {udp, tcp} th dport 58 socket cgroupv2 level 2 @dnsdist accept
             meta l4proto {udp, tcp} th dport 5353 ether saddr != @no_mdns socket cgroupv2 level 2 @avahi accept
 
             # Allow Kerberos
@@ -136,6 +138,8 @@
             meta l4proto tcp th dport 389 socket cgroupv2 level 2 @slapd accept
 
             iifname { "bridge", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
+
+            iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
 
             tcp dport { 22, 55, 56, 88, 389, 464, 465, 587, 749, 993 } reject
             udp dport { 55, 56, 88, 464, 749 } reject

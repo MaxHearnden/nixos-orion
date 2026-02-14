@@ -3,8 +3,11 @@
   environment.etc = {
     "dnsdist/dnsdist.conf".text = ''
       -- listen on all IPv4 and IPv6 addresses
-      addLocal("0.0.0.0:53")
-      addLocal("[::]:53")
+      addLocal("0.0.0.0:53", {enableProxyProtocol = false})
+      addLocal("[::]:53", {enableProxyProtocol = false})
+      addLocal("[::1]:58")
+
+      setProxyProtocolACL({"::1"})
 
       local private_addresses = newNMG()
       private_addresses:addMask("127.0.0.0/8")
@@ -32,7 +35,7 @@
 
       -- Add local DNS servers
       newServer({address = "[::1]:54", name = "knot-dns", pool = "auth", healthCheckMode = "lazy"})
-      newServer({address = "[::1]:55", name = "unbound", pool = "iterative", healthCheckMode = "lazy"})
+      newServer({address = "[::1]:57", name = "unbound", pool = "iterative", healthCheckMode = "lazy", useProxyProtocol = true})
       newServer({address = "[::1]:56", name = "dnsmasq", pool = "dnsmasq", healthCheckMode = "lazy"})
 
       -- Allow connections from all IP addresses
@@ -1064,7 +1067,7 @@
 
           # Reply to queries from the same address the query was sent to
           interface-automatic = true;
-          interface-automatic-ports = "\"55 8080\"";
+          interface-automatic-ports = "\"55 57 8080\"";
 
           # Disable local zones for special domains
           local-zone = [
@@ -1120,6 +1123,8 @@
             # Returns localhost to connect with a local app
             "authenticatorlocalprod.com"
           ];
+
+          proxy-protocol-port = 57;
 
           # Serve expired records if a new answer can't be found
           serve-expired = true;

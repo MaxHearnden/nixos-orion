@@ -70,7 +70,9 @@ in
                   default_sni local.zandoodle.me.uk
                 }
               }
-              proxy [::1]:53
+              proxy [::1]:58 {
+                proxy_protocol v2
+              }
             }
 
             route {
