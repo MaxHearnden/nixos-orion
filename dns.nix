@@ -1041,6 +1041,10 @@
           ];
           # Add eDNS cookies to the responses
           answer-cookie = true;
+
+          dns64-prefix = "fd09:a389:7c1e:3::/64";
+          dns64-ignore-aaaa = "vodafone.broadband";
+
           # Allow querying localhost
           do-not-query-localhost = false;
 
@@ -1080,6 +1084,8 @@
           ] ++ lib.genList (i: "${toString (i+64)}.100.in-addr.arpa nodefault") 64;
 
           log-servfail = true;
+
+          module-config = "\"respip dns64 validator iterator\"";
 
           # Set the nsid
           nsid = "ascii_recursive.dns.zandoodle.me.uk";
@@ -1125,6 +1131,11 @@
           ];
 
           proxy-protocol-port = 57;
+
+          response-ip = [
+            "fd09:a389:7c1e:3::/64 redirect"
+            "fd09:a389:7c1e:3:c0:a801::/96 always_transparent"
+          ];
 
           # Serve expired records if a new answer can't be found
           serve-expired = true;
