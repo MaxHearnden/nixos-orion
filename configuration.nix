@@ -576,8 +576,9 @@ in
           packages = [ config.services.tailscale.package ];
         };
         environment = {
-          TS_DEBUG_FIREWALL_MODE = "nftables";
           DBUS_SYSTEM_BUS_ADDRESS = "unix:path=/run/dbus/system_bus_socket";
+          TS_DEBUG_FIREWALL_MODE = "nftables";
+          TS_DEBUG_MTU = "1350";
         };
         serviceConfig = {
           UMask = "077";
