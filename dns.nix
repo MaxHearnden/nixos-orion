@@ -1428,10 +1428,6 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           # Use a dedicated user
           Group = "ddns";
 
-          # Allow get-IP-address to access the router
-          IPAddressAllow = "192.168.1.1 100.122.82.8 fd7a:115c:a1e0::1a01:5208";
-          IPAddressDeny = "any";
-
           LoadCredential = "mail_password:/etc/ddns/mail_password";
 
           # Don't allow get-IP-address to emulate Linux 2.6
@@ -1581,6 +1577,22 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           Your public zonefile has been updated to:
           $(</run/ddns/zonefile)
 
+          EOF
+            ${lib.getExe pkgs.hcloud} --config /var/lib/ddns/hcloud.toml zone change-primary-nameservers zandoodle.me.uk --primary-nameservers-file - <<EOF
+            [
+              {
+                "address": "$(</run/ddns/IPv6-address)",
+                "port": 53
+              }
+            ]
+          EOF
+            ${lib.getExe pkgs.hcloud} --config /var/lib/ddns/hcloud.toml zone change-primary-nameservers compsoc-dev.com --primary-nameservers-file - <<EOF
+            [
+              {
+                "address": "$(</run/ddns/IPv6-address)",
+                "port": 53
+              }
+            ]
           EOF
           fi
 
