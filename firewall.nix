@@ -25,7 +25,7 @@
         "shadow-lan".allowedUDPPorts = [ 67 547 ];
 
         # Allow submissions and imaps from tailscale
-        tailscale0.allowedTCPPorts = [ 465 587 993 ];
+        tailscale0.allowedTCPPorts = [ 179 465 587 993 ];
       };
     };
     nftables = {
@@ -40,6 +40,10 @@
         # Add service specific filters
         table inet services {
           set avahi {
+            type cgroupsv2
+          }
+
+          set bird {
             type cgroupsv2
           }
 
@@ -141,7 +145,9 @@
 
             iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
 
-            tcp dport { 22, 55, 56, 88, 389, 464, 465, 587, 749, 993 } reject
+            iifname {lo, tailscale0} tcp dport 179 socket cgroupv2 level 2 @bird accept
+
+            tcp dport { 22, 55, 56, 88, 179, 389, 464, 465, 587, 749, 993 } reject
             udp dport { 55, 56, 88, 464, 749 } reject
           }
 
@@ -239,6 +245,11 @@
       avahi-daemon = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:avahi";
+        wants = [ "nftables.service" ];
+      };
+      bird = {
+        after = [ "nftables.service" ];
+        serviceConfig.NFTSet = "cgroup:inet:services:bird";
         wants = [ "nftables.service" ];
       };
       caddy = {

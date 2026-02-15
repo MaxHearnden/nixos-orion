@@ -215,6 +215,31 @@ in
       };
       reflector = true;
     };
+    bird = {
+      enable = true;
+      config = ''
+        protocol bgp {
+          local fd7a:115c:a1e0::1a01:5208 as 65001;
+          neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016 as 65000;
+          multihop;
+          ipv6 {
+            export all;
+            import none;
+          };
+          ipv4 {
+            export all;
+            import none;
+          };
+        }
+        protocol device {
+
+        }
+        protocol direct {
+          ipv4;
+          ipv6;
+        }
+      '';
+    };
     # Use dbus-broker
     dbus.implementation = "broker";
     openssh = {
