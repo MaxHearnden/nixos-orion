@@ -237,6 +237,16 @@
             }
           }
         '';
+        tailscale-enforcement = {
+          family = "inet";
+          content = ''
+            chain post {
+              type filter hook output priority filter - 10;
+              oiftype {768, 769, 776} udp dport 41641 drop
+              oifname plat udp dport 41641 drop
+            }
+          '';
+        };
       };
     };
   };
