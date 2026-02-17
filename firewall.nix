@@ -8,6 +8,7 @@
         iifname {plat, guest, "shadow-lan", "bridge", "tailscale0"} oifname {plat, guest, "shadow-lan", "bridge"} accept
       '';
       extraInputRules = ''
+        iifname tailscale0 meta l4proto {4, 41} accept
         # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
         meta l4proto {udp, tcp} th dport {55, 56, 5353} ip saddr @local_ip accept
         meta l4proto {udp, tcp} th dport {55, 56, 5353} ip6 saddr @local_ip6 accept

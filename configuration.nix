@@ -19,6 +19,7 @@ in
     initrd.systemd.enable = true;
 
     kernel.sysctl = {
+      "net.core.fb_tunnels_only_for_init_net" = 2;
       "net.ipv4.conf.all.forwarding" = true;
       "net.ipv4.conf.default.forwarding" = true;
       # Enable Explicit Congestion Notification
@@ -225,10 +226,12 @@ in
           ipv6 {
             export all;
             import none;
+            next hop address fd27:6be8:399c:2:9c35:62ff:fe81:1b61;
           };
           ipv4 {
             export all;
             import none;
+            next hop address 192.168.10.1;
           };
         }
         protocol device {
@@ -311,6 +314,18 @@ in
           };
           vlanConfig = {
             Id = 10;
+          };
+        };
+
+        "10-ipv6-tunnel" = {
+          netdevConfig = {
+            Kind = "ip6tnl";
+            Name = "ipv6-tunnel";
+          };
+          tunnelConfig = {
+            Independent = true;
+            Local = "fd7a:115c:a1e0::1a01:5208";
+            Remote = "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016";
           };
         };
 
@@ -415,6 +430,11 @@ in
             IPv6AcceptRA = true;
             IPv6SendRA = true;
           };
+        };
+        "10-ipv6-tunnel" = {
+          address = [ "192.168.10.1/24" "fd27:6be8:399c:2:9c35:62ff:fe81:1b61/64" ];
+          name = "ipv6-tunnel";
+          linkConfig.RequiredForOnline = false;
         };
         "10-enp1s0" = {
           bridge = [ "bridge" ];
