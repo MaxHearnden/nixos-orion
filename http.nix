@@ -1,4 +1,4 @@
-{ config, inputs, lib, pkgs, ... }:
+{ config, inputs, lib, pkgs, pkgs-unstable, ... }:
 
 let
   compsoc-website = pkgs.callPackage "${inputs.compsoc-website}/package.nix" {};
@@ -702,6 +702,7 @@ in
         OLLAMA_NUM_PARALLEL = "10";
       };
       host = "[::1]";
+      package = pkgs-unstable.${config.nixpkgs.system}.ollama;
     };
   };
   systemd = {
