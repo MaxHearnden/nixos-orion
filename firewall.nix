@@ -215,6 +215,12 @@
               # NAT packets for router
               iifname { plat, guest, "shadow-lan" } oifname guest ip daddr 192.168.5.1 masquerade
             }
+
+            chain pre {
+              type nat hook prerouting priority dstnat;
+
+              ip6 daddr fd3c:32f8:5a30:2:93d6:ccd3:6c42:125c redirect
+            }
           '';
         };
         nixos-fw.content = ''

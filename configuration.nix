@@ -414,6 +414,9 @@ in
             {
               Route = "fd09:a389:7c1e::/48";
             }
+            {
+              Route = "fd3c:32f8:5a30:2:93d6:ccd3:6c42:125c/128";
+            }
           ];
 
           # Advertise NAT64 prefixes
