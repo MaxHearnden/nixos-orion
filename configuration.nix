@@ -48,19 +48,16 @@ in
 
         # The IPv4 address used for ICMPv4 messages
         ipv4-addr 192.168.8.1
-        # The IPv6 address used for ICMPv6 messages
-        ipv6-addr fd09:a389:7c1e:2::1
 
         # The NAT64 prefix, IPv4 addresses can be mapped to an IPv6 address
         # within this range, as an example 192.0.2.1 would map to
         # fd09:a389:7c1e:3:c0:2:100::
         prefix fd09:a389:7c1e:3::/64
 
-        # A pool of IPv4 addresses to allocate to IPv6 addresses
-        dynamic-pool 192.168.9.0/24
+        map 192.168.9.1 fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
+        map 192.168.8.0/24 fd09:a389:7c1e:2::/120
 
-        # Directory to store dynamic address mappings
-        data-dir /var/lib/tayga/plat
+        log drop
       '';
     };
     shellAliases.sda = "systemd-analyze security --no-pager";
@@ -479,7 +476,7 @@ in
         # Configure the NAT64 interface
         "10-plat" = {
           # Add IP addresses for the link
-          address = [ "192.168.8.0/31" "fd09:a389:7c1e:2::/127" ];
+          address = [ "192.168.8.2/24" "fd09:a389:7c1e:2::3/120" ];
           linkConfig.RequiredForOnline = false;
           matchConfig.Name = "plat";
 
