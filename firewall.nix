@@ -219,7 +219,7 @@
             chain pre {
               type nat hook prerouting priority dstnat;
 
-              ip6 daddr fd3c:32f8:5a30:2:93d6:ccd3:6c42:125c redirect
+              ip6 daddr {fd3c:32f8:5a30:2:93d6:ccd3:6c42:125c, fd3c:32f8:5a30:1:246c:f9c6:85bb:ebaf} redirect
             }
           '';
         };
