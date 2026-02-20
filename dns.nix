@@ -1048,8 +1048,20 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "fc00::/7 allow"
             "fe80::/10 allow"
           ];
+          access-control-tag = [
+            "192.168.0.0/16      \"inform\""
+            "fd09:a389:7c1e::/48 \"inform\""
+          ];
+
+          access-control-tag-action = [
+            "192.168.0.0/16      inform inform"
+            "fd09:a389:7c1e::/48 inform inform"
+          ];
+
           # Add eDNS cookies to the responses
           answer-cookie = true;
+
+          define-tag = "\"inform\"";
 
           dns64-prefix = "fd09:a389:7c1e:3::/64";
           dns64-ignore-aaaa = "vodafone.broadband";
@@ -1080,7 +1092,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
 
           # Disable local zones for special domains
           local-zone = [
-            ". inform"
+            ". always_transparent"
             "168.192.in-addr.arpa. nodefault"
             "39.118.92.in-addr.arpa. refuse"
             "92.94.80.in-addr.arpa. refuse"
@@ -1088,6 +1100,8 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "d.f.ip6.arpa. nodefault"
             "home.arpa. nodefault"
           ] ++ lib.genList (i: "${toString (i+64)}.100.in-addr.arpa nodefault") 64;
+
+          local-zone-tag = ". \"inform\"";
 
           log-servfail = true;
 
