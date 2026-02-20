@@ -1081,12 +1081,13 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
 
           # Disable local zones for special domains
           local-zone = [
-            "home.arpa. nodefault"
+            ". inform"
             "168.192.in-addr.arpa. nodefault"
-            "d.f.ip6.arpa. nodefault"
-            "corp.nai.org. deny"
-            "92.94.80.in-addr.arpa. refuse"
             "39.118.92.in-addr.arpa. refuse"
+            "92.94.80.in-addr.arpa. refuse"
+            "corp.nai.org. deny"
+            "d.f.ip6.arpa. nodefault"
+            "home.arpa. nodefault"
           ] ++ lib.genList (i: "${toString (i+64)}.100.in-addr.arpa nodefault") 64;
 
           log-servfail = true;
