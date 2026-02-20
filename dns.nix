@@ -1049,19 +1049,26 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "fe80::/10 allow"
           ];
           access-control-tag = [
-            "192.168.0.0/16      \"inform\""
-            "fd09:a389:7c1e::/48 \"inform\""
+            "fd7a:115c:a1e0::/48 \"lan\""
+            "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016/128 \"\""
+            "fd7a:115c:a1e0::d2df:ec69/128 \"\""
+            "192.168.0.0/16      \"inform public-dns64\""
+            "192.168.4.75        \"inform public-dns64\""
+            "fd09:a389:7c1e::/48 \"inform public-dns64\""
           ];
 
           access-control-tag-action = [
             "192.168.0.0/16      inform inform"
             "fd09:a389:7c1e::/48 inform inform"
+            "fd7a:115c:a1e0::/48 lan block_a"
+            "192.168.4.75        inform inform"
+            "192.168.4.75        public-dns64 inform"
           ];
 
           # Add eDNS cookies to the responses
           answer-cookie = true;
 
-          define-tag = "\"inform\"";
+          define-tag = "\"lan public-dns64 inform\"";
 
           dns64-prefix = "fd09:a389:7c1e:3::/64";
           dns64-ignore-aaaa = "vodafone.broadband";
@@ -1096,12 +1103,19 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "168.192.in-addr.arpa. nodefault"
             "39.118.92.in-addr.arpa. refuse"
             "92.94.80.in-addr.arpa. refuse"
+            "broadband. always_transparent"
             "corp.nai.org. deny"
             "d.f.ip6.arpa. nodefault"
-            "home.arpa. nodefault"
+            "home.arpa. always_transparent"
+            "workstation.home.arpa. always_transparent"
           ] ++ lib.genList (i: "${toString (i+64)}.100.in-addr.arpa nodefault") 64;
 
-          local-zone-tag = ". \"inform\"";
+          local-zone-tag = [
+            ". \"inform\""
+            "broadband. \"inform lan\""
+            "home.arpa. \"inform lan\""
+            "workstation.home.arpa. \"inform\""
+          ];
 
           log-servfail = true;
 
@@ -1157,6 +1171,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "fd09:a389:7c1e:3:c0:0:aa00::/103 always_transparent"
             "fd09:a389:7c1e:3:c0:a800::/88 always_transparent"
           ];
+          response-ip-tag = "fd09:a389:7c1e:3::/64 \"public-dns64\"";
 
           # Serve expired records if a new answer can't be found
           serve-expired = true;
