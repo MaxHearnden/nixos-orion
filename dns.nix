@@ -1042,27 +1042,33 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "10.0.0.0/8 allow"
             "100.64.0.0/10 allow"
             "169.254.0.0/16 allow"
-            "192.168.0.0/16 allow"
             "172.16.0.0/12 allow"
+            "192.168.0.0/16 allow"
             "::1/128 allow"
             "fc00::/7 allow"
+            "fd7a:115c:a1e0::d2df:ec69 allow"
+            "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016 allow"
             "fe80::/10 allow"
           ];
           access-control-tag = [
-            "fd7a:115c:a1e0::/48 \"lan\""
-            "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016/128 \"\""
-            "fd7a:115c:a1e0::d2df:ec69/128 \"\""
-            "192.168.0.0/16      \"inform public-dns64\""
-            "192.168.4.75        \"inform public-dns64\""
-            "fd09:a389:7c1e::/48 \"inform public-dns64\""
+            "100.76.205.13             \"inform\""
+            "192.168.0.0/16            \"inform public-dns64\""
+            "192.168.4.75              \"inform public-dns64\""
+            "fd09:a389:7c1e::/48       \"inform public-dns64\""
+            "fd7a:115c:a1e0::/48       \"lan\""
+            "fd7a:115c:a1e0::c601:cd3b \"inform lan\""
           ];
 
           access-control-tag-action = [
-            "192.168.0.0/16      inform inform"
-            "fd09:a389:7c1e::/48 inform inform"
-            "fd7a:115c:a1e0::/48 lan block_a"
-            "192.168.4.75        inform inform"
-            "192.168.4.75        public-dns64 inform"
+            "100.76.205.13             inform inform"
+            "100.76.205.13             lan block_a"
+            "192.168.0.0/16            inform inform"
+            "192.168.4.75              inform inform"
+            "192.168.4.75              public-dns64 inform"
+            "fd09:a389:7c1e::/48       inform inform"
+            "fd7a:115c:a1e0::/48       lan block_a"
+            "fd7a:115c:a1e0::c601:cd3b inform inform"
+            "fd7a:115c:a1e0::c601:cd3b lan block_a"
           ];
 
           # Add eDNS cookies to the responses
@@ -1078,10 +1084,10 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
 
           # Assume these domains are insecure and don't request DS records to prove it
           domain-insecure = [
-            "broadband"
-            "home.arpa"
             "168.192.in-addr.arpa."
+            "broadband"
             "d.f.ip6.arpa"
+            "home.arpa"
             "root-servers.net"
           ] ++ lib.genList (i: "${toString (i+64)}.100.in-addr.arpa") 64;
 
@@ -1138,17 +1144,16 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           private-address = [
             "10.0.0.0/8"
             "100.64.0.0/10"
-            # "127.0.0.0/8"
             "169.254.0.0/16"
             "172.16.0.0/12"
             "192.168.0.0/16"
+            "::1/128"
             "::ffff:10.0.0.0/104"
             "::ffff:100.64.0.0/106"
             "::ffff:127.0.0.0/104"
             "::ffff:169.254.0.0/112"
             "::ffff:172.16.0.0/108"
             "::ffff:192.168.0.0/112"
-            "::1/128"
             "fc00::/7"
             "fe80::/10"
           ];
