@@ -103,6 +103,7 @@ in
     ./nix.nix
   ];
   networking = {
+    domain = "int.zandoodle.me.uk";
     fqdn = "local.zandoodle.me.uk";
     hostName = "orion";
     useNetworkd = true;
