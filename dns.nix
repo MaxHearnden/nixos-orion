@@ -8,6 +8,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       addLocal("0.0.0.0:53", {enableProxyProtocol = false})
       addLocal("[::]:53", {enableProxyProtocol = false})
       addLocal("[::1]:58")
+      addDOHLocal("[::1]:59")
 
       setProxyProtocolACL({"::1"})
 
@@ -1071,15 +1072,11 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
 
           fast-server-permil = 900;
 
-          http-notls-downstream = true;
-
-          https-port = 8080;
-
           identity = "recusive.dns.zandoodle.me.uk";
 
           # Reply to queries from the same address the query was sent to
           interface-automatic = true;
-          interface-automatic-ports = "\"55 57 8080\"";
+          interface-automatic-ports = "\"55 57\"";
 
           # Disable local zones for special domains
           local-zone = [

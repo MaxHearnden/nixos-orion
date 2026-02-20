@@ -133,6 +133,7 @@
             iifname lo meta l4proto {udp, tcp} th dport 57 socket cgroupv2 level 2 @unbound accept
             meta l4proto {udp, tcp} th dport 56 socket cgroupv2 level 2 @dnsmasq accept
             iifname lo meta l4proto {udp, tcp} th dport 58 socket cgroupv2 level 2 @dnsdist accept
+            iifname lo tcp dport 59 socket cgroupv2 level 2 @dnsdist accept
             meta l4proto {udp, tcp} th dport 5353 ether saddr != @no_mdns socket cgroupv2 level 2 @avahi accept
 
             # Allow Kerberos
@@ -145,6 +146,7 @@
             iifname { "bridge", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
 
             iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
+            iifname lo tcp dport 59 reject
 
             iifname {lo, tailscale0} tcp dport 179 socket cgroupv2 level 2 @bird accept
 
@@ -161,7 +163,6 @@
             # Allow DNS handled by dnsdist, knot, unbound and dnsmasq
             meta l4proto {udp, tcp} th dport 53 socket cgroupv2 level 2 @dnsdist accept
             meta l4proto {udp, tcp} th dport 54 socket cgroupv2 level 2 @knot accept
-            iifname lo tcp dport 8080 socket cgroupv2 level 2 @unbound accept
 
             # Allow HTTP and HTTPS handled by caddy
             tcp dport { 80, 443, 853 } socket cgroupv2 level 2 @caddy accept
