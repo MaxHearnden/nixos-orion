@@ -1052,9 +1052,10 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           ];
           access-control-tag = [
             "100.76.205.13             \"inform\""
-            "192.168.0.0/16            \"inform public-dns64\""
-            "192.168.4.75              \"inform public-dns64\""
-            "fd09:a389:7c1e::/48       \"inform public-dns64\""
+            "192.168.0.0/16            \"inform\""
+            "192.168.4.0/24            \"inform public-dns64\""
+            "fd09:a389:7c1e:1::/64     \"inform public-dns64\""
+            "fd09:a389:7c1e::/48       \"inform\""
             "fd7a:115c:a1e0::/48       \"lan\""
             "fd7a:115c:a1e0::c601:cd3b \"inform lan\""
           ];
@@ -1063,8 +1064,10 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "100.76.205.13             inform inform"
             "100.76.205.13             lan block_a"
             "192.168.0.0/16            inform inform"
-            "192.168.4.75              inform inform"
-            "192.168.4.75              public-dns64 inform"
+            "192.168.4.0/24            inform inform"
+            "192.168.4.0/24            public-dns64 inform"
+            "fd09:a389:7c1e:1::/64     inform inform"
+            "fd09:a389:7c1e:1::/64     public-dns64 inform"
             "fd09:a389:7c1e::/48       inform inform"
             "fd7a:115c:a1e0::/48       lan block_a"
             "fd7a:115c:a1e0::c601:cd3b inform inform"
