@@ -216,6 +216,7 @@ in
     bird = {
       enable = true;
       config = ''
+        router id 192.168.1.201;
         protocol bgp {
           local fd7a:115c:a1e0::1a01:5208 as 65001;
           neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016 as 65000;
