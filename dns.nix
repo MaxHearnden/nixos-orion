@@ -217,6 +217,8 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       pc sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
       _acme-challenge.pc ns dns.zandoodle.me.uk.
       _kerberos.pc txt WORKSTATION.ZANDOODLE.ME.UK
+
+      tcp-fallback txt "${lib.strings.replicate 4096 "a"}"
     '';
     "knot/letsencrypt.zone.include".source =
       pkgs.callPackage ./gen-TLSA.nix {
