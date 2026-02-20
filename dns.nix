@@ -1044,6 +1044,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "169.254.0.0/16 allow"
             "172.16.0.0/12 allow"
             "192.168.0.0/16 allow"
+            "192.168.1.202 allow"
             "::1/128 allow"
             "fc00::/7 allow"
             "fd7a:115c:a1e0::d2df:ec69 allow"
