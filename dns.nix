@@ -1110,7 +1110,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "39.118.92.in-addr.arpa. refuse"
             "92.94.80.in-addr.arpa. refuse"
             "broadband. always_transparent"
-            "corp.nai.org. deny"
+            "corp.nai.org. inform_deny"
             "d.f.ip6.arpa. nodefault"
             "home.arpa. always_transparent"
             "workstation.home.arpa. always_transparent"
