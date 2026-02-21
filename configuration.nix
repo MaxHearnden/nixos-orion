@@ -478,7 +478,7 @@ in
         # Configure the NAT64 interface
         "10-plat" = {
           # Add IP addresses for the link
-          address = [ "192.168.8.2" "fd09:a389:7c1e:3:c0:a808:300::/64" ];
+          address = [ "192.168.8.2/32" "fd09:a389:7c1e:3:c0:a808:300::/64" ];
           linkConfig.RequiredForOnline = false;
           matchConfig.Name = "plat";
 
