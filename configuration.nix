@@ -106,6 +106,7 @@ in
     domain = "int.zandoodle.me.uk";
     fqdn = "local.zandoodle.me.uk";
     hostName = "orion";
+    hosts."127.0.0.2" = [ "zandoodle.me.uk" ];
     useNetworkd = true;
   };
   programs = {
