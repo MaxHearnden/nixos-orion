@@ -1061,17 +1061,14 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           ];
 
           access-control-tag-action = [
-            "100.76.205.13             inform inform"
-            "100.76.205.13             lan block_a"
             "192.168.0.0/16            inform inform"
             "192.168.4.0/24            inform inform"
             "192.168.4.0/24            public-dns64 inform"
             "fd09:a389:7c1e:1::/64     inform inform"
             "fd09:a389:7c1e:1::/64     public-dns64 inform"
             "fd09:a389:7c1e::/48       inform inform"
+            "fd3c:32f8:5a30::/48       inform inform"
             "fd7a:115c:a1e0::/48       lan block_a"
-            "fd7a:115c:a1e0::c601:cd3b inform inform"
-            "fd7a:115c:a1e0::c601:cd3b lan block_a"
           ];
 
           # Add eDNS cookies to the responses
