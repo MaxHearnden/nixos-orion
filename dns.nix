@@ -1052,13 +1052,12 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "fe80::/10 allow"
           ];
           access-control-tag = [
-            "100.76.205.13             \"inform\""
+            "100.64.0.0/10             \"lan\""
             "192.168.0.0/16            \"inform\""
             "192.168.4.0/24            \"inform public-dns64\""
             "fd09:a389:7c1e:1::/64     \"inform public-dns64\""
             "fd09:a389:7c1e::/48       \"inform\""
             "fd7a:115c:a1e0::/48       \"lan\""
-            "fd7a:115c:a1e0::c601:cd3b \"inform lan\""
           ];
 
           access-control-tag-action = [
