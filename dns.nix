@@ -1057,6 +1057,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             "192.168.4.0/24            \"inform public-dns64\""
             "fd09:a389:7c1e:1::/64     \"inform public-dns64\""
             "fd09:a389:7c1e::/48       \"inform\""
+            "fd3c:32f8:5a30::/48       \"inform\""
             "fd7a:115c:a1e0::/48       \"lan\""
           ];
 
