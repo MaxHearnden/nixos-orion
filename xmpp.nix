@@ -72,6 +72,7 @@ let cert_obtained = pkgs.writeShellApplication {
           domain = "conference.zandoodle.me.uk";
         }
       ];
+      s2sSecureAuth = true;
       virtualHosts = {
         default = {
           domain = "zandoodle.me.uk";
