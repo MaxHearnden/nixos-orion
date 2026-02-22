@@ -51,6 +51,10 @@ let cert_obtained = pkgs.writeShellApplication {
         s2s_direct_tls_ports = { 5270 }
         certificates = "/var/lib/caddy/certs"
         password_hash = "SHA-256"
+        use_dane = true
+        unbound = {
+          trustfile = "/var/lib/unbound/root.key"
+        }
       '';
       extraModules = [
         "admin_shell"

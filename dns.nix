@@ -323,6 +323,11 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       _xmpps-client._tcp SRV 0 10 5223 local-tailscale
       _xmpp-server._tcp SRV 10 10 5269 @
       _xmpps-server._tcp SRV 0 10 5270 @
+      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _5222._tcp.zandoodle.me.uk.
+      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _5223._tcp.zandoodle.me.uk.
+      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _5269._tcp.zandoodle.me.uk.
+      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _5270._tcp.zandoodle.me.uk.
+      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _xmpp-server.zandoodle.me.uk.
 
       ; Setup TLSRPT
       _smtp._tls txt "v=TLSRPTv1;rua=mailto:tlsrpt@zandoodle.me.uk"
