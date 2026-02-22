@@ -239,6 +239,17 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
         tlsa_selector = 0;
         tlsa_matching = 1;
       };
+    "knot/letsencrypt-dane-x2.zone.include".source =
+      pkgs.callPackage ./gen-TLSA.nix {
+        names = [
+          "root-ye-by-x2.der"
+        ];
+        bundle = ./intermediates;
+        bundle_subdir = ".";
+        tlsa_usage = 2;
+        tlsa_selector = 0;
+        tlsa_matching = 1;
+      };
     "knot/no-email.zone.include".text = ''
       ; Deny sending or receiving emails
       @ TXT "v=spf1 -all"
@@ -323,11 +334,11 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       _xmpps-client._tcp SRV 0 10 5223 local-tailscale
       _xmpp-server._tcp SRV 10 10 5269 @
       _xmpps-server._tcp SRV 0 10 5270 @
-      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _5222._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _5223._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _5269._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _5270._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _xmpp-server.zandoodle.me.uk.
+      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5222._tcp.zandoodle.me.uk.
+      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5223._tcp.zandoodle.me.uk.
+      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5269._tcp.zandoodle.me.uk.
+      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5270._tcp.zandoodle.me.uk.
+      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _xmpp-server.zandoodle.me.uk.
 
       ; Setup TLSRPT
       _smtp._tls txt "v=TLSRPTv1;rua=mailto:tlsrpt@zandoodle.me.uk"
@@ -1678,6 +1689,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           "int.zandoodle.me.uk.zone"
           "letsencrypt.zone.include"
           "letsencrypt-dane.zone.include"
+          "letsencrypt-dane-x2.zone.include"
           "no-email.zone.include"
           "rDNS.zone"
           "zandoodle.me.uk.zone"
