@@ -195,7 +195,7 @@
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
             icmp type echo-request accept comment "allow ping"
 
-            tcp dport {25, 53, 54, 80, 443, 853, 500, 5269, 5270, 5281} reject
+            tcp dport {25, 53, 54, 80, 443, 853, 5000, 5269, 5270, 5281} reject
             udp dport {53, 54, 67, 443, 547, 41641} reject
           }
         }
