@@ -172,6 +172,15 @@ in
             route {
               reverse_proxy /KdcProxy unix//run/kdcproxy
 
+              @xmpp path /.well-known/host-meta /.well-known/host-meta.json
+
+              reverse_proxy @xmpp https://[::1]:5281 {
+                header_up Host zandoodle.me.uk:5281
+                transport http {
+                  tls_server_name zandoodle.me.uk
+                }
+              }
+
               respond "This is a test of config ${inputs.self}"
             }
           '';

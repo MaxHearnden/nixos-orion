@@ -60,6 +60,8 @@ let cert_obtained = pkgs.writeShellApplication {
       '';
       extraModules = [
         "admin_shell"
+        "bosh"
+        "websocket"
       ];
       httpFileShare = {
         domain = "uploads.zandoodle.me.uk";
