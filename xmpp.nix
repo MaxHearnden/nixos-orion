@@ -78,5 +78,5 @@ let cert_obtained = pkgs.writeShellApplication {
       };
     };
   };
-  systemd.services.prosody.serviceConfig.SupplementaryGroups = "caddy";
+  users.users.prosody.extraGroups = [ "caddy" ];
 }
