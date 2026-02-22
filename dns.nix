@@ -319,6 +319,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       _kerberos-adm._tcp srv 0 10 749 local
       _submissions._tcp SRV 0 10 465 smtp
       _submission._tcp SRV 0 10 587 smtp
+      _xmpp-client._tcp SRV 0 10 5222 local-tailscale
 
       ; Setup TLSRPT
       _smtp._tls txt "v=TLSRPTv1;rua=mailto:tlsrpt@zandoodle.me.uk"
@@ -329,6 +330,9 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       _acme-challenge.cardgames cname _acme-challenge
       wss.cardgames cname @
       _acme-challenge.wss.cardgames cname _acme-challenge
+
+      conference cname @
+      _acme-challenge.conference cname _acme-challenge
 
       ; NS targets musn't be an alias
       $INCLUDE /var/lib/ddns/zonefile-ipv6-only dns.zandoodle.me.uk.
@@ -412,6 +416,9 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       ; Add a zero ttl record for testing DNS resolvers
       ttl-check 0 txt ttl\ check
       ttl-check 0 txt "v=spf1 -all"
+
+      uploads cname @
+      _acme-challenge.uploads cname _acme-challenge
 
       workstation a 100.91.224.22
       $INCLUDE /etc/knot/no-email.zone.include workstation.zandoodle.me.uk.

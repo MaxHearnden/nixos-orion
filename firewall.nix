@@ -3,7 +3,8 @@
     firewall = {
       # Allow DNS, HTTP and HTTPS
       allowedUDPPorts = [ 53 54 88 443 464 41641 ];
-      allowedTCPPorts = [ 25 53 54 80 88 389 443 464 749 853 ];
+      allowedTCPPorts =
+        [ 25 53 54 80 88 389 443 464 749 853 5000 5269 5280 5281 ];
       extraForwardRules = ''
         iifname {plat, guest, "shadow-lan", "bridge", "tailscale0"} oifname {plat, guest, "shadow-lan", "bridge"} accept
       '';
@@ -26,7 +27,7 @@
         "shadow-lan".allowedUDPPorts = [ 67 547 ];
 
         # Allow submissions and imaps from tailscale
-        tailscale0.allowedTCPPorts = [ 179 465 587 993 ];
+        tailscale0.allowedTCPPorts = [ 179 465 587 993 5222 ];
       };
     };
     nftables = {
@@ -77,6 +78,10 @@
           }
 
           set ollama_socket {
+            type cgroupsv2
+          }
+
+          set prosody {
             type cgroupsv2
           }
 
@@ -145,10 +150,14 @@
 
             iifname { "bridge", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
 
+            iifname {lo, tailscale0} tcp dport 179 socket cgroupv2 level 2 @bird accept
+
             iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
             iifname lo tcp dport 59 reject
 
-            iifname {lo, tailscale0} tcp dport 179 socket cgroupv2 level 2 @bird accept
+            iifname {lo, tailscale0} tcp dport 5222 socket cgroupv2 level 2 @prosody accept
+
+            iifname {lo, tailscale0} tcp dport 5222 reject
 
             tcp dport { 22, 55, 56, 88, 179, 389, 464, 465, 587, 749, 993 } reject
             udp dport { 55, 56, 88, 464, 749 } reject
@@ -178,11 +187,13 @@
 
             tcp dport 25 socket cgroupv2 level 2 @maddy accept
 
+            tcp dport {5000, 5269, 5280, 5281} socket cgroupv2 level 2 @prosody accept
+
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
             icmp type echo-request accept comment "allow ping"
 
-            tcp dport {25, 53, 54, 80, 443, 853} reject
+            tcp dport {25, 53, 54, 80, 443, 853, 500, 5269, 5280, 5281} reject
             udp dport {53, 54, 67, 443, 547, 41641} reject
           }
         }
@@ -324,6 +335,11 @@
           UMask = "077";
           Group = "nft";
         };
+      };
+      prosody = {
+        after = [ "nftables.service" ];
+        serviceConfig.NFTSet = "cgroup:inet:services:prosody";
+        wants = [ "nftables.service" ];
       };
       slapd = {
         after = [ "nftables.service" ];

@@ -101,6 +101,7 @@ in
     ./ldap.nix
     ./mail.nix
     ./nix.nix
+    ./xmpp.nix
   ];
   networking = {
     domain = "int.zandoodle.me.uk";

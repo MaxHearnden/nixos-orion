@@ -97,8 +97,9 @@ in
         plugins = [
           "github.com/caddy-dns/rfc2136@v1.0.0"
           "github.com/mholt/caddy-l4@v0.0.0-20260127203130-040d25cc886a"
+          "github.com/mholt/caddy-events-exec@v0.1.0"
         ];
-        hash = "sha256-IdbVnix3dgkaVdPLOWoJdmFxr5nFi/HvdufYXcAX2xU=";
+        hash = "sha256-p2TTI/m8x5pRdxgiio7s/yJ1P+oF8BEHy3lYUYBoWiU=";
       };
       virtualHosts = {
         "compsoc-dev.com" = {
