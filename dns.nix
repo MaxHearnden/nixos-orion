@@ -321,9 +321,6 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
 
       _spf txt "v=spf1 ?a:mail.zandoodle.me.uk -all"
 
-      ; Setup DANE for this domain
-      $INCLUDE /etc/knot/letsencrypt.zone.include *._tcp.zandoodle.me.uk.
-
       ; Setup SRV records
       _imaps._tcp SRV 0 10 993 imap
       _kerberos._tcp srv 0 10 88 local
@@ -334,11 +331,6 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       _xmpps-client._tcp SRV 0 10 5223 local-tailscale
       _xmpp-server._tcp SRV 10 10 5269 @
       _xmpps-server._tcp SRV 0 10 5270 @
-      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5222._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5223._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5269._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5270._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _xmpp-server.zandoodle.me.uk.
 
       ; Setup TLSRPT
       _smtp._tls txt "v=TLSRPTv1;rua=mailto:tlsrpt@zandoodle.me.uk"
