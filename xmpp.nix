@@ -55,6 +55,7 @@ let cert_obtained = pkgs.writeShellApplication {
       httpFileShare = {
         domain = "uploads.zandoodle.me.uk";
       };
+      httpInterfaces = [ "127.0.0.1" "::1" ];
       muc = [
         {
           domain = "conference.zandoodle.me.uk";
