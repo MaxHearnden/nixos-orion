@@ -3,7 +3,6 @@
 let cert_obtained = pkgs.writeShellApplication {
   name = "cert_obtained";
   text = ''
-    echo "$1"
     if [ "$1" = zandoodle.me.uk ] || [ "$1" = conference.zandoodle.me.uk ] || [ "$1" = uploads.zandoodle.me.uk ]; then
       install -Dm0440 -t /var/lib/caddy/certs \
         "/var/lib/caddy/.local/share/caddy/$2/$1.crt" \
