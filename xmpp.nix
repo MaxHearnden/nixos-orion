@@ -44,8 +44,11 @@ let cert_obtained = pkgs.writeShellApplication {
       };
     };
     prosody = {
+      admins = [ "max@zandoodle.me.uk" ];
       enable = true;
       extraConfig = ''
+        c2s_direct_tls_ports = { 5223 }
+        s2s_direct_tls_ports = { 5270 }
         certificates = "/var/lib/caddy/certs"
         password_hash = "SHA-256"
       '';

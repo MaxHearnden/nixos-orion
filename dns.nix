@@ -319,7 +319,10 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       _kerberos-adm._tcp srv 0 10 749 local
       _submissions._tcp SRV 0 10 465 smtp
       _submission._tcp SRV 0 10 587 smtp
-      _xmpp-client._tcp SRV 0 10 5222 local-tailscale
+      _xmpp-client._tcp SRV 10 10 5222 local-tailscale
+      _xmpps-client._tcp SRV 0 10 5223 local-tailscale
+      _xmpp-server._tcp SRV 10 10 5269 @
+      _xmpps-server._tcp SRV 0 10 5270 @
 
       ; Setup TLSRPT
       _smtp._tls txt "v=TLSRPTv1;rua=mailto:tlsrpt@zandoodle.me.uk"
