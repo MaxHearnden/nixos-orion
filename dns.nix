@@ -39,7 +39,6 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       -- Add local DNS servers
       newServer({address = "[::1]:54", name = "knot-dns", pool = "auth", healthCheckMode = "lazy"})
       newServer({address = "[::1]:57", name = "unbound", pool = "iterative", healthCheckMode = "lazy", useProxyProtocol = true})
-      newServer({address = "[::1]:56", name = "dnsmasq", pool = "dnsmasq", healthCheckMode = "lazy"})
 
       -- Allow connections from all IP addresses
       setACL({"0.0.0.0/0", "::/0"})
