@@ -8,7 +8,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       addLocal("0.0.0.0:53", {enableProxyProtocol = false})
       addLocal("[::]:53", {enableProxyProtocol = false})
       addLocal("[::1]:58")
-      addDOHLocal("[::1]:59")
+      addDOHLocal("[::1]:59", nil, nil, nil, {trustForwardedForHeader = true, enableProxyProtocol = false})
 
       setProxyProtocolACL({"::1"})
 

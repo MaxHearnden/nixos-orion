@@ -542,11 +542,7 @@ in
               Referrer-Policy no-referrer
             }
             route {
-              reverse_proxy /dns-query h2c://[::1]:59 {
-                transport http {
-                  proxy_protocol v2
-                }
-              }
+              reverse_proxy /dns-query h2c://[::1]:59
               respond "This is a test of config ${inputs.self}"
             }
           '';
@@ -574,11 +570,7 @@ in
             }
             route {
               reverse_proxy /KdcProxy unix//run/kdcproxy
-              reverse_proxy /dns-query h2c://[::1]:59 {
-                transport http {
-                  proxy_protocol v2
-                }
-              }
+              reverse_proxy /dns-query h2c://[::1]:59
               respond "This is a test of config ${inputs.self}"
             }
           '';
