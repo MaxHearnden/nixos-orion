@@ -3,7 +3,7 @@
 let cert_obtained = pkgs.writeShellApplication {
   name = "cert_obtained";
   text = ''
-    if [ "$1" = zandoodle.me.uk ] || [ "$1" = conference.zandoodle.me.uk ] || [ "$1" = uploads.zandoodle.me.uk ]; then
+    if [ "$1" = zandoodle.me.uk ] || [ "$1" = conference.zandoodle.me.uk ] || [ "$1" = uploads.zandoodle.me.uk ] || [ "$1" = lwad.xyz ]; then
       install -Dm0440 -t /var/lib/caddy/certs \
         "/var/lib/caddy/.local/share/caddy/$2/$1.crt" \
         "/var/lib/caddy/.local/share/caddy/$2/$1.key"
@@ -30,6 +30,16 @@ let cert_obtained = pkgs.writeShellApplication {
 
           abort
         '';
+        "lwad.xyz".extraConfig = ''
+          tls {
+            issuer acme {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile shortlived
+            }
+          }
+
+          abort
+        '';
         "uploads.zandoodle.me.uk".extraConfig = ''
           tls {
             issuer acme {
@@ -44,12 +54,14 @@ let cert_obtained = pkgs.writeShellApplication {
     };
     prosody = {
       admins = [ "max@zandoodle.me.uk" ];
+      allowRegistration = true;
       enable = true;
       extraConfig = ''
         c2s_direct_tls_ports = { 5223 }
         certificates = "/var/lib/caddy/certs"
         password_hash = "SHA-256"
         s2s_direct_tls_ports = { 5270 }
+        registration_invite_only = true
         ssl = {
           cafile = "/etc/ssl/certs/ca-bundle.crt",
           curveslist = { "X25519MLKEM768", "X25519", "prime256v1", "secp384r1" }
@@ -61,6 +73,8 @@ let cert_obtained = pkgs.writeShellApplication {
       '';
       extraModules = [
         "csi_simple"
+        "invites"
+        "invites_register"
         "s2s_bidi"
         "turn_external"
       ];
@@ -83,6 +97,10 @@ let cert_obtained = pkgs.writeShellApplication {
       virtualHosts = {
         default = {
           domain = "zandoodle.me.uk";
+          enabled = true;
+        };
+        lwad = {
+          domain = "lwad.xyz";
           enabled = true;
         };
       };
