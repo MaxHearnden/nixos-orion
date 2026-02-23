@@ -203,18 +203,6 @@ in
     };
   };
   services = {
-    avahi = {
-      allowInterfaces = [ "bridge" "shadow-lan" "guest" ];
-      enable = true;
-      nssmdns6 = true;
-      publish = {
-        addresses = true;
-        domain = true;
-        enable = true;
-        workstation = true;
-      };
-      reflector = true;
-    };
     bird = {
       enable = true;
       config = ''

@@ -11,8 +11,8 @@
       extraInputRules = ''
         iifname tailscale0 meta l4proto {4, 41} accept
         # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
-        meta l4proto {udp, tcp} th dport {55, 56, 5353} ip saddr @local_ip accept
-        meta l4proto {udp, tcp} th dport {55, 56, 5353} ip6 saddr @local_ip6 accept
+        meta l4proto {udp, tcp} th dport {55, 56} ip saddr @local_ip accept
+        meta l4proto {udp, tcp} th dport {55, 56} ip6 saddr @local_ip6 accept
       '';
       # Filter packets that would have been forwarded
       filterForward = true;
@@ -139,7 +139,6 @@
             meta l4proto {udp, tcp} th dport 56 socket cgroupv2 level 2 @dnsmasq accept
             iifname lo meta l4proto {udp, tcp} th dport 58 socket cgroupv2 level 2 @dnsdist accept
             iifname lo tcp dport 59 socket cgroupv2 level 2 @dnsdist accept
-            meta l4proto {udp, tcp} th dport 5353 ether saddr != @no_mdns socket cgroupv2 level 2 @avahi accept
 
             # Allow Kerberos
             meta l4proto {udp, tcp} th dport 88 socket cgroupv2 level 4 @kdc accept
