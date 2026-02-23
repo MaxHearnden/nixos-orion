@@ -60,14 +60,20 @@ let cert_obtained = pkgs.writeShellApplication {
         use_dane = true
       '';
       extraModules = [
-        "admin_shell"
-        "bosh"
-        "websocket"
+        "csi_simple"
+        "s2s_bidi"
+        "turn_external"
       ];
       httpFileShare = {
         domain = "uploads.zandoodle.me.uk";
       };
       httpInterfaces = [ "127.0.0.1" "::1" ];
+      modules = {
+        announce = true;
+        bosh = true;
+        websocket = true;
+        welcome = true;
+      };
       muc = [
         {
           domain = "conference.zandoodle.me.uk";
