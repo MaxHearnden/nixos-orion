@@ -455,6 +455,10 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       _kerberos-adm.workstation uri 20 1 krb5srv:m:tcp:workstation.zandoodle.me.uk
       _kerberos._tcp.workstation srv 0 10 88 workstation
       _kerberos-adm._tcp.workstation srv 0 10 749 workstation
+      _xmpp-client._tcp.workstation SRV 10 10 5222 workstation
+      _xmpps-client._tcp.workstation SRV 0 10 5223 workstation
+      _xmpp-server._tcp.workstation SRV 10 10 5269 workstation
+      _xmpps-server._tcp.workstation SRV 0 10 5270 workstation
       _kerberos._udp.workstation srv 0 10 88 workstation
       test.workstation cname workstation
       _kerberos.test.workstation uri 5 1 krb5srv:m:kkdcp:https://kkdcp.workstation.zandoodle.me.uk/
