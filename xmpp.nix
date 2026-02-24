@@ -82,6 +82,11 @@ let cert_obtained = pkgs.writeShellApplication {
         domain = "uploads.zandoodle.me.uk";
       };
       httpInterfaces = [ "127.0.0.1" "::1" ];
+      log = ''
+        {
+          {min = "warn", to = "*syslog"},
+        }
+      '';
       modules = {
         announce = true;
         bosh = true;
