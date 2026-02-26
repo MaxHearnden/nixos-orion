@@ -37,6 +37,8 @@ in
       # Always use the nix daemon even when root
       store = "daemon";
 
+      substitute = false;
+
       # Use cgroups for builds
       use-cgroups = true;
     };
