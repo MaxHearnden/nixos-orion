@@ -1593,11 +1593,11 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           fi
 
           # Append the IPv6 records
-          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary | ${lib.getExe pkgs.jq} -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary -deprecated | ${lib.getExe pkgs.jq} -r \
             '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/zonefile
-          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary | ${lib.getExe pkgs.jq} -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary -deprecated | ${lib.getExe pkgs.jq} -r \
             '"@ AAAA " + (.[].addr_info.[].local // empty)' >/run/ddns/zonefile-ipv6-only
-          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary | ${lib.getExe pkgs.jq} -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary -deprecated | ${lib.getExe pkgs.jq} -r \
             '.[].addr_info.[].local // empty' >/run/ddns/IPv6-address
 
           # Get the IP address for enp49s0
