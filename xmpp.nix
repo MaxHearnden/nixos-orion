@@ -79,6 +79,7 @@ let cert_obtained = pkgs.writeShellApplication {
         "turn_external"
       ];
       httpFileShare = {
+        access = [ "lwad.xyz" ];
         domain = "uploads.zandoodle.me.uk";
       };
       httpInterfaces = [ "127.0.0.1" "::1" ];
@@ -107,6 +108,12 @@ let cert_obtained = pkgs.writeShellApplication {
         lwad = {
           domain = "lwad.xyz";
           enabled = true;
+          extraConfig = ''
+            disco_items = {
+              { "uploads.zandoodle.me.uk", "file sharing service" },
+              { "conference.zandoodle.me.uk", "muc domain" },
+            }
+          '';
         };
       };
     };
