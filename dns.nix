@@ -1561,8 +1561,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           # Only allow typical syscalls
           SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
 
-          # Consider this process to have started when the main process exits
-          Type = "oneshot";
+          Type = "exec";
 
           # Use a dedicated user
           User = "ddns";
@@ -1570,6 +1569,9 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
         script = ''
           # Enable verbose mode
           set -x
+
+          changed=no
+          while [ "$changed" = no ]; do
 
           # Get the IP address from the router
           ${lib.getExe pkgs.curl} -o /run/ddns/login.lp -v \
@@ -1660,6 +1662,18 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           EOF
           fi
 
+          for file in zonefile local-zonefile local-guest-zonefile local-tailscale-zonefile; do
+            if ! ${lib.getExe' pkgs.diffutils "diff"} "/run/ddns/$file" "/var/lib/ddns/$file"; then
+              changed=yes
+            fi
+          done
+
+          if [ "$changed" = no ]; then
+            sleep 3600
+          fi
+
+          done
+
           # Move the verified data from /run/ddns to /var/lib/ddns
           ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
             /run/ddns/zonefile /run/ddns/local-zonefile /run/ddns/local-guest-zonefile /run/ddns/zonefile-ipv6-only /run/ddns/local-tailscale-zonefile /var/lib/ddns/
@@ -1748,7 +1762,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       timerConfig = {
         # Start the unit on boot
         OnBootSec = "0";
-        OnUnitActiveSec = "1h";
+        OnUnitInactiveSec = "1h";
       };
       wantedBy = [ "timers.target" ];
     };
