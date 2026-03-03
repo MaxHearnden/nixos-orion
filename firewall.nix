@@ -2,9 +2,10 @@
   networking = {
     firewall = {
       # Allow DNS, HTTP and HTTPS
-      allowedUDPPorts = [ 53 54 88 443 464 41641 ];
+      allowedUDPPorts = [ 53 54 88 443 464 3478 41641 ];
+      allowedUDPPortRanges = [ { from = 10000; to = 20000; } ];
       allowedTCPPorts =
-        [ 25 53 54 80 88 389 443 464 749 853 5000 5222 5223 5269 5270 5281 ];
+        [ 25 53 54 80 88 389 443 464 749 853 3478 5000 5222 5223 5269 5270 5281 ];
       extraForwardRules = ''
         iifname {plat, guest, "shadow-lan", "bridge", "tailscale0"} oifname {plat, guest, "shadow-lan", "bridge"} accept
       '';
@@ -50,6 +51,10 @@
           }
 
           set caddy {
+            type cgroupsv2
+          }
+
+          set coturn {
             type cgroupsv2
           }
 
@@ -188,6 +193,9 @@
 
             tcp dport {5000, 5222, 5223, 5269, 5270, 5281} socket cgroupv2 level 2 @prosody accept
 
+            meta l4proto {tcp, udp} th dport 3478 socket cgroupv2 level 2 @coturn accept
+            udp dport {10000-20000} socket cgroupv2 level 2 @coturn accept
+
             icmpv6 type != { nd-redirect, 139 } accept
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
             icmp type echo-request accept comment "allow ping"
@@ -284,6 +292,11 @@
       caddy = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:caddy";
+        wants = [ "nftables.service" ];
+      };
+      coturn = {
+        after = [ "nftables.service" ];
+        serviceConfig.NFTSet = "cgroup:inet:services:coturn";
         wants = [ "nftables.service" ];
       };
       dnsdist = {

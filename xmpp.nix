@@ -52,6 +52,18 @@ let cert_obtained = pkgs.writeShellApplication {
         '';
       };
     };
+    coturn = {
+      enable = true;
+      extraConfig = ''
+        verbose
+      '';
+      max-port = 20000;
+      min-port = 10000;
+      realm = "zandoodle.me.uk";
+      secure-stun = true;
+      static-auth-secret-file = "/run/credentials/coturn.service/stun-secret";
+      use-auth-secret = true;
+    };
     prosody = {
       admins = [ "max@zandoodle.me.uk" ];
       allowRegistration = true;
@@ -60,12 +72,14 @@ let cert_obtained = pkgs.writeShellApplication {
         c2s_direct_tls_ports = { 5223 }
         certificates = "/var/lib/caddy/certs"
         password_hash = "SHA-256"
-        s2s_direct_tls_ports = { 5270 }
         registration_invite_only = true
+        s2s_direct_tls_ports = { 5270 }
         ssl = {
           cafile = "/etc/ssl/certs/ca-bundle.crt",
           curveslist = { "X25519MLKEM768", "X25519", "prime256v1", "secp384r1" }
         }
+        turn_external_host = "zandoodle.me.uk"
+        turn_external_secret = Credential("stun-secret")
         unbound = {
           trustfile = "/var/lib/unbound/root.key"
         }
@@ -85,7 +99,7 @@ let cert_obtained = pkgs.writeShellApplication {
       httpInterfaces = [ "127.0.0.1" "::1" ];
       log = ''
         {
-          {min = "warn", to = "*syslog"},
+          {min = "info", to = "*syslog"},
         }
       '';
       modules = {
@@ -116,6 +130,61 @@ let cert_obtained = pkgs.writeShellApplication {
           '';
         };
       };
+    };
+  };
+
+  systemd = {
+    services = {
+      coturn = {
+        preStart = lib.mkAfter ''
+          chmod 740 /run/coturn/turnserver.cfg
+          echo "external-ip=$(</var/lib/ddns/IPv4-address)/192.168.1.201" >>/run/coturn/turnserver.cfg
+          chmod 640 /run/coturn/turnserver.cfg
+        '';
+        serviceConfig = {
+          LimitNOFILE = "infinity";
+          LoadCredential = "stun-secret:/run/coturn-secret/secret";
+        };
+      };
+      gen-coturn-secret = {
+        before = [ "coturn.service" "prosody.service" ];
+        confinement.enable = true;
+        requiredBy = [ "coturn.service" "prosody.service" ];
+        serviceConfig = {
+          CapabilityBoundingSet = "";
+          DynamicUser = true;
+          IPAddressDeny = "any";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          PrivateNetwork = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectHome = true;
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectProc = "invisible";
+          RemainAfterExit = true;
+          RestrictAddressFamilies = "none";
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
+          RuntimeDirectory = "coturn-secret";
+          RuntimeDirectoryPreserve = true;
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" "~@privileged @resources" ];
+          Type = "oneshot";
+          UMask = "077";
+        };
+        script = ''
+          ${lib.getExe pkgs.openssl} rand -base64 32 | ${lib.getExe' pkgs.coreutils "head"} -c -1 >/run/coturn-secret/secret
+        '';
+      };
+      prosody.serviceConfig.LoadCredential = "stun-secret:/run/coturn-secret/secret";
+    };
+    targets.coturn-restart = {
+      description = "restart coturn";
+      conflicts = [ "coturn.service" ];
+      unitConfig.StopWhenUnneeded = true;
+      onSuccess = [ "coturn.service" ];
     };
   };
   users.users.prosody.extraGroups = [ "caddy" ];

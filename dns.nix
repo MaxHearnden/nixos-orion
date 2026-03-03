@@ -112,8 +112,6 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       ; Advertise our public IP address as the IP address for compsoc-dev.com
       $INCLUDE /var/lib/ddns/zonefile
 
-      ; Advertise the authoritative nameserver
-      @ ns dns.zandoodle.me.uk.
       ; Advertise Hetzner secondary nameservers
       @ ns ns1.first-ns.de.
       @ ns robotns2.second-ns.de.
@@ -153,6 +151,9 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
 
       mail mx 10 mail.zandoodle.me.uk.
       mail txt "v=spf1 mx -all"
+
+      test-server cname @
+      _acme-challenge.test-server cname _acme-challenge.zandoodle.me.uk.
 
       default._domainkey.mail txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw+wMyRqY5sX/bHyuyYlSHM3N0tEqoCV6zQnSjMwCrxoETQsBx6ceXvFmEW1JCE9rp2l+DVDFk9IUVhvMUqHfC+NBKDojqX7PX4gNHrP+E6wkmPRuNzff07dHMSRat1pugpleP9oJgffJBjpGh/YpROsDbpOhlggd5gQjkgP2hH6JsrEwPtdRA/VBqGi6fonSpP9aWB19GVEKAx1xnpaZy991mzcpPSGhXXlOLXM6tgDthBEk0KCcJ3nKoIzbiDRc9oWRlyBxfOND2DYiDMVV02D2ykswCGb5GKhJ4Dy6KbFr9jbUo4h8zdN765P52Phd+tddDOVCbA9xyUI4rTZmkwIDAQAB"
 
@@ -264,8 +265,6 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       @ SOA dns hostmaster 0 14400 3600 604800 86400
       $INCLUDE /var/lib/ddns/zonefile
 
-      ; Advertise the primary DNS server
-      @ ns dns
       ; Advertise Hetzner secondary nameservers
       @ ns ns1.first-ns.de.
       @ ns robotns2.second-ns.de.
@@ -1479,7 +1478,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
         # Create a minimal sandbox for this service
         confinement.enable = true;
         # Reload the DNS zone after getting the IP address
-        onSuccess = [ "knot-reload.target" ];
+        onSuccess = [ "knot-reload.target" "coturn-restart.target" ];
         serviceConfig = {
           BindReadOnlyPaths = [
             "/var/run/nscd"
