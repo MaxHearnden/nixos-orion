@@ -103,7 +103,7 @@ let cert_obtained = pkgs.writeShellApplication {
       httpInterfaces = [ "127.0.0.1" "::1" ];
       log = ''
         {
-          {min = "info", to = "*syslog"},
+          info = "*syslog",
         }
       '';
       modules = {
