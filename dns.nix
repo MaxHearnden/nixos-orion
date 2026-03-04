@@ -434,6 +434,8 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       ttl-check 0 txt ttl\ check
       ttl-check 0 txt "v=spf1 -all"
 
+      turn cname @
+
       uploads cname @
       _acme-challenge.uploads cname _acme-challenge
 

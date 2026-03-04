@@ -59,7 +59,10 @@ let cert_obtained = pkgs.writeShellApplication {
       '';
       max-port = 20000;
       min-port = 10000;
-      realm = "zandoodle.me.uk";
+      no-cli = true;
+      no-tls = true;
+      no-dtls = true;
+      realm = "turn.zandoodle.me.uk";
       secure-stun = true;
       static-auth-secret-file = "/run/credentials/coturn.service/stun-secret";
       use-auth-secret = true;
@@ -78,7 +81,7 @@ let cert_obtained = pkgs.writeShellApplication {
           cafile = "/etc/ssl/certs/ca-bundle.crt",
           curveslist = { "X25519MLKEM768", "X25519", "prime256v1", "secp384r1" }
         }
-        turn_external_host = "zandoodle.me.uk"
+        turn_external_host = "turn.zandoodle.me.uk"
         turn_external_secret = Credential("stun-secret")
         unbound = {
           trustfile = "/var/lib/unbound/root.key"
