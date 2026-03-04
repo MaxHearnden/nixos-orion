@@ -112,6 +112,8 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       ; Advertise our public IP address as the IP address for compsoc-dev.com
       $INCLUDE /var/lib/ddns/zonefile
 
+      ; Advertise ourself as a nameserver for compsoc-dev.com
+      @ ns dns.zandoodle.me.uk.
       ; Advertise Hetzner secondary nameservers
       @ ns ns1.first-ns.de.
       @ ns robotns2.second-ns.de.
