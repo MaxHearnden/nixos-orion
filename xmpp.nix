@@ -74,6 +74,7 @@ let cert_obtained = pkgs.writeShellApplication {
       extraConfig = ''
         c2s_direct_tls_ports = { 5223 }
         certificates = "/var/lib/caddy/certs"
+        http_host = "zandoodle.me.uk"
         password_hash = "SHA-256"
         registration_invite_only = true
         s2s_direct_tls_ports = { 5270 }

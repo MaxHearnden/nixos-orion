@@ -348,8 +348,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       wss.cardgames cname @
       _acme-challenge.wss.cardgames cname _acme-challenge
 
-      conference cname @
-      _acme-challenge.conference cname _acme-challenge
+      conference dname @
 
       ; NS targets musn't be an alias
       $INCLUDE /var/lib/ddns/zonefile-ipv6-only dns.zandoodle.me.uk.
@@ -436,8 +435,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
 
       turn cname @
 
-      uploads cname @
-      _acme-challenge.uploads cname _acme-challenge
+      uploads dname @
 
       workstation a 100.91.224.22
       $INCLUDE /etc/knot/no-email.zone.include workstation.zandoodle.me.uk.
