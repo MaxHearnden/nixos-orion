@@ -177,6 +177,7 @@ let cert_obtained = pkgs.writeShellApplication {
         script = ''
           ${lib.getExe pkgs.openssl} rand -base64 32 | ${lib.getExe' pkgs.coreutils "head"} -c -1 >/run/coturn-secret/secret
         '';
+        unitConfig.StopWhenUnneeded = true;
       };
       prosody.serviceConfig.LoadCredential = "stun-secret:/run/coturn-secret/secret";
     };

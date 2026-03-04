@@ -1471,6 +1471,7 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
           ${lib.getExe pkgs.yq} -r '"key " + .key.[].secret' </run/keymgr/maddy >>/run/keymgr/maddy-config
           ${lib.getExe pkgs.yq} -r '"key_alg " + .key.[].algorithm' </run/keymgr/maddy >>/run/keymgr/maddy-config
         '';
+        unitConfig.StopWhenUnneeded = true;
       };
       # Get the IP address from the router
       get-IP-address = {
