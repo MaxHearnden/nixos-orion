@@ -1668,15 +1668,18 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
             fi
           done
 
+          # Move the verified data from /run/ddns to /var/lib/ddns
+          ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
+            /run/ddns/zonefile /run/ddns/local-zonefile \
+            /run/ddns/local-guest-zonefile /run/ddns/zonefile-ipv6-only \
+            /run/ddns/local-tailscale-zonefile /run/ddns/IPv6-address \
+            /var/lib/ddns/
+
           if [ "$changed" = no ]; then
             sleep 3600
           fi
 
           done
-
-          # Move the verified data from /run/ddns to /var/lib/ddns
-          ${lib.getExe' pkgs.coreutils "mv"} -f /run/ddns/IPv4-address \
-            /run/ddns/zonefile /run/ddns/local-zonefile /run/ddns/local-guest-zonefile /run/ddns/zonefile-ipv6-only /run/ddns/local-tailscale-zonefile /var/lib/ddns/
         '';
         unitConfig.StartLimitIntervalSec = "20m";
         wants = [ "network-online.target" "tailscale.service" ];
