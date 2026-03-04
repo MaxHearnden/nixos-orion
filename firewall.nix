@@ -2,7 +2,7 @@
   networking = {
     firewall = {
       # Allow DNS, HTTP and HTTPS
-      allowedUDPPorts = [ 53 54 88 443 464 3478 41641 ];
+      allowedUDPPorts = [ 53 54 88 443 464 3478 40000 41641 ];
       allowedUDPPortRanges = [ { from = 10000; to = 20000; } ];
       allowedTCPPorts =
         [ 25 53 54 80 88 389 443 464 749 853 3478 5000 5222 5223 5269 5270 5281 ];
@@ -187,7 +187,7 @@
 
             iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
-            udp dport 41641 socket cgroupv2 level 2 @tailscaled accept
+            udp dport {40000, 41641} socket cgroupv2 level 2 @tailscaled accept
 
             tcp dport 25 socket cgroupv2 level 2 @maddy accept
 
@@ -201,7 +201,7 @@
             icmp type echo-request accept comment "allow ping"
 
             tcp dport {25, 53, 54, 80, 443, 853, 5000, 5222, 5223, 5269, 5270, 5281} reject
-            udp dport {53, 54, 67, 443, 547, 41641} reject
+            udp dport {53, 54, 67, 443, 547, 40000, 41641} reject
           }
         }
       '';
@@ -269,8 +269,8 @@
           content = ''
             chain post {
               type filter hook output priority filter - 10;
-              oiftype {768, 769, 776} udp dport 41641 drop
-              oifname plat udp dport 41641 drop
+              oiftype {768, 769, 776} udp dport {40000, 41641} drop
+              oifname plat udp dport {40000, 41641} drop
             }
           '';
         };
