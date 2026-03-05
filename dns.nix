@@ -428,6 +428,8 @@ let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
       ; Check that null bytes within domains are handled correctly
       null-domain-check\000 TXT "null domain check"
 
+      proxy dname @
+
       smtp cname local-tailscale
       _acme-challenge.smtp cname mail._acme-challenge
 

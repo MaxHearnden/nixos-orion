@@ -3,7 +3,7 @@
 let cert_obtained = pkgs.writeShellApplication {
   name = "cert_obtained";
   text = ''
-    if [ "$1" = zandoodle.me.uk ] || [ "$1" = conference.zandoodle.me.uk ] || [ "$1" = uploads.zandoodle.me.uk ] || [ "$1" = lwad.xyz ]; then
+    if [ "$1" = zandoodle.me.uk ] || [ "$1" = conference.zandoodle.me.uk ] || [ "$1" = uploads.zandoodle.me.uk ] || [ "$1" = proxy.zandoodle.me.uk ] || [ "$1" = lwad.xyz ]; then
       install -Dm0440 -t /var/lib/caddy/certs \
         "/var/lib/caddy/.local/share/caddy/$2/$1.crt" \
         "/var/lib/caddy/.local/share/caddy/$2/$1.key"
@@ -31,6 +31,16 @@ let cert_obtained = pkgs.writeShellApplication {
           abort
         '';
         "lwad.xyz".extraConfig = ''
+          tls {
+            issuer acme {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile shortlived
+            }
+          }
+
+          abort
+        '';
+        "proxy.zandoodle.me.uk".extraConfig = ''
           tls {
             issuer acme {
               dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
@@ -88,6 +98,10 @@ let cert_obtained = pkgs.writeShellApplication {
           trustfile = "/var/lib/unbound/root.key"
         }
         use_dane = true
+
+        Component "proxy.zandoodle.me.uk" "proxy65"
+          proxy65_address = "zandoodle.me.uk"
+          proxy65_acl = {"lwad.xyz", "zandoodle.me.uk"}
       '';
       extraModules = [
         "csi_simple"
@@ -97,7 +111,7 @@ let cert_obtained = pkgs.writeShellApplication {
         "turn_external"
       ];
       httpFileShare = {
-        access = [ "lwad.xyz" ];
+        access = [ "lwad.xyz" "zandoodle.me.uk" ];
         domain = "uploads.zandoodle.me.uk";
       };
       httpInterfaces = [ "127.0.0.1" "::1" ];
@@ -128,8 +142,9 @@ let cert_obtained = pkgs.writeShellApplication {
           enabled = true;
           extraConfig = ''
             disco_items = {
-              { "uploads.zandoodle.me.uk", "file sharing service" },
               { "conference.zandoodle.me.uk", "muc domain" },
+              { "proxy.zandoodle.me.uk", "proxy65 service" },
+              { "uploads.zandoodle.me.uk", "file sharing service" },
             }
           '';
         };
