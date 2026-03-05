@@ -94,6 +94,7 @@ let cert_obtained = pkgs.writeShellApplication {
         }
         turn_external_host = "turn.zandoodle.me.uk"
         turn_external_secret = Credential("stun-secret")
+        turn_external_tcp = true
         unbound = {
           trustfile = "/var/lib/unbound/root.key"
         }
