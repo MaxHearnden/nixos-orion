@@ -267,6 +267,11 @@
         tailscale-enforcement = {
           family = "inet";
           content = ''
+            chain input {
+              type filter hook input priority filter - 10;
+              iiftype {768, 769, 776} udp dport {40000, 41641} drop
+              iifname plat udp dport {40000, 41641} drop
+            }
             chain post {
               type filter hook output priority filter - 10;
               oiftype {768, 769, 776} udp dport {40000, 41641} drop
