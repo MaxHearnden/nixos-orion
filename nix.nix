@@ -124,9 +124,11 @@ in
               ${git} checkout main
               ${git} merge --ff update
               ${git} push
+              update_failed=no
             else
               ${git} checkout main
               ${nixos-rebuild} boot --flake .?ref=main
+              update_failed=yes
             fi
 
             booted=$(${lib.getExe' pkgs.coreutils "readlink"} /run/booted-system/{kernel,kernel-modules})
@@ -136,6 +138,11 @@ in
               ${nixos-rebuild} test --flake .
             else
               ${lib.getExe nixos-kexec} --when "1 hour left"
+            fi
+
+            if [ "$update_failed" = yes ]; then
+              echo "Failed to update lockfile" >&2
+              exit 75
             fi
           '';
         serviceConfig = {
