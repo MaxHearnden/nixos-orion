@@ -116,7 +116,7 @@ in
         packageOverrides = self: super: {
           luasec = super.luasec.overrideAttrs (
             { patches ? [], ... }: {
-              patches = ./210.patch;
+              patches = patches ++ [./210.patch];
             });
         };
       };
