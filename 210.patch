@@ -1,0 +1,34 @@
+From 4bd9c2cb9573b8904b3f229e396d09d137388cf3 Mon Sep 17 00:00:00 2001
+From: Max Hearnden <git@zandoodle.me.uk>
+Date: Tue, 10 Mar 2026 11:53:06 +0000
+Subject: [PATCH] Terminate TLS sessions where the client and server
+
+have ALPN configurured but there is no overlap
+
+This mitigates against ALPACA style cross protocol attacks.
+---
+ src/context.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/context.c b/src/context.c
+index 881ebb9..5f26a6c 100644
+--- a/src/context.c
++++ b/src/context.c
+@@ -667,7 +667,7 @@ static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen,
+ 
+   if (!lua_isstring(L, -1)) {
+     lua_pop(L, 2);
+-    return SSL_TLSEXT_ERR_NOACK;
++    return SSL_TLSEXT_ERR_ALERT_FATAL;
+   }
+ 
+   // Protocol list from server in wire-format string
+@@ -676,7 +676,7 @@ static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen,
+                                server_len, in, inlen);
+   if (ret != OPENSSL_NPN_NEGOTIATED) {
+     lua_pop(L, 2);
+-    return SSL_TLSEXT_ERR_NOACK;
++    return SSL_TLSEXT_ERR_ALERT_FATAL;
+   } 
+ 
+   // Copy the result because lua_pop() can collect the pointer

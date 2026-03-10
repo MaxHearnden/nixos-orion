@@ -110,6 +110,18 @@ in
     hosts."127.0.0.2" = [ "zandoodle.me.uk" ];
     useNetworkd = true;
   };
+  nixpkgs.overlays = [
+    (self: super: {
+      lua = super.lua.override {
+        packageOverrides = self: super: {
+          luasec = super.luasec.overrideAttrs (
+            { patches ? [], ... }: {
+              patches = ./210.patch;
+            });
+        };
+      };
+    })
+  ];
   programs = {
     # Disable command-not-found as it's partially incompatible with flakes.
     # command-not-found relises on a database included in the NixOS nix channel, as I'm not using nix channels, there is no such database.

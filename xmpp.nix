@@ -85,10 +85,14 @@ let cert_obtained = pkgs.writeShellApplication {
         c2s_direct_tls_ports = { 5223 }
         certificates = "/var/lib/caddy/certs"
         http_host = "zandoodle.me.uk"
+        https_ssl = {
+          alpn = { "http/1.1", "http/1.0" }
+        }
         password_hash = "SHA-256"
         registration_invite_only = true
         s2s_direct_tls_ports = { 5270 }
         ssl = {
+          alpn = { "xmpp-client", "xmpp-server" },
           cafile = "/etc/ssl/certs/ca-bundle.crt",
           curveslist = { "X25519MLKEM768", "X25519", "prime256v1", "secp384r1" }
         }
