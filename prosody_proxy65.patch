@@ -1,0 +1,21 @@
+diff -r f20bb1c53652 plugins/mod_proxy65.lua
+--- a/plugins/mod_proxy65.lua	Sat Feb 21 17:08:11 2026 +0100
++++ b/plugins/mod_proxy65.lua	Tue Mar 10 16:59:51 2026 +0000
+@@ -60,8 +60,6 @@
+ 				transfers[sha].initiator = conn;
+ 				session.sha = sha;
+ 				module:log("debug", "SOCKS5 initiator connected for session %s", sha);
+-				server.link(conn, transfers[sha].target, max_buffer_size);
+-				server.link(transfers[sha].target, conn, max_buffer_size);
+ 			end
+ 		else -- error, unexpected input
+ 			conn:write("\5\1\0\3\0\0\0"); -- VER, REP, RSV, ATYP, BND.ADDR (sha), BND.PORT (2 Byte)
+@@ -166,6 +164,8 @@
+ 			else -- if transfers[sha].initiator ~= nil and transfers[sha].target ~= nil then
+ 				module:log("debug", "Transfer activated (%s)", info);
+ 				transfers[sha].activated = true;
++				server.link(transfers[sha].initiator, transfers[sha].target, max_buffer_size);
++				server.link(transfers[sha].target, transfers[sha].initiator, max_buffer_size);
+ 				transfers[sha].target:resume();
+ 				transfers[sha].initiator:resume();
+ 				origin.send(st.reply(stanza));

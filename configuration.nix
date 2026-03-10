@@ -120,6 +120,10 @@ in
             });
         };
       };
+      prosody = super.prosody.overrideAttrs (
+        { patches ? [ ], ... }: {
+          patches = patches ++ [ ./prosody_proxy65.patch ];
+        });
     })
   ];
   programs = {
