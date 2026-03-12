@@ -1,6 +1,6 @@
 { config, lib, pkgs, pkgs-unstable, utils, ... }:
 
-let dnsdist = pkgs.callPackage ./dnsdist.nix {}; in
+let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 {
   environment.etc = {
     "dnsdist/dnsdist.conf".text = ''
