@@ -1034,6 +1034,12 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             dnssec-validation = false;
             template = "icann";
           };
+          "max.home.arpa" = {
+            dnssec-validation = true;
+            master = "workstation";
+            module = "mod-queryacl/local";
+            notify = "pc";
+          };
           "orion.home.arpa".template = "dnsmasq";
           "root-servers.net" = {
             dnssec-validation = false;
