@@ -664,7 +664,7 @@ in
           gcc
           htop
           jq
-          krill
+          pkgs-unstable.${config.nixpkgs.system}.krill
           ldns
           ldns.examples
           lshw
