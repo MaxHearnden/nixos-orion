@@ -664,6 +664,7 @@ in
           gcc
           htop
           jq
+          krill
           ldns
           ldns.examples
           lshw
