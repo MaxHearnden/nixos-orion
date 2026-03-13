@@ -269,6 +269,8 @@ in
         protocol bgp pc {
           local as 65001;
           neighbor fd09:a389:7c1e:5:42b0:76ff:fede:79dc as 65002;
+          local role provider;
+          require roles on;
           ipv4 {
             export all;
             import filter peer_in_v4;
@@ -284,6 +286,8 @@ in
           local fd7a:115c:a1e0::1a01:5208 as 65001;
           neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016 onlink as 65000;
           interface "tailscale0";
+          local role provider;
+          require roles on;
           ipv4 {
             export all;
             import filter peer_in_v4_tunnel;
