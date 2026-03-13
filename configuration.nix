@@ -231,8 +231,8 @@ in
           if (roa_check(r4) = ROA_INVALID) then {
             reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
           }
-          if (aspa_check_downstream(at) = ROA_INVALID) then {
-            reject "Ignore ASPA invalid ", net, " for ASN ", bgp_path.last;
+          if (aspa_check_upstream(at) = ASPA_INVALID) then {
+            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
           }
           accept;
         }
@@ -240,26 +240,40 @@ in
           if (roa_check(r6) = ROA_INVALID) then {
             reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
           }
-          if (aspa_check_downstream(at) = ROA_INVALID) then {
-            reject "Ignore ASPA invalid ", net, " for ASN ", bgp_path.last;
+          if (aspa_check_upstream(at) = ASPA_INVALID) then {
+            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
           }
           accept;
         }
-        protocol bgp {
-          local fd7a:115c:a1e0::1a01:5208 as 65001;
-          neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016 as 65000;
-          multihop;
+        protocol bgp pc {
+          local as 65001;
+          neighbor fd09:a389:7c1e:5:42b0:76ff:fede:79dc as 65002;
+          ipv4 {
+            export all;
+            import filter peer_in_v4;
+            import table on;
+          };
           ipv6 {
             export where net !~ 2000::/3;
             import filter peer_in_v6;
             import table on;
-            next hop address fd27:6be8:399c:2:9c35:62ff:fe81:1b61;
           };
+        }
+        protocol bgp workstation {
+          local fd7a:115c:a1e0::1a01:5208 as 65001;
+          neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016 as 65000;
+          multihop;
           ipv4 {
             export all;
             import filter peer_in_v4;
             import table on;
             next hop address 192.168.10.1;
+          };
+          ipv6 {
+            export where net !~ 2000::/3;
+            import filter peer_in_v6;
+            import table on;
+            next hop address fd27:6be8:399c:2:9c35:62ff:fe81:1b61;
           };
         }
         protocol device {

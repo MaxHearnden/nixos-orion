@@ -19,7 +19,7 @@
       filterForward = true;
       interfaces = {
         # Allow the TP-link WAP to send logs
-        "\"bridge\"".allowedTCPPorts = [ 465 ];
+        "\"bridge\"".allowedTCPPorts = [ 179 465 ];
         "\"bridge\"".allowedUDPPorts = [ 547 ];
 
         # Allow DHCP from managed networks
@@ -166,7 +166,7 @@
 
             iifname { "bridge", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
 
-            iifname {lo, tailscale0} tcp dport 179 socket cgroupv2 level 2 @bird accept
+            iifname {lo, tailscale0, "bridge"} tcp dport 179 socket cgroupv2 level 2 @bird accept
 
             iifname lo tcp dport 3000 socket cgroupv2 level 2 @krill accept
 
