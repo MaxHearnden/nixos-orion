@@ -224,18 +224,41 @@ in
       enable = true;
       config = ''
         router id 192.168.1.201;
+        roa4 table r4;
+        roa6 table r6;
+        aspa table at;
+        filter peer_in_v4 {
+          if (roa_check(r4) = ROA_INVALID) then {
+            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
+          }
+          if (aspa_check_downstream(at) = ROA_INVALID) then {
+            reject "Ignore ASPA invalid ", net, " for ASN ", bgp_path.last;
+          }
+          accept;
+        }
+        filter peer_in_v6 {
+          if (roa_check(r6) = ROA_INVALID) then {
+            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
+          }
+          if (aspa_check_downstream(at) = ROA_INVALID) then {
+            reject "Ignore ASPA invalid ", net, " for ASN ", bgp_path.last;
+          }
+          accept;
+        }
         protocol bgp {
           local fd7a:115c:a1e0::1a01:5208 as 65001;
           neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016 as 65000;
           multihop;
           ipv6 {
-            export all;
-            import none;
+            export where net !~ 2000::/3;
+            import filter peer_in_v6;
+            import table on;
             next hop address fd27:6be8:399c:2:9c35:62ff:fe81:1b61;
           };
           ipv4 {
             export all;
-            import none;
+            import filter peer_in_v4;
+            import table on;
             next hop address 192.168.10.1;
           };
         }
@@ -245,6 +268,14 @@ in
         protocol direct {
           ipv4;
           ipv6;
+          interface -"tailscale*", "*";
+        }
+        protocol rpki {
+          roa4 { table r4; };
+          roa6 { table r6; };
+          aspa { table at; };
+
+          remote "localhost";
         }
       '';
     };

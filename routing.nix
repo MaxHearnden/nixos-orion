@@ -3,7 +3,6 @@
 {
   environment.etc = {
     "krill.conf".text = ''
-      log_level = "debug"
       log_type = "syslog"
       service_uri = "https://krill.zandoodle.me.uk/"
       storage_uri = "/var/lib/krill/data"
@@ -14,8 +13,16 @@
   services = {
     routinator = {
       enable = true;
+      package =
+        pkgs.routinator.overrideAttrs (
+          { patches ? [], ... }: {
+            patches = patches ++ [ ./routinator.patch ];
+          });
       settings = {
+        enable-aspa = true;
+        extra-tals-dir = ./tals;
         no-rir-tals = true;
+        systemd-listen = true;
       };
     };
     rsyncd = {
@@ -102,6 +109,10 @@
           UMask = "077";
         };
       };
+    };
+    sockets.routinator = {
+      listenStreams = [ "[::]:323" ];
+      wantedBy = [ "routinator.service" ];
     };
   };
   users = {

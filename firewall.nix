@@ -94,6 +94,10 @@
             type cgroupsv2
           }
 
+          set routinator {
+            type cgroupsv2
+          }
+
           set rsync {
             type cgroupsv2
           }
@@ -170,8 +174,10 @@
 
             tcp dport 873 socket cgroupv2 level 2 @rsync accept
 
+            iifname lo tcp dport 323 socket cgroupv2 level 2 @routinator accept
+
             iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
-            iifname lo tcp dport {59, 3000, 5280} reject
+            iifname lo tcp dport {59, 323, 3000, 5280} reject
 
             tcp dport { 22, 55, 56, 88, 179, 389, 464, 465, 587, 749, 873, 993 } reject
             udp dport { 55, 56, 88, 464, 749 } reject
@@ -418,6 +424,11 @@
       ollama-proxy = {
         after = [ "nftables.service" ];
         socketConfig.NFTSet = "cgroup:inet:services:ollama_socket";
+        wants = [ "nftables.service" ];
+      };
+      routinator = {
+        after = [ "nftables.service" ];
+        socketConfig.NFTSet = "cgroup:inet:services:routinator";
         wants = [ "nftables.service" ];
       };
     };
