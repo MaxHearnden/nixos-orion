@@ -222,6 +222,7 @@ in
   services = {
     bird = {
       enable = true;
+      package = pkgs-unstable.${config.nixpkgs.system}.bird3;
       config = ''
         router id 192.168.1.201;
         roa4 table r4;
@@ -261,8 +262,8 @@ in
         }
         protocol bgp workstation {
           local fd7a:115c:a1e0::1a01:5208 as 65001;
-          neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016 as 65000;
-          multihop;
+          neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016 onlink as 65000;
+          interface "tailscale0";
           ipv4 {
             export all;
             import filter peer_in_v4;
@@ -282,7 +283,7 @@ in
         protocol direct {
           ipv4;
           ipv6;
-          interface -"tailscale*", "*";
+          interface -"tailscale*", -"ipv6-tunnel", "*";
         }
         protocol rpki {
           roa4 { table r4; };
