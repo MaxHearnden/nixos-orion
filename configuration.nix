@@ -303,6 +303,18 @@ in
           ipv6;
           interface -"tailscale*", -"ipv6-tunnel", "*";
         }
+        protocol kernel {
+          ipv4 {
+            export where source !~ [RTS_STATIC, RTS_DEVICE];
+          };
+          kernel table 20;
+        }
+        protocol kernel {
+          ipv6 {
+            export where source !~ [RTS_STATIC, RTS_DEVICE];
+          };
+          kernel table 20;
+        }
         protocol rpki {
           roa4 { table r4; };
           roa6 { table r6; };
