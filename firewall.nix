@@ -28,7 +28,7 @@
         "shadow-lan".allowedUDPPorts = [ 67 547 ];
 
         # Allow submissions and imaps from tailscale
-        tailscale0.allowedTCPPorts = [ 179 465 587 993 ];
+        tailscale0.allowedTCPPorts = [ 179 465 587 873 993 ];
       };
     };
     nftables = {
@@ -78,6 +78,10 @@
             type cgroupsv2
           }
 
+          set krill {
+            type cgroupsv2
+          }
+
           set maddy {
             type cgroupsv2
           }
@@ -87,6 +91,10 @@
           }
 
           set prosody {
+            type cgroupsv2
+          }
+
+          set rsync {
             type cgroupsv2
           }
 
@@ -156,14 +164,16 @@
 
             iifname {lo, tailscale0} tcp dport 179 socket cgroupv2 level 2 @bird accept
 
-            iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
-            iifname lo tcp dport 59 reject
+            iifname lo tcp dport 3000 socket cgroupv2 level 2 @krill accept
 
             iifname lo tcp dport 5280 socket cgroupv2 level 2 @prosody accept
 
-            iifname lo tcp dport 5280 reject
+            tcp dport 873 socket cgroupv2 level 2 @rsync accept
 
-            tcp dport { 22, 55, 56, 88, 179, 389, 464, 465, 587, 749, 993 } reject
+            iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
+            iifname lo tcp dport {59, 3000, 5280} reject
+
+            tcp dport { 22, 55, 56, 88, 179, 389, 464, 465, 587, 749, 873, 993 } reject
             udp dport { 55, 56, 88, 464, 749 } reject
           }
 
@@ -319,6 +329,11 @@
         serviceConfig.NFTSet = "cgroup:inet:services:knot";
         wants = [ "nftables.service" ];
       };
+      krill = {
+        after = [ "nftables.service" ];
+        serviceConfig.NFTSet = "cgroup:inet:services:krill";
+        wants = [ "nftables.service" ];
+      };
       maddy = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:maddy";
@@ -356,6 +371,11 @@
       prosody = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:prosody";
+        wants = [ "nftables.service" ];
+      };
+      rsync = {
+        after = [ "nftables.service" ];
+        serviceConfig.NFTSet = "cgroup:inet:services:rsync";
         wants = [ "nftables.service" ];
       };
       slapd = {

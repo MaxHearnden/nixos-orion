@@ -366,6 +366,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 
       int ns dns
 
+      krill cname local-tailscale
+      _acme-challenge.krill cname _acme-challenge
+
       $INCLUDE /var/lib/ddns/local-zonefile local.zandoodle.me.uk.
       $INCLUDE /etc/knot/no-email.zone.include local.zandoodle.me.uk.
 

@@ -101,6 +101,7 @@ in
     ./ldap.nix
     ./mail.nix
     ./nix.nix
+    ./routing.nix
     ./xmpp.nix
   ];
   networking = {
