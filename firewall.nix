@@ -193,6 +193,8 @@
             meta l4proto {udp, tcp} th dport 53 socket cgroupv2 level 2 @dnsdist accept
             meta l4proto {udp, tcp} th dport 54 socket cgroupv2 level 2 @knot accept
 
+            iifname {tailscale0, lo} meta l4proto {4, 41} accept
+
             # Allow HTTP and HTTPS handled by caddy
             tcp dport { 80, 443, 853 } socket cgroupv2 level 2 @caddy accept
             udp dport 443 socket cgroupv2 level 2 @caddy accept
