@@ -246,6 +246,26 @@ in
           }
           accept;
         }
+        filter peer_in_v4_tunnel {
+          if (roa_check(r4) = ROA_INVALID) then {
+            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
+          }
+          if (aspa_check_upstream(at) = ASPA_INVALID) then {
+            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
+          }
+          ifname = "ipv6-tunnel";
+          accept;
+        }
+        filter peer_in_v6_tunnel {
+          if (roa_check(r6) = ROA_INVALID) then {
+            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
+          }
+          if (aspa_check_upstream(at) = ASPA_INVALID) then {
+            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
+          }
+          ifname = "ipv6-tunnel";
+          accept;
+        }
         protocol bgp pc {
           local as 65001;
           neighbor fd09:a389:7c1e:5:42b0:76ff:fede:79dc as 65002;
@@ -266,15 +286,13 @@ in
           interface "tailscale0";
           ipv4 {
             export all;
-            import filter peer_in_v4;
+            import filter peer_in_v4_tunnel;
             import table on;
-            next hop address 192.168.10.1;
           };
           ipv6 {
             export where net !~ 2000::/3;
-            import filter peer_in_v6;
+            import filter peer_in_v6_tunnel;
             import table on;
-            next hop address fd27:6be8:399c:2:9c35:62ff:fe81:1b61;
           };
         }
         protocol device {
