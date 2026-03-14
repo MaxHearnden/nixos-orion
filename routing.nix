@@ -62,11 +62,12 @@
         }
         protocol bgp pc {
           local as 65001;
-          neighbor fd09:a389:7c1e:5:42b0:76ff:fede:79dc as 65002;
+          neighbor fe80::42b0:76ff:fede:79dc%bridge as 65002;
           local role provider;
           require roles on;
           ipv4 {
             export all;
+            extended next hop on;
             import filter peer_in_v4;
             import table on;
           };
@@ -74,6 +75,45 @@
             export where net !~ 2000::/3;
             import filter peer_in_v6;
             import table on;
+          };
+        }
+        protocol bgp pc_guest {
+          local as 65001;
+          neighbor fe80::42b0:76ff:fede:79dc%guest as 65002;
+          local role provider;
+          require roles on;
+          ipv4 {
+            export all;
+            extended next hop on;
+            import filter peer_in_v4;
+            import table on;
+            preference 80;
+          };
+          ipv6 {
+            export where net !~ 2000::/3;
+            import filter peer_in_v6;
+            import table on;
+            preference 80;
+          };
+        }
+        protocol bgp pc_shadow {
+          local as 65001;
+          neighbor fe80::42b0:76ff:fede:79dc as 65002;
+          interface "shadow-lan";
+          local role provider;
+          require roles on;
+          ipv4 {
+            export all;
+            extended next hop on;
+            import filter peer_in_v4;
+            import table on;
+            preference 90;
+          };
+          ipv6 {
+            export where net !~ 2000::/3;
+            import filter peer_in_v6;
+            import table on;
+            preference 90;
           };
         }
         protocol bgp workstation {

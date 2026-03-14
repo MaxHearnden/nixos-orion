@@ -24,7 +24,9 @@
 
         # Allow DHCP from managed networks
         web-vm.allowedUDPPorts = [ 67 ];
+        guest.allowedTCPPorts = [ 179 ];
         guest.allowedUDPPorts = [ 67 547 ];
+        "shadow-lan".allowedTCPPorts = [ 179 ];
         "shadow-lan".allowedUDPPorts = [ 67 547 ];
 
         # Allow submissions and imaps from tailscale
@@ -166,7 +168,7 @@
 
             iifname { "bridge", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
 
-            iifname {lo, tailscale0, "bridge"} tcp dport 179 socket cgroupv2 level 2 @bird accept
+            iifname {lo, tailscale0, "bridge", guest, "shadow-lan"} tcp dport 179 socket cgroupv2 level 2 @bird accept
 
             iifname lo tcp dport 3000 socket cgroupv2 level 2 @krill accept
 
