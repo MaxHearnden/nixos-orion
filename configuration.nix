@@ -309,15 +309,13 @@ in
         }
         protocol kernel {
           ipv4 {
-            export where source !~ [RTS_STATIC, RTS_DEVICE];
+            export where source !~ [RTS_STATIC, RTS_DEVICE] && net !~ 192.168.10.0/24;
           };
-          kernel table 20;
         }
         protocol kernel {
           ipv6 {
-            export where source !~ [RTS_STATIC, RTS_DEVICE];
+            export where source !~ [RTS_STATIC, RTS_DEVICE] && net !~ fd27:6be8:399c:2::/64;
           };
-          kernel table 20;
         }
         protocol rpki {
           roa4 { table r4; };
