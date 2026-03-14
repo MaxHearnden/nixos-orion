@@ -7,7 +7,7 @@
       allowedTCPPorts =
         [ 25 53 54 80 88 389 443 464 749 853 3478 5000 5222 5223 5269 5270 5281 ];
       extraForwardRules = ''
-        iifname {plat, guest, "shadow-lan", "bridge", "tailscale0", ipv6-tunnel} oifname {plat, guest, "shadow-lan", "bridge"} accept
+        iifname {plat, guest, "shadow-lan", "bridge", "tailscale0", ipv6-tunnel} oifname {plat, guest, "shadow-lan", "bridge", "ipv6-tunnel"} accept
       '';
       extraInputRules = ''
         iifname tailscale0 meta l4proto {4, 41} accept
