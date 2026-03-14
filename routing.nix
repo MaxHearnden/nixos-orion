@@ -139,16 +139,16 @@
         protocol direct {
           ipv4;
           ipv6;
-          interface -"tailscale*", -"ipv6-tunnel", "*";
+          interface -"tailscale*", -"ipv6-tunnel", -"lo", "*";
         }
         protocol kernel {
           ipv4 {
-            export where source !~ [RTS_STATIC, RTS_DEVICE] && net !~ 192.168.10.0/24;
+            export where source != RTS_DEVICE && net !~ 192.168.10.0/24;
           };
         }
         protocol kernel {
           ipv6 {
-            export where source !~ [RTS_STATIC, RTS_DEVICE] && net !~ fd27:6be8:399c:2::/64;
+            export where source != RTS_DEVICE && net !~ fd27:6be8:399c:2::/64;
           };
         }
         protocol rpki {
@@ -157,6 +157,14 @@
           aspa { table at; };
 
           remote "localhost";
+        }
+        protocol static {
+          ipv4;
+          route 192.168.12.0/24 unreachable;
+        }
+        protocol static {
+          ipv6;
+          route fd09:a389:7c1e:7::/64 unreachable;
         }
       '';
     };

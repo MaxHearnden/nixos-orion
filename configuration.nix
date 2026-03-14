@@ -453,6 +453,11 @@ in
           name = "enp49s0";
         };
 
+        "10-lo" = {
+          address = [ "192.168.12.1" "fd09:a389:7c1e:7::1" ];
+          name = "lo";
+        };
+
         # Configure the NAT64 interface
         "10-plat" = {
           # Add IP addresses for the link
