@@ -7,7 +7,7 @@
       allowedTCPPorts =
         [ 25 53 54 80 88 389 443 464 749 853 3478 5000 5222 5223 5269 5270 5281 ];
       extraForwardRules = ''
-        iifname {plat, guest, "shadow-lan", "bridge", "tailscale0", ipv6-tunnel} oifname {plat, guest, "shadow-lan", "bridge", "ipv6-tunnel"} accept
+        iifname {plat, guest, "shadow-lan", "bridge", "tailscale0", "*-tnl"} oifname {plat, guest, "shadow-lan", "bridge", "*-tnl"} accept
       '';
       extraInputRules = ''
         iifname tailscale0 meta l4proto {4, 41} accept
@@ -249,11 +249,11 @@
               type nat hook postrouting priority srcnat; policy accept;
               # Don't nat packets which don't need it
               iifname { plat, guest, "shadow-lan", "bridge" } ip6 daddr == fd09:a389:7c1e::/48 accept
-              iifname { plat, guest, "shadow-lan", "ipv6-tunnel" } oifname "bridge" masquerade
+              iifname { plat, guest, "shadow-lan", "*-tnl" } oifname "bridge" masquerade
               oifname plat masquerade
 
               # NAT packets for router
-              iifname { plat, guest, "shadow-lan", "ipv6-tunnel" } oifname guest ip daddr 192.168.5.1 masquerade
+              iifname { plat, guest, "shadow-lan", "*-tnl" } oifname guest ip daddr 192.168.5.1 masquerade
             }
 
             chain pre {

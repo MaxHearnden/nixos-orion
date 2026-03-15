@@ -297,12 +297,48 @@ in
         "10-ipv6-tunnel" = {
           netdevConfig = {
             Kind = "ip6tnl";
-            Name = "ipv6-tunnel";
+            Name = "workstation-tnl";
           };
           tunnelConfig = {
             Independent = true;
             Local = "fd7a:115c:a1e0::1a01:5208";
             Remote = "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016";
+          };
+        };
+
+        "10-ipv6-tunnel-chromebook" = {
+          netdevConfig = {
+            Kind = "ip6tnl";
+            Name = "chromebook-tnl";
+          };
+          tunnelConfig = {
+            Independent = true;
+            Local = "fd7a:115c:a1e0::1a01:5208";
+            Remote = "fd7a:115c:a1e0::d401:5546";
+          };
+        };
+
+        "10-ipv6-tunnel-laptop" = {
+          netdevConfig = {
+            Kind = "ip6tnl";
+            Name = "laptop-tnl";
+          };
+          tunnelConfig = {
+            Independent = true;
+            Local = "fd7a:115c:a1e0::1a01:5208";
+            Remote = "fd7a:115c:a1e0::d601:c604";
+          };
+        };
+
+        "10-ipv6-tunnel-pc" = {
+          netdevConfig = {
+            Kind = "ip6tnl";
+            Name = "pc-tnl";
+          };
+          tunnelConfig = {
+            Independent = true;
+            Local = "fd7a:115c:a1e0::1a01:5208";
+            Remote = "fd7a:115c:a1e0::d2df:ec69";
           };
         };
 
@@ -412,8 +448,19 @@ in
           };
         };
         "10-ipv6-tunnel" = {
-          address = [ "192.168.10.1/24" "fd27:6be8:399c:2:9c35:62ff:fe81:1b61/64" ];
-          name = "ipv6-tunnel";
+          name = "workstation-tnl";
+          linkConfig.RequiredForOnline = false;
+        };
+        "10-ipv6-tunnel-chromebook" = {
+          name = "chromebook-tnl";
+          linkConfig.RequiredForOnline = false;
+        };
+        "10-ipv6-tunnel-laptop" = {
+          name = "laptop-tnl";
+          linkConfig.RequiredForOnline = false;
+        };
+        "10-ipv6-tunnel-pc" = {
+          name = "pc-tnl";
           linkConfig.RequiredForOnline = false;
         };
         "10-enp1s0" = {
@@ -454,7 +501,7 @@ in
         };
 
         "10-lo" = {
-          address = [ "192.168.12.1" "fd09:a389:7c1e:7::1" ];
+          address = [ "192.168.12.1/128" "fd09:a389:7c1e:7::1/128" ];
           name = "lo";
         };
 

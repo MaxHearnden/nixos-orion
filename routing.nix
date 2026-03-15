@@ -47,7 +47,7 @@
           if (aspa_check_upstream(at) = ASPA_INVALID) then {
             reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
           }
-          ifname = "ipv6-tunnel";
+          ifname = "workstation-tnl";
           accept;
         }
         filter peer_in_v6_tunnel {
@@ -57,7 +57,7 @@
           if (aspa_check_upstream(at) = ASPA_INVALID) then {
             reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
           }
-          ifname = "ipv6-tunnel";
+          ifname = "workstation-tnl";
           accept;
         }
         protocol bgp pc {
@@ -139,7 +139,7 @@
         protocol direct {
           ipv4;
           ipv6;
-          interface -"tailscale*", -"ipv6-tunnel", -"lo", "*";
+          interface -"tailscale*", -"*-tnl", -"lo", "*";
         }
         protocol kernel {
           ipv4 {
