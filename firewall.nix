@@ -293,7 +293,8 @@
           }
           chain to_routed {
             oifname @routed_interfaces accept
-            oiftype ipip6 accept
+            oiftype ipip6 meta l4proto != udp accept
+            oiftype ipip6 udp dport != {40000, 41641} accept
           }
         '';
         tailscale-enforcement = {
