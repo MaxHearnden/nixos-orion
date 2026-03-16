@@ -7,7 +7,9 @@
       allowedTCPPorts =
         [ 25 53 54 80 88 389 443 464 749 853 3478 5000 5222 5223 5269 5270 5281 ];
       extraForwardRules = ''
-        iifname {plat, guest, "shadow-lan", "bridge", "tailscale0", "*-tnl"} oifname {plat, guest, "shadow-lan", "bridge", "*-tnl"} accept
+        iifname "tailscale0" jump to_routed
+        iiftype ipip6 jump to_routed
+        iifname @routed_interfaces jump to_routed
       '';
       extraInputRules = ''
         iifname tailscale0 meta l4proto {4, 41} accept
@@ -248,12 +250,12 @@
             chain post {
               type nat hook postrouting priority srcnat; policy accept;
               # Don't nat packets which don't need it
-              iifname { plat, guest, "shadow-lan", "bridge" } ip6 daddr == fd09:a389:7c1e::/48 accept
-              iifname { plat, guest, "shadow-lan", "*-tnl" } oifname "bridge" masquerade
-              oifname plat masquerade
+              iifname != lo ip6 daddr == fd09:a389:7c1e::/48 accept
+              iifname != lo oifname "bridge" masquerade
+              iifname != lo oifname plat masquerade
 
               # NAT packets for router
-              iifname { plat, guest, "shadow-lan", "*-tnl" } oifname guest ip daddr 192.168.5.1 masquerade
+              iifname != lo oifname guest ip daddr 192.168.5.1 masquerade
             }
 
             chain pre {
@@ -282,6 +284,16 @@
               fc00::/7,
               fe80::/10,
             }
+          }
+          set routed_interfaces {
+            typeof iifname; flags constant;
+            elements = {
+              plat, guest, "shadow-lan", "bridge"
+            }
+          }
+          chain to_routed {
+            oifname @routed_interfaces accept
+            oiftype ipip6 accept
           }
         '';
         tailscale-enforcement = {
