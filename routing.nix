@@ -143,12 +143,12 @@
         }
         protocol kernel {
           ipv4 {
-            export where source != RTS_DEVICE && net !~ 192.168.10.0/24;
+            export where source != RTS_DEVICE;
           };
         }
         protocol kernel {
           ipv6 {
-            export where source != RTS_DEVICE && net !~ fd27:6be8:399c:2::/64;
+            export where source != RTS_DEVICE;
           };
         }
         protocol rpki {
