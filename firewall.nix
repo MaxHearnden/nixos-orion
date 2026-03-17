@@ -249,10 +249,10 @@
           content = ''
             chain post {
               type nat hook postrouting priority srcnat; policy accept;
+              iifname != lo meta nfproto ipv6 oifname plat masquerade
               # Don't nat packets which don't need it
               iifname != lo ip6 daddr == fd09:a389:7c1e::/48 accept
               iifname != lo oifname "bridge" masquerade
-              iifname != lo oifname plat masquerade
 
               # NAT packets for router
               iifname != lo oifname guest ip daddr 192.168.5.1 masquerade
