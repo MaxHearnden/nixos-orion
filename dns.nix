@@ -213,6 +213,12 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 
       orion cname local-tailscale.zandoodle.me.uk.
 
+      orion-routed A 192.168.11.1
+      $INCLUDE /etc/knot/no-email.zone.include orion-routed.int.zandoodle.me.uk.
+      orion-routed AAAA fd09:a389:7c1e:6::1
+      orion-routed IN SSHFP 1 2 ab797327e7a122d79bed1df5ebee639bf2a0cdb68e0e2cef4be62439333d028e
+      orion-routed IN SSHFP 4 2 1a775110beae6e379adcd0cc2ea510bfb12b077883016754511103bd3a550b81
+
       pc a 100.95.236.105
       $INCLUDE /etc/knot/no-email.zone.include pc.int.zandoodle.me.uk.
       pc aaaa fd7a:115c:a1e0::d2df:ec69
@@ -220,6 +226,13 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       pc sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
       _acme-challenge.pc ns dns.zandoodle.me.uk.
       _kerberos.pc txt WORKSTATION.ZANDOODLE.ME.UK
+
+      pc-routed a 192.168.11.5
+      $INCLUDE /etc/knot/no-email.zone.include pc-routed.int.zandoodle.me.uk.
+      pc-routed aaaa fd09:a389:7c1e:6::5
+      pc-routed sshfp 1 2 ea259e9d2d355d9506919e56ed0c35fbb0476501524f6349cf9f6ef6dbe19c50
+      pc-routed sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
+      _kerberos.pc-routed txt WORKSTATION.ZANDOODLE.ME.UK
 
       tcp-fallback txt "${lib.strings.replicate 4096 "a"}"
     '';
