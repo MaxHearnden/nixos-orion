@@ -40,26 +40,6 @@
           }
           accept;
         }
-        filter peer_in_v4_tunnel {
-          if (roa_check(r4) = ROA_INVALID) then {
-            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
-          }
-          if (aspa_check_upstream(at) = ASPA_INVALID) then {
-            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
-          }
-          ifname = "workstation-tnl";
-          accept;
-        }
-        filter peer_in_v6_tunnel {
-          if (roa_check(r6) = ROA_INVALID) then {
-            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
-          }
-          if (aspa_check_upstream(at) = ASPA_INVALID) then {
-            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
-          }
-          ifname = "workstation-tnl";
-          accept;
-        }
         protocol bgp pc {
           local as 65001;
           neighbor fe80::42b0:76ff:fede:79dc%bridge as 65002;
@@ -117,19 +97,21 @@
           };
         }
         protocol bgp workstation {
-          local fd7a:115c:a1e0::1a01:5208 as 65001;
-          neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016 onlink as 65000;
-          interface "tailscale0";
+          local fe80::1 as 65001;
+          neighbor fe80::2 as 65000;
+          interface "workstation-tnl";
           local role provider;
           require roles on;
           ipv4 {
             export all;
-            import filter peer_in_v4_tunnel;
+            extended next hop on;
+            import filter peer_in_v4;
             import table on;
+            require extended next hop on;
           };
           ipv6 {
             export all;
-            import filter peer_in_v6_tunnel;
+            import filter peer_in_v6;
             import table on;
           };
         }
