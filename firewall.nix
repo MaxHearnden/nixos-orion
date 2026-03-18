@@ -16,6 +16,7 @@
         # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
         meta l4proto {udp, tcp} th dport {55, 56} ip saddr @local_ip accept
         meta l4proto {udp, tcp} th dport {55, 56} ip6 saddr @local_ip6 accept
+        iiftype ipip6 tcp dport 179 accept
       '';
       # Filter packets that would have been forwarded
       filterForward = true;
@@ -171,6 +172,7 @@
             iifname { "bridge", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
 
             iifname {lo, tailscale0, "bridge", guest, "shadow-lan"} tcp dport 179 socket cgroupv2 level 2 @bird accept
+            iiftype ipip6 tcp dport 179 socket cgroupv2 level 2 @bird accept
 
             iifname lo tcp dport 3000 socket cgroupv2 level 2 @krill accept
 
