@@ -448,18 +448,22 @@ in
           };
         };
         "10-ipv6-tunnel" = {
+          address = [ "fe80::1/64" ];
           name = "workstation-tnl";
           linkConfig.RequiredForOnline = false;
         };
         "10-ipv6-tunnel-chromebook" = {
+          address = [ "fe80::1/64" ];
           name = "chromebook-tnl";
           linkConfig.RequiredForOnline = false;
         };
         "10-ipv6-tunnel-laptop" = {
+          address = [ "fe80::1/64" ];
           name = "laptop-tnl";
           linkConfig.RequiredForOnline = false;
         };
         "10-ipv6-tunnel-pc" = {
+          address = [ "fe80::1/64" ];
           name = "pc-tnl";
           linkConfig.RequiredForOnline = false;
         };
