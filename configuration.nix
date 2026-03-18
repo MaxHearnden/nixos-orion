@@ -268,6 +268,10 @@ in
     network = {
       # Enable systemd-networkd
       enable = true;
+      config.networkConfig = {
+        ManageForeignRoutingPolicyRules = false;
+        ManageForeignRoutes = false;
+      };
       netdevs = {
         # Configure a bridge
         "10-bridge" = {
@@ -300,7 +304,6 @@ in
             Name = "workstation-tnl";
           };
           tunnelConfig = {
-            Independent = true;
             Local = "fd7a:115c:a1e0::1a01:5208";
             Remote = "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016";
           };
@@ -312,7 +315,6 @@ in
             Name = "chromebook-tnl";
           };
           tunnelConfig = {
-            Independent = true;
             Local = "fd7a:115c:a1e0::1a01:5208";
             Remote = "fd7a:115c:a1e0::d401:5546";
           };
@@ -324,7 +326,6 @@ in
             Name = "laptop-tnl";
           };
           tunnelConfig = {
-            Independent = true;
             Local = "fd7a:115c:a1e0::1a01:5208";
             Remote = "fd7a:115c:a1e0::d601:c604";
           };
@@ -336,7 +337,6 @@ in
             Name = "pc-tnl";
           };
           tunnelConfig = {
-            Independent = true;
             Local = "fd7a:115c:a1e0::1a01:5208";
             Remote = "fd7a:115c:a1e0::d2df:ec69";
           };
@@ -556,6 +556,16 @@ in
             IPv6SendRA = true;
           };
           dhcpServerConfig.DNS = "_server_address";
+        };
+        "10-tailscale" = {
+          name = "tailscale0";
+          linkConfig.RequiredForOnline = false;
+          networkConfig = {
+            DHCP = false;
+            IPv6AcceptRA = false;
+            KeepConfiguration = "static";
+          };
+          tunnel = [ "workstation-tnl" "pc-tnl" "laptop-tnl" "chromebook-tnl" ];
         };
       };
 
