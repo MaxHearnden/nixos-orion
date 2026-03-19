@@ -40,6 +40,26 @@
           }
           accept;
         }
+        filter peer_in_v4_tunnel {
+          if (roa_check(r4) = ROA_INVALID) then {
+            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
+          }
+          if (aspa_check_upstream(at) = ASPA_INVALID) then {
+            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
+          }
+          krt_prefsrc = 192.168.11.1;
+          accept;
+        }
+        filter peer_in_v6_tunnel {
+          if (roa_check(r6) = ROA_INVALID) then {
+            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
+          }
+          if (aspa_check_upstream(at) = ASPA_INVALID) then {
+            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
+          }
+          krt_prefsrc = fd09:a389:7c1e:6::1;
+          accept;
+        }
         protocol bgp pc {
           local as 65001;
           neighbor fe80::42b0:76ff:fede:79dc%bridge as 65002;
@@ -105,13 +125,13 @@
           ipv4 {
             export all;
             extended next hop on;
-            import filter peer_in_v4;
+            import filter peer_in_v4_tunnel;
             import table on;
             require extended next hop on;
           };
           ipv6 {
             export all;
-            import filter peer_in_v6;
+            import filter peer_in_v6_tunnel;
             import table on;
           };
         }
