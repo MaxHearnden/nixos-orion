@@ -141,7 +141,7 @@
         protocol direct {
           ipv4;
           ipv6;
-          interface -"tailscale*", -"*-tnl", -"lo", "*";
+          interface "bridge", "guest", "shadow-lan";
         }
         protocol kernel {
           ipv4 {
@@ -167,6 +167,7 @@
         protocol static {
           ipv6;
           route fd09:a389:7c1e:6::1/128 unreachable;
+          route fd09:a389:7c1e::/48 unreachable;
         }
       '';
     };
