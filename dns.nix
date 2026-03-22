@@ -235,6 +235,12 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       _kerberos.pc-routed txt WORKSTATION.ZANDOODLE.ME.UK
 
       tcp-fallback txt "${lib.strings.replicate 4096 "a"}"
+
+      workstation-routed a 192.168.11.2
+      $INCLUDE /etc/knot/no-email.zone.include workstation-routed.int.zandoodle.me.uk.
+      workstation-routed aaaa fd09:a389:7c1e:6::2
+      workstation-routed sshfp 1 2 bb26ac7d22088477cf1a3f701f702595025a569c7373306bbfb44d880202322f
+      workstation-routed sshfp 4 2 7fa4a718df8a2c3fe600f3d9976d00ac825d56a1ca41b5b36026a279400642e8
     '';
     "knot/letsencrypt.zone.include".source =
       pkgs.callPackage ./gen-TLSA.nix {
