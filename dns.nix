@@ -187,6 +187,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       @ ns dns.zandoodle.me.uk.
       @ txt "This is meant to be public, this is just for stuff where I don't care about being able to resolve it over IPv4"
 
+      bird-lg cname local-tailscale.zandoodle.me.uk.
+      _acme-challenge.bird-lg cname _acme-challenge.zandoodle.me.uk.
+
       ; Setup an extant domain for DNSSEC testing
       bogus-exists type65534 \# 0
 

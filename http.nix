@@ -37,6 +37,18 @@ in
     [*ZANDOODLE.ME.UK]
   '';
   services = {
+    bird-lg = {
+      frontend = {
+        domain = "int.zandoodle.me.uk";
+        enable = true;
+        listenAddresses = "/run/bird-lg/frontend";
+        servers = ["orion"];
+      };
+      proxy = {
+        enable = true;
+        listenAddresses = [ "[::]:8000" ];
+      };
+    };
     caddy = {
       enable = true;
       globalConfig = ''
@@ -102,6 +114,18 @@ in
         hash = "sha256-WS3Td0wkFRogZNWjbChjAPvSpjqV8pyUTF9vUW1596w=";
       };
       virtualHosts = {
+        "bird-lg.int.zandoodle.me.uk" = {
+          extraConfig = ''
+            tls {
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile shortlived
+              }
+            }
+            encode
+            reverse_proxy unix//run/bird-lg/frontend
+          '';
+        };
         "compsoc-dev.com" = {
           extraConfig = ''
             tls {
@@ -782,6 +806,10 @@ in
       };
     };
     services = {
+      bird-lg-frontend.serviceConfig = {
+        RuntimeDirectory = "bird-lg";
+        UMask = "0";
+      };
       caddy.serviceConfig = {
         # Allow Caddy to bind to port 80 and port 443
         CapabilityBoundingSet = "CAP_NET_ADMIN CAP_NET_BIND_SERVICE";

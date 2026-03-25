@@ -55,6 +55,10 @@
             type cgroupsv2
           }
 
+          set bird_lg_proxy {
+            type cgroupsv2
+          }
+
           set caddy {
             type cgroupsv2
           }
@@ -180,12 +184,14 @@
 
             tcp dport 873 socket cgroupv2 level 2 @rsync accept
 
+            tcp dport 8000 socket cgroupv2 level 2 @bird_lg_proxy accept
+
             iifname lo tcp dport 323 socket cgroupv2 level 2 @routinator accept
 
             iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
             iifname lo tcp dport {59, 323, 3000, 5280} reject
 
-            tcp dport { 22, 55, 56, 88, 179, 389, 464, 465, 587, 749, 873, 993 } reject
+            tcp dport { 22, 55, 56, 88, 179, 389, 464, 465, 587, 749, 873, 993, 8000 } reject
             udp dport { 55, 56, 88, 464, 749 } reject
           }
 
@@ -327,6 +333,11 @@
       bird = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:bird";
+        wants = [ "nftables.service" ];
+      };
+      bird-lg-proxy = {
+        after = [ "nftables.service" ];
+        serviceConfig.NFTSet = "cgroup:inet:services:bird_lg_proxy";
         wants = [ "nftables.service" ];
       };
       caddy = {
