@@ -239,6 +239,13 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 
       tcp-fallback txt "${lib.strings.replicate 4096 "a"}"
 
+      workstation a 100.91.224.22
+      $INCLUDE /etc/knot/no-email.zone.include workstation.int.zandoodle.me.uk.
+      workstation aaaa fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
+      workstation sshfp 1 2 bb26ac7d22088477cf1a3f701f702595025a569c7373306bbfb44d880202322f
+      workstation sshfp 4 2 7fa4a718df8a2c3fe600f3d9976d00ac825d56a1ca41b5b36026a279400642e8
+      workstation dname workstation.zandoodle.me.uk.
+
       workstation-routed a 192.168.11.2
       $INCLUDE /etc/knot/no-email.zone.include workstation-routed.int.zandoodle.me.uk.
       workstation-routed aaaa fd09:a389:7c1e:6::2
