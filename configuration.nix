@@ -491,6 +491,7 @@ in
         };
         "10-enp49s0" = {
           bridge = [ "bridge" ];
+          bridgeConfig.Cost = 20;
           bridgeVLANs = [
             {
               VLAN = "10";
