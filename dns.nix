@@ -642,7 +642,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 
         # Enable DHCP operation on C-VLAN 10, S-VLAN 20 and the web-vm TAP interface
         interface = [
-          "bridge"
+          "internet"
           "guest"
           "shadow-lan"
           "web-vm"
@@ -651,7 +651,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
         # Add a DNS entry for ourselves
         interface-name = [
           "orion-guest.orion.home.arpa,guest"
-          "orion-bridge.orion.home.arpa,bridge"
+          "orion-bridge.orion.home.arpa,internet"
           "orion-shadow.orion.home.arpa,shadow-lan"
         ];
 
@@ -1637,17 +1637,17 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           fi
 
           # Append the IPv6 records
-          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary -deprecated | ${lib.getExe pkgs.jq} -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev internet to 2000::/3 -temporary -deprecated | ${lib.getExe pkgs.jq} -r \
             '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/zonefile
-          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary -deprecated | ${lib.getExe pkgs.jq} -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev internet to 2000::/3 -temporary -deprecated | ${lib.getExe pkgs.jq} -r \
             '"@ AAAA " + (.[].addr_info.[].local // empty)' >/run/ddns/zonefile-ipv6-only
-          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to 2000::/3 -temporary -deprecated | ${lib.getExe pkgs.jq} -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev internet to 2000::/3 -temporary -deprecated | ${lib.getExe pkgs.jq} -r \
             '.[].addr_info.[].local // empty' >/run/ddns/IPv6-address
 
           # Get the IP address for enp49s0
-          ${lib.getExe' pkgs.iproute2 "ip"} -json -4 address show dev bridge | ${lib.getExe pkgs.jq} -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -4 address show dev internet | ${lib.getExe pkgs.jq} -r \
             '"@ A " + (.[].addr_info.[].local // empty)' >/run/ddns/local-zonefile
-          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev bridge to fc00::/7 | ${lib.getExe pkgs.jq} -r \
+          ${lib.getExe' pkgs.iproute2 "ip"} -json -6 address show dev internet to fc00::/7 | ${lib.getExe pkgs.jq} -r \
             '"@ AAAA " + (.[].addr_info.[].local // empty)' >>/run/ddns/local-zonefile
 
           # Check the zonefile is valid

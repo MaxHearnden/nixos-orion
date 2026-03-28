@@ -62,7 +62,7 @@
         }
         protocol bgp pc {
           local as 65001;
-          neighbor fe80::42b0:76ff:fede:79dc%bridge as 65002;
+          neighbor fe80::42b0:76ff:fede:79dc%internet as 65002;
           local role provider;
           require roles on;
           ipv4 {
@@ -141,7 +141,7 @@
         protocol direct {
           ipv4;
           ipv6;
-          interface "bridge", "guest", "shadow-lan";
+          interface "internet", "guest", "shadow-lan";
         }
         protocol kernel {
           ipv4 {

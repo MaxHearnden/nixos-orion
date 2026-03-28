@@ -298,6 +298,14 @@ in
           };
         };
 
+        "10-internet" = {
+          netdevConfig = {
+            Kind = "vlan";
+            Name = "internet";
+          };
+          vlanConfig.Id = 1;
+        };
+
         "10-ipv6-tunnel" = {
           netdevConfig = {
             Kind = "ip6tnl";
@@ -366,47 +374,21 @@ in
       };
       networks = {
         "10-bridge" = {
-          address = [ "192.168.1.201/24" ];
           bridgeVLANs = [
             {
-              VLAN = "10";
-              PVID = 1;
-              EgressUntagged = "1";
+              VLAN = 1;
             }
             {
-              VLAN = "20";
+              VLAN = 10;
             }
-          ];
-          extraConfig = ''
-            [IPv6RoutePrefix]
-            Route=fd09:a389:7c1e::/48
-            Preference=low
-          '';
-          ipv6SendRAConfig = {
-            Managed = true;
-            RouterLifetimeSec = 0;
-          };
-          ipv6Prefixes = [
             {
-              Prefix = "fd09:a389:7c1e:5::/64";
-              Assign = true;
+              VLAN = 20;
             }
           ];
+          linkConfig.ARP = false;
           name = "bridge";
-          networkConfig = {
-            IPv6SendRA = true;
-            IPv6AcceptRA = true;
-            IPv6PrivacyExtensions = false;
-          };
-          routes = [
-            {
-              # Add a static route to the router
-              Gateway = "192.168.1.1";
-              PreferredSource = "192.168.1.201";
-            }
-          ];
           # Create VLANs and bind them to this interface
-          vlan = [ "guest" "shadow-lan" ];
+          vlan = [ "guest" "internet" "shadow-lan" ];
         };
         # configure the guest interface
         "10-guest" = {
@@ -439,13 +421,48 @@ in
             }
           ];
 
-          # Don't wait for this interface to be configured
-          linkConfig.RequiredForOnline = false;
+          linkConfig = {
+            ARP = true;
+            # Don't wait for this interface to be configured
+            RequiredForOnline = false;
+          };
           name = "guest";
           networkConfig = {
             IPv6AcceptRA = true;
             IPv6SendRA = true;
           };
+        };
+        "10-internet" = {
+          address = [ "192.168.1.201/24" ];
+          extraConfig = ''
+            [IPv6RoutePrefix]
+            Route=fd09:a389:7c1e::/48
+            Preference=low
+          '';
+          ipv6SendRAConfig = {
+            Managed = true;
+            RouterLifetimeSec = 0;
+          };
+          ipv6Prefixes = [
+            {
+              Prefix = "fd09:a389:7c1e:5::/64";
+              Assign = true;
+            }
+          ];
+          linkConfig.ARP = true;
+          networkConfig = {
+            IPv6SendRA = true;
+            IPv6AcceptRA = true;
+            IPv6PrivacyExtensions = false;
+          };
+          routes = [
+            {
+              # Add a static route to the router
+              Gateway = "192.168.1.1";
+              PreferredSource = "192.168.1.201";
+            }
+          ];
+          name = "internet";
         };
         "10-ipv6-tunnel" = {
           address = [ "fe80::1/64" ];
@@ -551,7 +568,10 @@ in
               Prefix = "fd09:a389:7c1e:3::/64";
             }
           ];
-          linkConfig.RequiredForOnline = false;
+          linkConfig = {
+            ARP = true;
+            RequiredForOnline = false;
+          };
           matchConfig.Name = "shadow-lan";
           networkConfig = {
             IPv6SendRA = true;

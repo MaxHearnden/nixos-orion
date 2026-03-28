@@ -22,8 +22,8 @@
       filterForward = true;
       interfaces = {
         # Allow the TP-link WAP to send logs
-        "\"bridge\"".allowedTCPPorts = [ 179 465 ];
-        "\"bridge\"".allowedUDPPorts = [ 547 ];
+        "\"internet\"".allowedTCPPorts = [ 179 465 ];
+        "\"internet\"".allowedUDPPorts = [ 547 ];
 
         # Allow DHCP from managed networks
         web-vm.allowedUDPPorts = [ 67 ];
@@ -173,9 +173,9 @@
             # Allow LDAP
             meta l4proto tcp th dport 389 socket cgroupv2 level 2 @slapd accept
 
-            iifname { "bridge", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
+            iifname { "internet", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
 
-            iifname {lo, tailscale0, "bridge", guest, "shadow-lan"} tcp dport 179 socket cgroupv2 level 2 @bird accept
+            iifname {lo, tailscale0, "internet", guest, "shadow-lan"} tcp dport 179 socket cgroupv2 level 2 @bird accept
             iiftype ipip6 tcp dport 179 socket cgroupv2 level 2 @bird accept
 
             iifname lo tcp dport 3000 socket cgroupv2 level 2 @krill accept
@@ -213,7 +213,7 @@
 
             # Allow DHCP handled by dnsmasq
             udp dport 67 iifname { shadow-lan, guest, web-vm } socket cgroupv2 level 2 @dnsmasq accept
-            udp dport 547 iifname { shadow-lan, guest, "bridge" } socket cgroupv2 level 2 @dnsmasq accept
+            udp dport 547 iifname { shadow-lan, guest, "internet" } socket cgroupv2 level 2 @dnsmasq accept
 
             iifname lo tcp dport 11434 socket cgroupv2 level 2 @ollama_socket accept
 
@@ -260,7 +260,7 @@
               iifname != lo meta nfproto ipv6 oifname plat masquerade
               # Don't nat packets which don't need it
               iifname != lo ip6 daddr == fd09:a389:7c1e::/48 accept
-              iifname != lo oifname "bridge" masquerade
+              iifname != lo oifname "internet" masquerade
 
               # NAT packets for router
               iifname != lo oifname guest ip daddr 192.168.5.1 masquerade
@@ -296,7 +296,7 @@
           set routed_interfaces {
             typeof iifname; flags constant;
             elements = {
-              plat, guest, "shadow-lan", "bridge"
+              plat, guest, "shadow-lan", "internet"
             }
           }
           chain to_routed {
