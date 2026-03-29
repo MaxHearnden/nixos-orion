@@ -62,7 +62,7 @@
         }
         protocol bgp pc {
           local as 65001;
-          neighbor fe80::9ab7:85ff:fe22:bd4f%internet as 65002;
+          neighbor fe80::9ab7:85ff:fe22:bd4e%internet as 65002;
           local role provider;
           require roles on;
           ipv4 {
@@ -79,7 +79,7 @@
         }
         protocol bgp pc_guest {
           local as 65001;
-          neighbor fe80::9ab7:85ff:fe22:bd4f%guest as 65002;
+          neighbor fe80::9ab7:85ff:fe22:bd4e%guest as 65002;
           local role provider;
           require roles on;
           ipv4 {
@@ -98,7 +98,7 @@
         }
         protocol bgp pc_shadow {
           local as 65001;
-          neighbor fe80::9ab7:85ff:fe22:bd4f as 65002;
+          neighbor fe80::9ab7:85ff:fe22:bd4e as 65002;
           interface "shadow-lan";
           local role provider;
           require roles on;
