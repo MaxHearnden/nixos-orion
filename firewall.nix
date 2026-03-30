@@ -12,7 +12,7 @@
         iifname @routed_interfaces jump to_routed
       '';
       extraInputRules = ''
-        iifname tailscale0 meta l4proto {4, 41} accept
+        iifname tailscale0 meta l4proto {4, 41, 137} accept
         # Allow local devices to reach the local DNS servers (unbound and dnsmasq)
         meta l4proto {udp, tcp} th dport {55, 56} ip saddr @local_ip accept
         meta l4proto {udp, tcp} th dport {55, 56} ip6 saddr @local_ip6 accept
@@ -205,7 +205,7 @@
             meta l4proto {udp, tcp} th dport 53 socket cgroupv2 level 2 @dnsdist accept
             meta l4proto {udp, tcp} th dport 54 socket cgroupv2 level 2 @knot accept
 
-            iifname {tailscale0, lo} meta l4proto {4, 41} accept
+            iifname {tailscale0, lo} meta l4proto {4, 41, 137} accept
 
             # Allow HTTP and HTTPS handled by caddy
             tcp dport { 80, 443, 853 } socket cgroupv2 level 2 @caddy accept
