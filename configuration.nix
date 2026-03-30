@@ -28,7 +28,10 @@ in
       "net.ipv4.tcp_fastopen" = 3;
       # Enable forwarding IPv6 packets
       "net.ipv6.conf.all.forwarding" = 1;
+      "net.mpls.platform_labels" = 1048575;
     };
+
+    kernelModules = [ "mpls_router" "mpls_iptunnel" "mpls_gro" ];
 
     # Use the latest Linux kernel
     kernelPackages = pkgs.linuxPackages_latest;
@@ -394,6 +397,10 @@ in
         "10-guest" = {
           address = [ "192.168.5.201/24" "192.168.6.1/24" ];
 
+          extraConfig = ''
+            [Network]
+            MPLSRouting=true
+          '';
           ipv6AcceptRAConfig.RouteMetric = 2048;
           ipv6SendRAConfig = {
             Managed = true;
@@ -438,6 +445,9 @@ in
             [IPv6RoutePrefix]
             Route=fd09:a389:7c1e::/48
             Preference=low
+
+            [Network]
+            MPLSRouting=true
           '';
           ipv6SendRAConfig = {
             Managed = true;
@@ -466,21 +476,37 @@ in
         };
         "10-ipv6-tunnel" = {
           address = [ "fe80::1/64" ];
+          extraConfig = ''
+            [Network]
+            MPLSRouting=true
+          '';
           name = "workstation-tnl";
           linkConfig.RequiredForOnline = false;
         };
         "10-ipv6-tunnel-chromebook" = {
           address = [ "fe80::1/64" ];
+          extraConfig = ''
+            [Network]
+            MPLSRouting=true
+          '';
           name = "chromebook-tnl";
           linkConfig.RequiredForOnline = false;
         };
         "10-ipv6-tunnel-laptop" = {
           address = [ "fe80::1/64" ];
+          extraConfig = ''
+            [Network]
+            MPLSRouting=true
+          '';
           name = "laptop-tnl";
           linkConfig.RequiredForOnline = false;
         };
         "10-ipv6-tunnel-pc" = {
           address = [ "fe80::1/64" ];
+          extraConfig = ''
+            [Network]
+            MPLSRouting=true
+          '';
           name = "pc-tnl";
           linkConfig.RequiredForOnline = false;
         };
@@ -547,6 +573,10 @@ in
         # Configure C-VLAN 20
         "10-shadow-lan" = {
           address = [ "fd09:a389:7c1e:1::1/64" "192.168.4.1/24" ];
+          extraConfig = ''
+            [Network]
+            MPLSRouting=true
+          '';
           ipv6Prefixes = [
             {
               Prefix = "fd09:a389:7c1e:1::/64";
