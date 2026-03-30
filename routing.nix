@@ -22,6 +22,12 @@
         roa4 table r4;
         roa6 table r6;
         aspa table at;
+        mpls domain mdom;
+        mpls table mtab;
+        ipv4 table mpls4;
+        ipv6 table mpls6;
+        vpn4 table vtab4;
+        vpn6 table vtab6;
         filter peer_in_v4 {
           if (roa_check(r4) = ROA_INVALID) then {
             reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
@@ -60,46 +66,9 @@
           krt_prefsrc = fd09:a389:7c1e:6::1;
           accept;
         }
-        protocol bgp pc {
-          local as 65001;
-          neighbor fe80::9ab7:85ff:fe22:bd4e%internet as 65002;
-          local role provider;
-          require roles on;
-          ipv4 {
-            export all;
-            extended next hop on;
-            import filter peer_in_v4;
-            import table on;
-          };
-          ipv6 {
-            export all;
-            import filter peer_in_v6;
-            import table on;
-          };
-        }
-        protocol bgp pc_guest {
-          local as 65001;
-          neighbor fe80::9ab7:85ff:fe22:bd4e%guest as 65002;
-          local role provider;
-          require roles on;
-          ipv4 {
-            export all;
-            extended next hop on;
-            import filter peer_in_v4;
-            import table on;
-            preference 80;
-          };
-          ipv6 {
-            export all;
-            import filter peer_in_v6;
-            import table on;
-            preference 80;
-          };
-        }
-        protocol bgp pc_shadow {
+        template bgp pc {
           local as 65001;
           neighbor fe80::9ab7:85ff:fe22:bd4e as 65002;
-          interface "shadow-lan";
           local role provider;
           require roles on;
           ipv4 {
@@ -107,12 +76,80 @@
             extended next hop on;
             import filter peer_in_v4;
             import table on;
+          };
+          ipv6 {
+            export all;
+            import filter peer_in_v6;
+            import table on;
+          };
+          ipv4 mpls {
+            export all;
+            extended next hop on;
+            import filter peer_in_v4;
+            import table on;
+            table mpls4;
+          };
+          ipv6 mpls {
+            export all;
+            import filter peer_in_v6;
+            import table on;
+            table mpls6;
+          };
+          vpn4 mpls {
+            export all;
+            extended next hop on;
+            import filter peer_in_v4;
+            import table on;
+          };
+          vpn6 mpls {
+            export all;
+            import filter peer_in_v6;
+            import table on;
+          };
+          mpls { label policy aggregate; };
+        }
+        protocol bgp pc_internet from pc {
+          interface "internet";
+        }
+        protocol bgp pc_guest from pc {
+          interface "guest";
+          ipv4 {
+            preference 80;
+          };
+          ipv6 {
+            preference 80;
+          };
+          ipv4 mpls {
+            preference 80;
+          };
+          ipv6 mpls {
+            preference 80;
+          };
+          vpn4 mpls {
+            preference 80;
+          };
+          vpn6 mpls {
+            preference 80;
+          };
+        }
+        protocol bgp pc_shadow from pc {
+          interface "shadow-lan";
+          ipv4 {
             preference 90;
           };
           ipv6 {
-            export all;
-            import filter peer_in_v6;
-            import table on;
+            preference 90;
+          };
+          ipv4 mpls {
+            preference 90;
+          };
+          ipv6 mpls {
+            preference 90;
+          };
+          vpn4 mpls {
+            preference 90;
+          };
+          vpn6 mpls {
             preference 90;
           };
         }
@@ -135,6 +172,16 @@
             import table on;
           };
         }
+        protocol pipe {
+          table master4;
+          peer table mpls4;
+          export all;
+        }
+        protocol pipe {
+          table master6;
+          peer table mpls6;
+          export all;
+        }
         protocol device {
 
         }
@@ -152,6 +199,9 @@
           ipv6 {
             export where source != RTS_DEVICE;
           };
+        }
+        protocol kernel {
+          mpls {export all;};
         }
         protocol rpki {
           roa4 { table r4; };
