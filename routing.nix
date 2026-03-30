@@ -24,8 +24,6 @@
         aspa table at;
         mpls domain mdom;
         mpls table mtab;
-        ipv4 table mpls4;
-        ipv6 table mpls6;
         vpn4 table vtab4;
         vpn6 table vtab6;
         filter peer_in_v4 {
@@ -71,29 +69,16 @@
           neighbor fe80::9ab7:85ff:fe22:bd4e as 65002;
           local role provider;
           require roles on;
-          ipv4 {
-            export all;
-            extended next hop on;
-            import filter peer_in_v4;
-            import table on;
-          };
-          ipv6 {
-            export all;
-            import filter peer_in_v6;
-            import table on;
-          };
           ipv4 mpls {
             export all;
             extended next hop on;
             import filter peer_in_v4;
             import table on;
-            table mpls4;
           };
           ipv6 mpls {
             export all;
             import filter peer_in_v6;
             import table on;
-            table mpls6;
           };
           vpn4 mpls {
             export all;
@@ -113,12 +98,6 @@
         }
         protocol bgp pc_guest from pc {
           interface "guest";
-          ipv4 {
-            preference 80;
-          };
-          ipv6 {
-            preference 80;
-          };
           ipv4 mpls {
             preference 80;
           };
@@ -134,12 +113,6 @@
         }
         protocol bgp pc_shadow from pc {
           interface "shadow-lan";
-          ipv4 {
-            preference 90;
-          };
-          ipv6 {
-            preference 90;
-          };
           ipv4 mpls {
             preference 90;
           };
@@ -159,28 +132,18 @@
           interface "workstation-tnl";
           local role provider;
           require roles on;
-          ipv4 {
+          ipv4 mpls {
             export all;
             extended next hop on;
             import filter peer_in_v4_tunnel;
             import table on;
             require extended next hop on;
           };
-          ipv6 {
+          ipv6 mpls {
             export all;
             import filter peer_in_v6_tunnel;
             import table on;
           };
-        }
-        protocol pipe {
-          table master4;
-          peer table mpls4;
-          export all;
-        }
-        protocol pipe {
-          table master6;
-          peer table mpls6;
-          export all;
         }
         protocol device {
 
