@@ -183,6 +183,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       workstation ns workstation.zandoodle.me.uk.
     '';
     "knot/int.zandoodle.me.uk.zone".text = ''
+      $ttl 600
       @ soa local-tailscale.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3600 604800 86400
       @ ns dns.zandoodle.me.uk.
       @ txt "This is meant to be public, this is just for stuff where I don't care about being able to resolve it over IPv4"
