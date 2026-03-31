@@ -26,69 +26,91 @@
         mpls table mtab;
         vpn4 table vtab4;
         vpn6 table vtab6;
-        filter peer_in_v4 {
-          if (roa_check(r4) = ROA_INVALID) then {
-            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
+        function verify_in(bool upstream) {
+          case net.type {
+            NET_IP4: {
+              if (roa_check(r4) = ROA_INVALID) then {
+                reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
+              }
+            }
+            NET_IP6: {
+              if (roa_check(r6) = ROA_INVALID) then {
+                reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
+              }
+            }
           }
-          if (aspa_check_upstream(at) = ASPA_INVALID) then {
-            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
+          if (aspa_check(at, bgp_path, upstream) = ASPA_INVALID) then {
+            reject "Ignore ASPA invalid ", net, " for ASN ", bgp_path.last;
+          }
+        }
+        filter provider_in {
+          if !defined(bgp_otc) then {
+            bgp_otc = bgp_path.first;
+          }
+          verify_in(false);
+          accept;
+        }
+        filter peer_in {
+          if !defined(bgp_otc) then {
+            bgp_otc = bgp_path.first;
+          }
+          if bgp_otc != bgp_path.first then reject;
+          verify_in(true);
+          accept;
+        }
+        filter customer_in {
+          if defined(bgp_otc) then {
+            reject;
+          }
+          verify_in(true);
+          accept;
+        }
+        filter provider_out {
+          if defined(bgp_otc) then {
+            reject;
           }
           accept;
         }
-        filter peer_in_v6 {
-          if (roa_check(r6) = ROA_INVALID) then {
-            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
+        filter peer_out {
+          if defined(bgp_otc) then {
+            reject;
           }
-          if (aspa_check_upstream(at) = ASPA_INVALID) then {
-            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
+          bgp_otc = 65001;
+          accept;
+        }
+        filter customer_out {
+          if !defined(bgp_otc) then {
+            bgp_otc = 65001;
           }
           accept;
         }
-        filter peer_in_v4_tunnel {
-          if (roa_check(r4) = ROA_INVALID) then {
-            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
-          }
-          if (aspa_check_upstream(at) = ASPA_INVALID) then {
-            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
-          }
-          krt_prefsrc = 192.168.11.1;
-          accept;
-        }
-        filter peer_in_v6_tunnel {
-          if (roa_check(r6) = ROA_INVALID) then {
-            reject "Ignore RPKI invalid ", net, " for ASN ", bgp_path.last;
-          }
-          if (aspa_check_upstream(at) = ASPA_INVALID) then {
-            reject "Ignore ASPA invalid ", net, " for ASNs ", bgp_path;
-          }
-          krt_prefsrc = fd09:a389:7c1e:6::1;
-          accept;
-        }
+
         template bgp pc {
           local as 65001;
           neighbor fe80::9ab7:85ff:fe22:bd4e as 65002;
           local role provider;
           require roles on;
+          enforce first as on;
           ipv4 mpls {
-            export all;
+            export filter customer_out;
             extended next hop on;
-            import filter peer_in_v4;
+            import filter customer_in;
             import table on;
           };
           ipv6 mpls {
-            export all;
-            import filter peer_in_v6;
+            export filter customer_out;
+            import filter customer_in;
             import table on;
           };
           vpn4 mpls {
-            export all;
+            export filter customer_out;
             extended next hop on;
-            import filter peer_in_v4;
+            import filter customer_in;
             import table on;
           };
           vpn6 mpls {
-            export all;
-            import filter peer_in_v6;
+            export filter customer_out;
+            import filter customer_in;
             import table on;
           };
           mpls { label policy aggregate; };
@@ -132,17 +154,28 @@
           interface "workstation-tnl";
           local role provider;
           require roles on;
+          enforce first as on;
           ipv4 mpls {
-            export all;
+            export filter customer_out;
             extended next hop on;
-            import filter peer_in_v4_tunnel;
+            import filter customer_in;
             import table on;
             require extended next hop on;
           };
           ipv6 mpls {
-            export all;
-            import filter peer_in_v6_tunnel;
+            export filter customer_out;
+            import filter customer_in;
             import table on;
+          };
+          vpn4 mpls {
+            export filter customer_out;
+            extended next hop on;
+            import filter customer_in;
+            import table on;
+          };
+          vpn6 mpls {
+            export filter customer_out;
+            import filter customer_in;
           };
         }
         protocol device {
@@ -155,12 +188,20 @@
         }
         protocol kernel {
           ipv4 {
-            export where source != RTS_DEVICE;
+            export filter {
+              if source = RTS_DEVICE then
+                reject;
+              krt_prefsrc = 192.168.11.1;
+            };
           };
         }
         protocol kernel {
           ipv6 {
-            export where source != RTS_DEVICE;
+            export filter {
+              if source = RTS_DEVICE then
+                reject;
+              krt_prefsrc = fd09:a389:7c1e:6::1;
+            };
           };
         }
         protocol kernel {
