@@ -87,65 +87,75 @@
 
         template bgp pc {
           local as 65001;
-          neighbor fe80::9ab7:85ff:fe22:bd4e as 65002;
           local role provider;
           require roles on;
           enforce first as on;
-          ipv4 mpls {
-            export filter customer_out;
-            extended next hop on;
-            import filter customer_in;
-            import table on;
-          };
-          ipv6 mpls {
-            export filter customer_out;
-            import filter customer_in;
-            import table on;
-          };
-          vpn4 mpls {
-            export filter customer_out;
-            extended next hop on;
-            import filter customer_in;
-            import table on;
-          };
-          vpn6 mpls {
-            export filter customer_out;
-            import filter customer_in;
-            import table on;
-          };
-          mpls { label policy aggregate; };
         }
-        protocol bgp pc_internet from pc {
+        template bgp pc_untrusted from pc {
+          neighbor fe80::9ab7:85ff:fe22:bd4e as 65002;
+          ipv4 {
+            export all;
+            extended next hop on;
+            import all;
+            import table on;
+          };
+          ipv6 {
+            export all;
+            import all;
+            import table on;
+          };
+        }
+        protocol bgp pc_internet from pc_untrusted {
           interface "internet";
         }
-        protocol bgp pc_guest from pc {
+        protocol bgp pc_guest from pc_untrusted {
           interface "guest";
-          ipv4 mpls {
+          ipv4 {
             preference 80;
           };
-          ipv6 mpls {
-            preference 80;
-          };
-          vpn4 mpls {
-            preference 80;
-          };
-          vpn6 mpls {
+          ipv6 {
             preference 80;
           };
         }
-        protocol bgp pc_shadow from pc {
+        protocol bgp pc_shadow from pc_untrusted {
           interface "shadow-lan";
-          ipv4 mpls {
+          ipv4 {
             preference 90;
+          };
+          ipv6 {
+            preference 90;
+          };
+        }
+        protocol bgp pc_mpls from pc {
+          interface "mpls";
+          local fe80::1;
+          neighbor fe80::5 as 65002;
+          ipv4 mpls {
+            export filter customer_out;
+            extended next hop on;
+            import filter customer_in;
+            import table on;
+            require extended next hop on;
           };
           ipv6 mpls {
-            preference 90;
+            export filter customer_out;
+            import filter customer_in;
+            import table on;
+          };
+          mpls {
+            label policy aggregate;
           };
           vpn4 mpls {
-            preference 90;
+            export filter customer_out;
+            extended next hop on;
+            import filter customer_in;
+            import table on;
+            require extended next hop on;
           };
           vpn6 mpls {
-            preference 90;
+            export filter customer_out;
+            import filter customer_in;
+            import table on;
           };
         }
         protocol bgp workstation {
