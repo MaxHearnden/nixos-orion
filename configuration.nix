@@ -353,6 +353,14 @@ in
           };
         };
 
+        "10-mpls" = {
+          netdevConfig = {
+            Kind = "vlan";
+            Name = "mpls";
+          };
+          vlanConfig.Id = 2;
+        };
+
         # Configure the NAT64 interface
         "10-plat" = {
           netdevConfig = {
@@ -382,6 +390,9 @@ in
               VLAN = 1;
             }
             {
+              VLAN = 2;
+            }
+            {
               VLAN = 10;
             }
             {
@@ -391,7 +402,7 @@ in
           linkConfig.ARP = false;
           name = "bridge";
           # Create VLANs and bind them to this interface
-          vlan = [ "guest" "internet" "shadow-lan" ];
+          vlan = [ "guest" "internet" "mpls" "shadow-lan" ];
         };
         # configure the guest interface
         "10-guest" = {
@@ -519,6 +530,9 @@ in
               EgressUntagged = "1";
             }
             {
+              VLAN = "2";
+            }
+            {
               VLAN = "20";
             }
           ];
@@ -551,6 +565,19 @@ in
         "10-lo" = {
           address = [ "192.168.11.1/32" "fd09:a389:7c1e:6::1/128" ];
           name = "lo";
+        };
+
+        "10-mpls" = {
+          address = [ "fe80::1/64" ];
+          extraConfig = ''
+            [Network]
+            MPLSRouting=true
+          '';
+          linkConfig = {
+            ARP = true;
+            RequiredForOnline = false;
+          };
+          name = "mpls";
         };
 
         # Configure the NAT64 interface
