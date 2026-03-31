@@ -176,6 +176,7 @@
           vpn6 mpls {
             export filter customer_out;
             import filter customer_in;
+            import table on;
           };
         }
         protocol device {
