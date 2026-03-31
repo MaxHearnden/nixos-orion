@@ -297,7 +297,7 @@
           set routed_interfaces {
             typeof iifname; flags constant;
             elements = {
-              plat, guest, "shadow-lan", "internet"
+              plat, guest, "shadow-lan", "internet", "mpls"
             }
           }
           chain to_routed {
