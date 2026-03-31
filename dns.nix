@@ -763,16 +763,26 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             ksk-lifetime = "14d";
             single-type-signing = true;
           };
-          global = {
+          com = {
             # Add a DNSSEC policy with DS verfiication using unbound
             ksk-lifetime = "30d";
-            ksk-submission = "unbound";
+            ksk-submission = "com";
+            rrsig-refresh = "7d";
+            propagation-delay = "1d";
+            single-type-signing = true;
+          };
+          uk = {
+            # Add a DNSSEC policy with DS verfiication using unbound
+            ksk-lifetime = "30d";
+            ksk-submission = "uk";
             rrsig-refresh = "7d";
             propagation-delay = "1d";
             single-type-signing = true;
           };
         };
         remote = {
+          "a.gtld-servers.net".address = [ "2001:503:a83e::2:30" "192.5.6.30" ];
+          "b.gtld-servers.net".address = [ "2001:503:231d::2:30" "192.33.14.30" ];
           "b.root-servers.net" = {
             address = [
               "2001:500:200::b"
@@ -780,6 +790,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             ];
             automatic-acl = false;
           };
+          "c.gtld-servers.net".address = [ "2001:503:83eb::30" "192.26.92.30" ];
           "c.root-servers.net" = {
             address = [
               "2001:500:2::c"
@@ -787,6 +798,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             ];
             automatic-acl = false;
           };
+          "d.gtld-servers.net".address = [ "2001:500:856e::30" "192.31.80.30" ];
           "d.root-servers.net" = {
             address = [
               "2001:500:2d::d"
@@ -794,6 +806,10 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             ];
             automatic-acl = false;
           };
+          "dns1.nic.uk".address = [ "2a01:618:400::1" "213.248.216.1" ];
+          "dns2.nic.uk".address = [ "2401:fd80:400::1" "103.49.80.1" ];
+          "dns3.nic.uk".address = [ "2a01:618:404::1" "213.248.220.1" ];
+          "dns4.nic.uk".address = [ "2401:fd80:404::1" "43.230.48.1" ];
           dnsmasq = {
             address = [
               "::1@56"
@@ -809,6 +825,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             ];
             automatic-acl = false;
           };
+          "e.gtld-servers.net".address = [ "2001:502:1ca1::30" "192.12.94.30" ];
+          "f.gtld-servers.net".address = [ "2001:503:d414::30" "192.35.51.30" ];
+          "g.gtld-servers.net".address = [ "2001:503:eea3::30" "192.42.93.30" ];
           "g.root-servers.net" = {
             address = [
               "2001:500:12::d0d"
@@ -816,7 +835,17 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             ];
             automatic-acl = false;
           };
+          "h.gtld-servers.net".address = [ "2001:502:8cc::30" "192.54.112.30" ];
+          "i.gtld-servers.net".address = [ "2001:503:39c1::30" "192.43.172.30" ];
+          "j.gtld-servers.net".address = [ "2001:502:7094::30" "192.48.79.30" ];
+          "k.gtld-servers.net".address = [ "2001:503:d2d::30" "192.52.178.30" ];
+          "l.gtld-servers.net".address = [ "2001:500:d937::30" "192.41.162.30" ];
+          "m.gtld-servers.net".address = [ "2001:501:b1f9::30" "192.55.83.30" ];
           "ns1.first-ns.de".address = "2a01:4f8:0:a101::a:1";
+          "nsa.nic.uk".address = [ "2001:502:ad09::3" "156.154.100.3" ];
+          "nsb.nic.uk".address = [ "2001:502:2eda::3" "156.154.101.3" ];
+          "nsc.nic.uk".address = [ "2610:a1:1009::3" "156.154.102.3" ];
+          "nsd.nic.uk".address = [ "2610:a1:1010::3" "156.154.103.3" ];
           pc = {
             address = "fd7a:115c:a1e0::d2df:ec69@54";
             key = "pc";
@@ -862,6 +891,21 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
         };
         remotes = {
+          com.remote = [
+            "a.gtld-servers.net"
+            "b.gtld-servers.net"
+            "c.gtld-servers.net"
+            "d.gtld-servers.net"
+            "e.gtld-servers.net"
+            "f.gtld-servers.net"
+            "g.gtld-servers.net"
+            "h.gtld-servers.net"
+            "i.gtld-servers.net"
+            "j.gtld-servers.net"
+            "k.gtld-servers.net"
+            "l.gtld-servers.net"
+            "m.gtld-servers.net"
+          ];
           hetzner.remote = [
             "ns1.first-ns.de"
             "robotns2.second-ns.de"
@@ -876,6 +920,16 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             "k.root-servers.net"
             "xfr.cjr.dns.icann.org"
             "xfr.lax.dns.icann.org"
+          ];
+          uk.remote = [
+            "nsa.nic.uk"
+            "nsb.nic.uk"
+            "nsc.nic.uk"
+            "nsd.nic.uk"
+            "dns1.nic.uk"
+            "dns2.nic.uk"
+            "dns3.nic.uk"
+            "dns4.nic.uk"
           ];
         };
         server = {
@@ -900,8 +954,12 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
         submission = {
           subdomain.parent = [ "unbound" "knot-ds-push" "hetzner" ];
           # Check DS submittion using unbound
-          unbound = {
-            parent = "unbound";
+          com = {
+            parent = ["unbound" "com"];
+            parent-delay = "48h";
+          };
+          uk = {
+            parent = ["unbound" "uk"];
             parent-delay = "48h";
           };
         };
@@ -1030,7 +1088,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "compsoc-dev.com" = {
             acl = [ "transfer" ];
             catalog-group = "global";
-            dnssec-policy = "global";
+            dnssec-policy = "com";
             dnssec-signing = true;
             file = "/etc/knot/compsoc-dev.com.zone";
             notify = [ "hetzner" "pc" "workstation" ];
@@ -1086,7 +1144,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "zandoodle.me.uk" = {
             acl = [ "knot-ds" "transfer" "workstation" ];
             catalog-group = "global";
-            dnssec-policy = "global";
+            dnssec-policy = "uk";
             dnssec-signing = true;
             file = "/etc/knot/zandoodle.me.uk.zone";
             notify = [ "hetzner" "pc" "workstation" ];
