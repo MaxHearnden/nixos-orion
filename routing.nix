@@ -192,6 +192,7 @@
               if source = RTS_DEVICE then
                 reject;
               krt_prefsrc = 192.168.11.1;
+              accept;
             };
           };
         }
@@ -201,6 +202,7 @@
               if source = RTS_DEVICE then
                 reject;
               krt_prefsrc = fd09:a389:7c1e:6::1;
+              accept;
             };
           };
         }
