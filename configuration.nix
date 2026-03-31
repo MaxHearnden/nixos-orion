@@ -408,10 +408,6 @@ in
         "10-guest" = {
           address = [ "192.168.5.201/24" "192.168.6.1/24" ];
 
-          extraConfig = ''
-            [Network]
-            MPLSRouting=true
-          '';
           ipv6AcceptRAConfig.RouteMetric = 2048;
           ipv6SendRAConfig = {
             Managed = true;
@@ -456,9 +452,6 @@ in
             [IPv6RoutePrefix]
             Route=fd09:a389:7c1e::/48
             Preference=low
-
-            [Network]
-            MPLSRouting=true
           '';
           ipv6SendRAConfig = {
             Managed = true;
@@ -600,10 +593,6 @@ in
         # Configure C-VLAN 20
         "10-shadow-lan" = {
           address = [ "fd09:a389:7c1e:1::1/64" "192.168.4.1/24" ];
-          extraConfig = ''
-            [Network]
-            MPLSRouting=true
-          '';
           ipv6Prefixes = [
             {
               Prefix = "fd09:a389:7c1e:1::/64";
