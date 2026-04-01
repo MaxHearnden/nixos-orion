@@ -249,11 +249,15 @@
           }
           chain input {
           }
+          chain output {
+          }
         }
         flush chain inet services input
         delete chain inet services input
         flush chain inet services local_input
         delete chain inet services local_input
+        flush chain inet services output
+        delete chain inet services output
         destroy set inet services local_ip
         destroy set inet services local_ip6
         destroy set inet services no_mdns
