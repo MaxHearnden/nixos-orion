@@ -234,6 +234,12 @@
             tcp dport {25, 53, 54, 80, 443, 853, 5000, 5222, 5223, 5269, 5270, 5281} reject
             udp dport {53, 54, 67, 443, 547, 40000, 41641} reject
           }
+
+          chain output {
+            type filter hook output priority filter + 10; policy accept;
+            ct state vmap { invalid : drop, established : accept, related : accept }
+            tcp dport 179 socket cgroupv2 level 2 != @bird reject
+          }
         }
       '';
       extraDeletions = ''
