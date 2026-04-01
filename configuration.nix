@@ -571,6 +571,7 @@ in
             RequiredForOnline = false;
           };
           name = "mpls";
+          networkConfig.LinkLocalAddressing = false;
         };
 
         # Configure the NAT64 interface
