@@ -88,7 +88,6 @@
         template bgp pc {
           local as 65001;
           local role provider;
-          require roles on;
           enforce first as on;
         }
         template bgp pc_untrusted from pc {
@@ -163,7 +162,6 @@
           neighbor fe80::2 as 65000;
           interface "workstation-tnl";
           local role provider;
-          require roles on;
           enforce first as on;
           ipv4 mpls {
             export filter customer_out;
