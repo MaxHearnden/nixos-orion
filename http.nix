@@ -42,7 +42,7 @@ in
         domain = "int.zandoodle.me.uk";
         enable = true;
         listenAddresses = "/run/bird-lg/frontend";
-        servers = ["orion" "pc" "workstation"];
+        servers = ["orion" "chromebook" "laptop" "pc" "workstation"];
       };
       proxy = {
         enable = true;
