@@ -134,30 +134,30 @@
           local fe80::1;
           neighbor fe80::5 as 65002;
           ipv4 mpls {
-            export filter customer_out;
+            export filter peer_out;
             extended next hop on;
-            import filter customer_in;
+            import filter peer_in;
             import table on;
             require extended next hop on;
           };
           ipv6 mpls {
-            export filter customer_out;
-            import filter customer_in;
+            export filter peer_out;
+            import filter peer_in;
             import table on;
           };
           mpls {
             label policy aggregate;
           };
           vpn4 mpls {
-            export filter customer_out;
+            export filter peer_out;
             extended next hop on;
-            import filter customer_in;
+            import filter peer_in;
             import table on;
             require extended next hop on;
           };
           vpn6 mpls {
-            export filter customer_out;
-            import filter customer_in;
+            export filter peer_out;
+            import filter peer_in;
             import table on;
           };
         }
@@ -166,28 +166,28 @@
           local role provider;
           enforce first as on;
           ipv4 mpls {
-            export filter peer_out;
+            export filter customer_out;
             extended next hop on;
-            import filter peer_in;
+            import filter customer_in;
             import table on;
             require extended next hop on;
           };
           ipv6 mpls {
-            export filter peer_out;
-            import filter peer_in;
+            export filter customer_out;
+            import filter customer_in;
             import table on;
           };
           mpls {label policy aggregate;};
           vpn4 mpls {
-            export filter peer_out;
+            export filter customer_out;
             extended next hop on;
-            import filter peer_in;
+            import filter customer_in;
             import table on;
             require extended next hop on;
           };
           vpn6 mpls {
-            export filter peer_out;
-            import filter peer_in;
+            export filter customer_out;
+            import filter customer_in;
             import table on;
           };
         }
