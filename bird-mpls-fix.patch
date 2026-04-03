@@ -1,0 +1,14 @@
+diff --git a/nest/mpls.c b/nest/mpls.c
+index 5cf7d552..4f44691e 100644
+--- a/nest/mpls.c
++++ b/nest/mpls.c
+@@ -708,7 +708,8 @@ mpls_channel_reconfigure(struct channel *C, struct channel_config *CC, int *impo
+     *import_changed = 1;
+   }
+ 
+-  mpls_fec_map_reconfigure(c->mpls_map, C);
++  if (c->mpls_map)
++    mpls_fec_map_reconfigure(c->mpls_map, C);
+ 
+   return 1;
+ }
