@@ -91,7 +91,7 @@
 
         template bgp pc {
           local as 65001;
-          local role provider;
+          local role peer;
           enforce first as on;
         }
         template bgp pc_untrusted from pc {
@@ -163,30 +163,31 @@
         }
         template bgp mpls_tunnel {
           local fe80::1 as 65001;
+          local role provider;
           enforce first as on;
           ipv4 mpls {
-            export all;
+            export filter peer_out;
             extended next hop on;
-            import filter complex_in;
+            import filter peer_in;
             import table on;
             require extended next hop on;
           };
           ipv6 mpls {
-            export all;
-            import filter complex_in;
+            export filter peer_out;
+            import filter peer_in;
             import table on;
           };
           mpls {label policy aggregate;};
           vpn4 mpls {
-            export all;
+            export filter peer_out;
             extended next hop on;
-            import filter complex_in;
+            import filter peer_in;
             import table on;
             require extended next hop on;
           };
           vpn6 mpls {
-            export all;
-            import filter complex_in;
+            export filter peer_out;
+            import filter peer_in;
             import table on;
           };
         }
