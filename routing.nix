@@ -15,7 +15,7 @@
       enable = true;
       package = pkgs-unstable.${config.nixpkgs.system}.bird3.overrideAttrs (
         { patches ? [], ... }: {
-          patches = patches ++ [ ./bird-aspa.patch ./bird-mpls-fix.patch ];
+          patches = patches ++ [ ./bird-mpls-fix.patch ];
         });
       config = ''
         router id 192.168.1.201;
