@@ -207,7 +207,12 @@
 
         }
         protocol direct {
-          ipv4;
+          ipv4 {
+            import filter {
+              if net = 192.168.6.0/24 then reject;
+              accept;
+            };
+          };
           ipv6;
           interface "internet", "guest", "shadow-lan";
         }
