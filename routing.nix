@@ -110,23 +110,29 @@
         }
         protocol bgp pc_internet from pc_untrusted {
           interface "internet";
+          ipv4 {
+            preference 90;
+          };
+          ipv6 {
+            preference 90;
+          };
         }
         protocol bgp pc_guest from pc_untrusted {
           interface "guest";
           ipv4 {
-            preference 80;
+            preference 70;
           };
           ipv6 {
-            preference 80;
+            preference 70;
           };
         }
         protocol bgp pc_shadow from pc_untrusted {
           interface "shadow-lan";
           ipv4 {
-            preference 90;
+            preference 80;
           };
           ipv6 {
-            preference 90;
+            preference 80;
           };
         }
         protocol bgp pc_mpls from pc {
