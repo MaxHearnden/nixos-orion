@@ -265,11 +265,6 @@
     };
     routinator = {
       enable = true;
-      package =
-        pkgs.routinator.overrideAttrs (
-          { patches ? [], ... }: {
-            patches = patches ++ [ ./routinator.patch ];
-          });
       settings = {
         enable-aspa = true;
         extra-tals-dir = ./tals;
@@ -334,6 +329,7 @@
         };
         wantedBy = [ "multi-user.target" ];
       };
+      routinator.serviceConfig.NonBlocking = true;
       rsync = {
         confinement.enable = true;
         serviceConfig = {
