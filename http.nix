@@ -165,17 +165,6 @@ in
             file_server
           '';
         };
-        "test-server.compsoc-dev.com".extraConfig = ''
-          tls {
-            issuer acme {
-              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
-              profile shortlived
-            }
-          }
-          reverse_proxy http://100.97.123.78:5000 {
-            header_up Host {upstream_hostport}
-          }
-        '';
         "zandoodle.me.uk" = {
           extraConfig = ''
             tls {

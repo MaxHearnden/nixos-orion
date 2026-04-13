@@ -154,9 +154,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       mail mx 10 mail.zandoodle.me.uk.
       mail txt "v=spf1 mx -all"
 
-      test-server cname @
-      _acme-challenge.test-server cname _acme-challenge.zandoodle.me.uk.
-
       default._domainkey.mail txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw+wMyRqY5sX/bHyuyYlSHM3N0tEqoCV6zQnSjMwCrxoETQsBx6ceXvFmEW1JCE9rp2l+DVDFk9IUVhvMUqHfC+NBKDojqX7PX4gNHrP+E6wkmPRuNzff07dHMSRat1pugpleP9oJgffJBjpGh/YpROsDbpOhlggd5gQjkgP2hH6JsrEwPtdRA/VBqGi6fonSpP9aWB19GVEKAx1xnpaZy991mzcpPSGhXXlOLXM6tgDthBEk0KCcJ3nKoIzbiDRc9oWRlyBxfOND2DYiDMVV02D2ykswCGb5GKhJ4Dy6KbFr9jbUo4h8zdN765P52Phd+tddDOVCbA9xyUI4rTZmkwIDAQAB"
 
       _mta-sts.mail cname _mta-sts.zandoodle.me.uk.
