@@ -255,6 +255,7 @@
         protocol static {
           ipv4;
           route 192.168.11.1/32 unreachable;
+          route 192.168.0.0/16 unreachable;
         }
         protocol static {
           ipv6;
