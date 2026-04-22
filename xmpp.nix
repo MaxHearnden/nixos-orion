@@ -64,9 +64,6 @@ let cert_obtained = pkgs.writeShellApplication {
     };
     coturn = {
       enable = true;
-      extraConfig = ''
-        verbose
-      '';
       max-port = 20000;
       min-port = 10000;
       no-cli = true;
