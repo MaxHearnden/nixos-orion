@@ -272,6 +272,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       pkgs.callPackage ./gen-TLSA.nix {
         names = [
           "root-ye-by-x2.der"
+          "e7.der"
+          "e8.der"
+          "e9.der"
         ];
         bundle = ./intermediates;
         bundle_subdir = ".";
