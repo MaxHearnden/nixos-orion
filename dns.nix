@@ -324,7 +324,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       _acme-challenge ns dns
 
       ; Setup DMARC
-      _dmarc txt "v=DMARC1;p=reject;aspf=s;adkim=s;fo=d;rua=mailto:dmarc-reports@zandoodle.me.uk;ruf=mailto:dmarc-reports@zandoodle.me.uk"
+      _dmarc txt "v=DMARC1;p=reject;aspf=s;adkim=s;fo=0:s:d;rua=mailto:dmarc-reports@zandoodle.me.uk;ruf=mailto:dmarc-reports@zandoodle.me.uk"
       compsoc-dev.com._report._dmarc txt "v=DMARC1;"
 
       ; Setup DKIM for this domain
