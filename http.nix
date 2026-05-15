@@ -111,7 +111,7 @@ in
           "github.com/mholt/caddy-l4@v0.0.0-20260127203130-040d25cc886a"
           "github.com/mholt/caddy-events-exec@v0.1.0"
         ];
-        hash = "sha256-WS3Td0wkFRogZNWjbChjAPvSpjqV8pyUTF9vUW1596w=";
+        hash = "sha256-r03NBQK80RpSUjpgiMdeElV5XxsuqNkAs/VUU8Vr3jQ=";
       };
       virtualHosts = {
         "bird-lg.int.zandoodle.me.uk" = {
