@@ -200,7 +200,10 @@ let cert_obtained = pkgs.writeShellApplication {
         '';
         unitConfig.StopWhenUnneeded = true;
       };
-      prosody.serviceConfig.LoadCredential = "stun-secret:/run/coturn-secret/secret";
+      prosody.serviceConfig = {
+        LoadCredential = "stun-secret:/run/coturn-secret/secret";
+        UMask = "027";
+      };
     };
     targets.coturn-restart = {
       description = "restart coturn";
