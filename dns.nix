@@ -610,11 +610,10 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 
         # Set the router, ntp server and DNS server addresses.
         dhcp-option = [
-          "tag:has-routes,tag:guest,option:router,192.168.5.1"
-          "tag:has-routes,tag:guest,option:static-route,192.168.1.0,192.168.5.201,192.168.4.0,192.168.5.201,192.168.6.0,192.168.5.201,192.168.8.0,192.168.5.201"
+          "tag:guest,option:router,192.168.5.201"
+          "tag:guest,option:classless-static-route,0.0.0.0/0,192.168.5.1,192.168.0.0/16,192.168.5.201"
           "tag:guest,option:ntp-server,192.168.5.1"
           "tag:guest,option:dns-server,192.168.5.201"
-          "tag:!has-routes,tag:guest,option:router,192.168.6.1"
           "tag:shadow,option:router,192.168.4.1"
           "tag:shadow,option:dns-server,192.168.4.1"
           "tag:shadow,option:static-route,192.168.1.0,192.168.4.1,192.168.5.0,192.168.4.1,192.168.6.0,192.168.4.1,192.168.8.0,192.168.4.1"
@@ -624,11 +623,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "tag:shadow,option6:dns-server,fd09:a389:7c1e:1::1"
           "option:domain-search,orion.home.arpa,home.arpa"
         ];
-        dhcp-match = "set:has-routes,55,!";
         # Enable DHCP and allocate from a suitable IP address range
         dhcp-range = [
-          "tag:has-routes,set:guest,192.168.5.2,192.168.5.199,1d"
-          "tag:!has-routes,set:guest,192.168.6.2,192.168.6.199,1d"
+          "set:guest,192.168.5.2,192.168.5.199,1d"
           "set:guest,fd09:a389:7c1e:4::,fd09:a389:7c1e:4:ffff:ffff:ffff:ffff,64,1d"
           "set:shadow,192.168.4.2,192.168.4.199,1d"
           "set:shadow,fd09:a389:7c1e:1::,fd09:a389:7c1e:1:ffff:ffff:ffff:ffff,64,1d"
