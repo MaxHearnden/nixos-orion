@@ -40,7 +40,7 @@ in
     loader.systemd-boot.enable = true;
   };
   # Save several minutes per rebuild
-  documentation.man.generateCaches = false;
+  documentation.man.cache.enable = false;
   environment = {
     sessionVariables.SYSTEMD_EDITOR = "nvim";
     etc = {
@@ -112,6 +112,7 @@ in
     fqdn = "local.zandoodle.me.uk";
     hostName = "orion";
     hosts."127.0.0.2" = [ "zandoodle.me.uk" ];
+    resolvconf.enable = false;
     useNetworkd = true;
   };
   nixpkgs.overlays = [
@@ -263,11 +264,6 @@ in
     stateVersion = "25.11";
   };
   systemd = {
-    additionalUpstreamSystemUnits = [
-      # Enable soft-reboot
-      "soft-reboot.target"
-      "systemd-soft-reboot.service"
-    ];
     network = {
       # Enable systemd-networkd
       enable = true;

@@ -27,7 +27,10 @@ in
     '';
   };
   imports = [ "${modulesPath}/profiles/perlless.nix" ];
-  networking.firewall.allowedTCPPorts = [ 80 ];
+  networking = {
+    firewall.allowedTCPPorts = [ 80 ];
+    resolvconf.enable = false;
+  };
   nix.enable = false;
   security = {
     doas = {
