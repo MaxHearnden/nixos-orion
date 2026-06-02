@@ -96,6 +96,7 @@ in
       fsType = "vfat";
     };
   };
+  hardware.graphics.enable = true;
   imports = [
     ./dns.nix
     ./firewall.nix
@@ -234,6 +235,7 @@ in
         PasswordAuthentication = false;
         GSSAPIAuthentication = true;
         GSSAPIStrictAcceptorCheck = false;
+        X11Forwarding = true;
       };
     };
     # Disable systemd-resolved
@@ -776,6 +778,7 @@ in
           ripgrep
           slirp4netns
           tio
+          waypipe
         ];
       };
       tailscale = {
