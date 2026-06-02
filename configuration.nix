@@ -10,10 +10,21 @@ in
 {
   boot = {
     # Emulate x86 and riscv
-    binfmt.emulatedSystems = [
-      "x86_64-linux"
-      "riscv64-linux"
-    ];
+    binfmt = {
+      emulatedSystems = [
+        "armv7l-linux"
+        "i386-linux"
+        "i686-linux"
+        "x86_64-linux"
+        "riscv64-linux"
+      ];
+      registrations = {
+        "wine" = {
+          interpreter = lib.getExe inputs.nixpkgs.legacyPackages.x86_64-linux.wineWow64Packages.full;
+          magicOrExtension = "MZ";
+        };
+      };
+    };
 
     # Enable systemd in the initramfs (required for overlay etc)
     initrd.systemd.enable = true;
