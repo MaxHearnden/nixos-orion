@@ -181,6 +181,7 @@ let cert_obtained = pkgs.writeShellApplication {
         serviceConfig = {
           LimitNOFILE = "infinity";
           LoadCredential = "stun-secret:/run/coturn-secret/secret";
+          Restart = "on-failure";
         };
       };
       gen-coturn-secret = {
