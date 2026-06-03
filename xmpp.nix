@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let cert_obtained = pkgs.writeShellApplication {
   name = "cert_obtained";
@@ -7,6 +7,7 @@ let cert_obtained = pkgs.writeShellApplication {
       install -Dm0440 -t /var/lib/caddy/certs \
         "/var/lib/caddy/.local/share/caddy/$2/$1.crt" \
         "/var/lib/caddy/.local/share/caddy/$2/$1.key"
+      touch /var/lib/caddy/certs/prosody-reload
     fi
   '';
 }; in
@@ -155,6 +156,10 @@ let cert_obtained = pkgs.writeShellApplication {
   };
 
   systemd = {
+    paths.prosody-reload = {
+      pathConfig.PathChanged = "/var/lib/caddy/certs/prosody-reload";
+      wantedBy = [ "multi-user.target" ];
+    };
     services = {
       coturn = {
         preStart = lib.mkAfter ''
@@ -203,6 +208,23 @@ let cert_obtained = pkgs.writeShellApplication {
       prosody.serviceConfig = {
         LoadCredential = "stun-secret:/run/coturn-secret/secret";
         UMask = "027";
+      };
+      prosody-reload = {
+        serviceConfig = {
+          CapabilityBoundingSet = "";
+          ExecStart =
+            "${lib.getExe' config.services.prosody.package "prosodyctl"} reload";
+          Group = "prosody";
+          IPAddressDeny = "any";
+          MemoryDenyWriteExecute = true;
+          RemoveIPC = true;
+          RestrictSUIDSGID = true;
+          RuntimeDirectory = "prosody";
+          RuntimeDirectoryPreserve = true;
+          StateDirectory = "prosody";
+          User = "prosody";
+          UMask = "077";
+        };
       };
     };
     targets.coturn-restart = {
