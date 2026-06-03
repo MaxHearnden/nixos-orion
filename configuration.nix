@@ -127,22 +127,6 @@ in
     resolvconf.enable = false;
     useNetworkd = true;
   };
-  nixpkgs.overlays = [
-    (self: super: {
-      lua = super.lua.override {
-        packageOverrides = self: super: {
-          luasec = super.luasec.overrideAttrs (
-            { patches ? [], ... }: {
-              patches = patches ++ [./210.patch];
-            });
-        };
-      };
-      prosody = super.prosody.overrideAttrs (
-        { patches ? [ ], ... }: {
-          patches = patches ++ [ ./prosody_proxy65.patch ];
-        });
-    })
-  ];
   programs = {
     # Disable command-not-found as it's partially incompatible with flakes.
     # command-not-found relises on a database included in the NixOS nix channel, as I'm not using nix channels, there is no such database.

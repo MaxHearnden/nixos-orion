@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, pkgs-unstable, ... }:
 
 let cert_obtained = pkgs.writeShellApplication {
   name = "cert_obtained";
@@ -134,6 +134,17 @@ let cert_obtained = pkgs.writeShellApplication {
           domain = "conference.zandoodle.me.uk";
         }
       ];
+      package =
+        pkgs-unstable.${config.nixpkgs.system}.prosody.override ({lua, ...}: {
+          lua = lua.override {
+            packageOverrides = self: super: {
+              luasec = super.luasec.overrideAttrs (
+                { patches ? [], ... }: {
+                  patches = patches ++ [./210.patch];
+                });
+            };
+          };
+        });
       s2sSecureAuth = true;
       virtualHosts = {
         default = {
