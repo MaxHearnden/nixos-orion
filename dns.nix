@@ -635,6 +635,18 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
         # Enable DHCP rapid commit (allows for a two message DHCP exchange)
         dhcp-rapid-commit = true;
 
+        dhcp-script = lib.getExe (pkgs.writeShellApplication {
+          name = "dnsmasq-notify";
+          text = ''
+            action=$1
+            case "$action" in
+              add|del|old)
+                ${lib.getExe' pkgs.knot-dns "kdig"} NOTIFY orion.home.arpa @::1 -p 54
+                ;;
+            esac
+          '';
+        });
+
         # Set the search domain for unqualified names
         domain = "orion.home.arpa";
 
@@ -807,14 +819,10 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "dns2.nic.uk".address = [ "2401:fd80:400::1" "103.49.80.1" ];
           "dns3.nic.uk".address = [ "2a01:618:404::1" "213.248.220.1" ];
           "dns4.nic.uk".address = [ "2401:fd80:404::1" "43.230.48.1" ];
-          dnsmasq = {
-            address = [
-              "::1@56"
-              "127.0.0.1@56"
-            ];
-            automatic-acl = false;
-            block-notify-after-transfer = true;
-          };
+          dnsmasq.address = [
+            "::1@56"
+            "127.0.0.1@56"
+          ];
           "f.root-servers.net" = {
             address = [
               "2001:500:2f::f"
