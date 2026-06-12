@@ -13,10 +13,7 @@
   services = {
     bird = {
       enable = true;
-      package = pkgs-unstable.${config.nixpkgs.system}.bird3.overrideAttrs (
-        { patches ? [], ... }: {
-          patches = patches ++ [ ./bird-mpls-fix.patch ];
-        });
+      package = pkgs-unstable.${config.nixpkgs.system}.bird3;
       config = ''
         router id 192.168.1.201;
         roa4 table r4;
