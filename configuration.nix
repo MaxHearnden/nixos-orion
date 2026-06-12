@@ -773,6 +773,7 @@ in
           ripgrep
           slirp4netns
           tio
+          xwayland-satellite
           waypipe
         ];
       };
