@@ -137,7 +137,7 @@ in
         };
         startAt = "4:40";
         unitConfig = {
-          OnFailure = "nixos-upgrade-fallback";
+          OnFailure = "nixos-upgrade-fallback.service";
           X-StopOnRemoval = true;
         };
         wants = [ "network-online.target" ];
