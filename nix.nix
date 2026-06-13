@@ -120,16 +120,8 @@ in
             cd /run/nixos-upgrade/nixos-config
             ${git} checkout -b update
             ${nix} flake update  --commit-lock-file --refresh
-            if ${nixos-rebuild} boot --flake .?ref=update; then
-              ${git} checkout main
-              ${git} merge --ff update
-              ${git} push
-              update_failed=no
-            else
-              ${git} checkout main
-              ${nixos-rebuild} boot --flake .?ref=main
-              update_failed=yes
-            fi
+            ${nixos-rebuild} boot --flake .
+            ${git} push
 
             booted=$(${lib.getExe' pkgs.coreutils "readlink"} /run/booted-system/{kernel,kernel-modules})
             built=$(${lib.getExe' pkgs.coreutils "readlink"} /nix/var/nix/profiles/system/{kernel,kernel-modules})
@@ -139,17 +131,44 @@ in
             else
               ${lib.getExe nixos-kexec} --when "1 hour left"
             fi
-
-            if [ "$update_failed" = yes ]; then
-              echo "Failed to update lockfile" >&2
-              exit 75
-            fi
           '';
         serviceConfig = {
+          OnFailure = "nixos-upgrade-all-fallback";
           RuntimeDirectory = "nixos-upgrade";
           Type = "oneshot";
         };
         startAt = "4:40";
+        unitConfig.X-StopOnRemoval = true;
+        wants = [ "network-online.target" ];
+      };
+      nixos-upgrade-fallback = {
+        after = [ "network-online.target" ];
+        path = [ pkgs.gitMinimal pkgs.kexec-tools pkgs.openssh ];
+        restartIfChanged = false;
+        script =
+          let
+            git = lib.getExe pkgs.git;
+            nix = lib.getExe config.nix.package;
+            nixos-rebuild = lib.getExe config.system.build.nixos-rebuild;
+            setpriv = lib.getExe' pkgs.util-linux "setpriv";
+          in ''
+            ${git} clone -b main --single-branch /etc/nixos /run/nixos-upgrade-fallback/nixos-config
+            cd /run/nixos-upgrade-fallback/nixos-config
+            ${nixos-rebuild} boot --flake .?ref=update
+
+            booted=$(${lib.getExe' pkgs.coreutils "readlink"} /run/booted-system/{kernel,kernel-modules})
+            built=$(${lib.getExe' pkgs.coreutils "readlink"} /nix/var/nix/profiles/system/{kernel,kernel-modules})
+
+            if [ "$booted" = "$built" ]; then
+              ${nixos-rebuild} test --flake .
+            else
+              ${lib.getExe nixos-kexec} --when "1 hour left"
+            fi
+          '';
+        serviceConfig = {
+          RuntimeDirectory = "nixos-upgrade-fallback";
+          Type = "oneshot";
+        };
         unitConfig.X-StopOnRemoval = true;
         wants = [ "network-online.target" ];
       };
