@@ -132,12 +132,14 @@ in
             fi
           '';
         serviceConfig = {
-          OnFailure = "nixos-upgrade-all-fallback";
           RuntimeDirectory = "nixos-upgrade";
           Type = "oneshot";
         };
         startAt = "4:40";
-        unitConfig.X-StopOnRemoval = true;
+        unitConfig = {
+          OnFailure = true;
+          X-StopOnRemoval = true;
+        };
         wants = [ "network-online.target" ];
       };
       nixos-upgrade-fallback = {
