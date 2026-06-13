@@ -118,7 +118,6 @@ in
           in ''
             ${git} clone -b main --single-branch /etc/nixos /run/nixos-upgrade/nixos-config
             cd /run/nixos-upgrade/nixos-config
-            ${git} checkout -b update
             ${nix} flake update  --commit-lock-file --refresh
             ${nixos-rebuild} boot --flake .
             ${git} push
@@ -154,7 +153,7 @@ in
           in ''
             ${git} clone -b main --single-branch /etc/nixos /run/nixos-upgrade-fallback/nixos-config
             cd /run/nixos-upgrade-fallback/nixos-config
-            ${nixos-rebuild} boot --flake .?ref=update
+            ${nixos-rebuild} boot --flake .
 
             booted=$(${lib.getExe' pkgs.coreutils "readlink"} /run/booted-system/{kernel,kernel-modules})
             built=$(${lib.getExe' pkgs.coreutils "readlink"} /nix/var/nix/profiles/system/{kernel,kernel-modules})
