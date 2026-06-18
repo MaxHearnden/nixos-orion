@@ -114,7 +114,6 @@ in
             git = lib.getExe pkgs.git;
             nix = lib.getExe config.nix.package;
             nixos-rebuild = lib.getExe config.system.build.nixos-rebuild;
-            setpriv = lib.getExe' pkgs.util-linux "setpriv";
           in ''
             ${git} clone -b main --single-branch /etc/nixos /run/nixos-upgrade/nixos-config
             cd /run/nixos-upgrade/nixos-config
@@ -151,7 +150,6 @@ in
             git = lib.getExe pkgs.git;
             nix = lib.getExe config.nix.package;
             nixos-rebuild = lib.getExe config.system.build.nixos-rebuild;
-            setpriv = lib.getExe' pkgs.util-linux "setpriv";
           in ''
             ${git} clone -b main --single-branch /etc/nixos /run/nixos-upgrade-fallback/nixos-config
             cd /run/nixos-upgrade-fallback/nixos-config
