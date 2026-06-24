@@ -641,7 +641,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             action=$1
             case "$action" in
               add|del|old)
-                ${lib.getExe' pkgs.knot-dns "kdig"} NOTIFY orion.home.arpa @::1 -p 54
+                ${lib.getExe' pkgs.knot-dns "kdig"} NOTIFY orion.home.arpa @::1 -p 54 +noall
                 ;;
             esac
           '';
