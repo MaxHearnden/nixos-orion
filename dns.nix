@@ -474,6 +474,8 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 
       uploads dname @
 
+      *.wildcard txt "This is served by a wildcard"
+
       workstation a 100.91.224.22
       $INCLUDE /etc/knot/no-email.zone.include workstation.zandoodle.me.uk.
       workstation aaaa fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
