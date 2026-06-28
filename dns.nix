@@ -1128,6 +1128,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             zonefile-load = "difference-no-serial";
             zonefile-skip = "DS";
             zonefile-sync = -1;
+            zonemd-generate = "zonemd-sha512";
           };
           "ip6.arpa".template = "icann";
           "ipv4only.arpa" = {
