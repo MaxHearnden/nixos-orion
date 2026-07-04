@@ -1041,6 +1041,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
         };
         zone = lib.genAttrs (lib.genList (i: "${toString (i+64)}.100.in-addr.arpa") 64) (_: {template = "rDNS";})
+        // lib.genAttrs (lib.genList (i: "${toString (i+224)}.in-addr.arpa") 16) (_: {template = "icann";})
         // {
           "." = {
             # Serve a copy of the root zone
@@ -1130,6 +1131,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             zonefile-sync = -1;
             zonemd-generate = "zonemd-sha512";
           };
+          "ip6-servers.arpa".template = "icann";
           "ip6.arpa".template = "icann";
           "ipv4only.arpa" = {
             dnssec-validation = false;
@@ -1141,6 +1143,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             module = "mod-queryacl/local";
             notify = "pc";
           };
+          "mcast.net".template = "icann";
           "orion.home.arpa".template = "dnsmasq";
           "root-servers.net" = {
             dnssec-validation = false;
@@ -1404,10 +1407,25 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             stub-addr = "::1@54";
             stub-first = true;
           }
+          {
+            name = "ip6-servers.arpa";
+            stub-addr = "::1@54";
+            stub-first = true;
+          }
+          {
+            name = "mcast.net";
+            stub-addr = "::1@54";
+            stub-first = true;
+          }
         ] ++ lib.genList (i: {
           name = "${toString (i+64)}.100.in-addr.arpa";
           stub-addr = "::1@54";
-        }) 64;
+        }) 64
+        ++ lib.genList (i: {
+          name = "${toString (i+224)}.in-addr.arpa";
+          stub-addr = "::1@54";
+          stub-first = true;
+        }) 16;
       };
     };
   };
