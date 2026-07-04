@@ -1194,13 +1194,13 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             "fe80::/10 allow"
           ];
           access-control-tag = [
-            "100.64.0.0/10             \"lan\""
+            "100.64.0.0/10             \"lan no_lan\""
             "192.168.0.0/16            \"inform\""
             "192.168.4.0/24            \"inform public-dns64\""
             "fd09:a389:7c1e:1::/64     \"inform public-dns64\""
             "fd09:a389:7c1e::/48       \"inform\""
             "fd3c:32f8:5a30::/48       \"inform\""
-            "fd7a:115c:a1e0::/48       \"lan\""
+            "fd7a:115c:a1e0::/48       \"lan no_lan\""
           ];
 
           access-control-tag-action = [
@@ -1217,7 +1217,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           # Add eDNS cookies to the responses
           answer-cookie = true;
 
-          define-tag = "\"lan public-dns64 inform\"";
+          define-tag = "\"lan public-dns64 inform no_lan\"";
 
           dns64-prefix = "fd09:a389:7c1e:3::/64";
           dns64-ignore-aaaa = "vodafone.broadband";
@@ -1261,9 +1261,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 
           local-zone-tag = [
             ". \"inform\""
-            "broadband. \"inform lan\""
-            "home.arpa. \"inform lan\""
-            "workstation.home.arpa. \"inform\""
+            "broadband. \"lan\""
+            "home.arpa. \"lan\""
+            "workstation.home.arpa. \"no_lan\""
           ];
 
           log-servfail = true;
