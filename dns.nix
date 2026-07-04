@@ -979,7 +979,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             catalog-zone = "catz";
             # Add DNS cookies and rate limiting
             global-module = ["mod-cookies" "mod-rrl"];
-            notify = [ "pc" "workstation" ];
+            notify = [ "pc" "unbound" "workstation" ];
             semantic-checks = true;
           };
           catalog = {
@@ -994,7 +994,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             ixfr-from-axfr = true;
             master = "dnsmasq";
             module = "mod-queryacl/local";
-            notify = [ "pc" "workstation" ];
+            notify = [ "pc" "unbound" "workstation" ];
             semantic-checks = true;
           };
           icann = {
@@ -1005,7 +1005,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             ixfr-from-axfr = true;
             master = ["xfr.cjr.dns.icann.org" "xfr.lax.dns.icann.org"];
             module = "mod-queryacl/local";
-            notify = [ "pc" "workstation" ];
+            notify = [ "pc" "unbound" "workstation" ];
             semantic-checks = true;
           };
           root-servers = {
@@ -1016,7 +1016,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             ixfr-from-axfr = true;
             master = "root-servers";
             module = "mod-queryacl/local";
-            notify = [ "pc" "workstation" ];
+            notify = [ "pc" "unbound" "workstation" ];
             semantic-checks = true;
           };
           rDNS = {
@@ -1025,7 +1025,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             catalog-zone = "catz";
             file = "/etc/knot/rDNS.zone";
             module = [ "mod-queryacl/local" ];
-            notify = [ "pc" "workstation" ];
+            notify = [ "pc" "unbound" "workstation" ];
             reverse-generate = [
               "compsoc-dev.com"
               "home.arpa"
@@ -1179,6 +1179,36 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       # Don't modify /etc/resolv.conf
       resolveLocalQueries = false;
       settings = {
+        auth-zone = map (name: {
+          inherit name;
+          primary = "::1@54";
+          fallback-enabled = true;
+          for-downstream = false;
+          zonefile = "/var/lib/unbound/${name}.zone";
+          zonemd-check = true;
+        }) ([
+          "."
+          "arpa"
+          "zandoodle.me.uk"
+          "int.zandoodle.me.uk"
+          "_acme-challenge.zandoodle.me.uk"
+          "_acme-challenge.workstation.zandoodle.me.uk"
+          "_acme-challenge.pc.int.zandoodle.me.uk"
+          "compsoc-dev.com"
+          "home.arpa"
+          "orion.home.arpa"
+          "workstation.home.arpa"
+          "max.home.arpa"
+          "168.192.in-addr.arpa"
+          "d.f.ip6.arpa"
+          "in-addr.arpa"
+          "ip6.arpa"
+          "root-servers.net"
+          "ipv4only.arpa"
+          "ip6-servers.arpa"
+          "mcast.net"
+        ] ++ lib.genList (i: "${toString (i+64)}.100.in-addr.arpa") 64
+        ++ lib.genList (i: "${toString (i+224)}.in-addr.arpa") 16);
         server = {
           # Allow queries from local devices
           access-control = [
@@ -1377,6 +1407,20 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             # Query knot for home.arpa
             name = "home.arpa";
             stub-addr = "::1@54";
+          }
+          {
+            name = "orion.home.arpa";
+            stub-addr = "::1@54";
+          }
+          {
+            name = "workstation.home.arpa";
+            stub-addr = "::1@54";
+            stub-first = true;
+          }
+          {
+            name = "max.home.arpa";
+            stub-addr = "::1@54";
+            stub-first = true;
           }
           {
             # Query knot for 168.192.in-addr.arpa (192.168.0.0/16)
