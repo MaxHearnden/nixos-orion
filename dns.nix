@@ -1173,6 +1173,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
     };
     unbound = {
       enable = true;
+      checkconf = true;
       localControlSocketPath = "/run/unbound/unbound.ctl";
       package = pkgs.unbound-full;
       # Don't modify /etc/resolv.conf
