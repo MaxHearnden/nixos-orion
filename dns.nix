@@ -1066,14 +1066,14 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             acl = [ "transfer" ];
             dnssec-validation = true;
             master = "pc";
-            notify = "workstation";
+            notify = ["unbound" "workstation"];
             zonemd-verify = true;
           };
           "_acme-challenge.workstation.zandoodle.me.uk" = {
             acl = [ "transfer" ];
             dnssec-validation = true;
             master = "workstation";
-            notify = "pc";
+            notify = ["pc" "unbound"];
             zonemd-verify = true;
           };
           arpa.template = "root-servers"; # Serve a copy of the root zone
@@ -1141,7 +1141,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             dnssec-validation = true;
             master = "workstation";
             module = "mod-queryacl/local";
-            notify = "pc";
+            notify = ["pc" "unbound"];
           };
           "mcast.net".template = "icann";
           "orion.home.arpa".template = "dnsmasq";
@@ -1152,7 +1152,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "workstation.home.arpa" = {
             master = "workstation";
             module = "mod-queryacl/local";
-            notify = "pc";
+            notify = ["pc" "unbound"];
           };
           "zandoodle.me.uk" = {
             acl = [ "knot-ds" "transfer" "workstation" ];
@@ -1179,8 +1179,26 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       # Don't modify /etc/resolv.conf
       resolveLocalQueries = false;
       settings = {
-        auth-zone = map (name: {
+        auth-zone = [
+          {
+            name = "bogus.int.zandoodle.me.uk";
+            allow-notify = "::1";
+            primary = "::1@54";
+            fallback-enabled = true;
+            for-downstream = false;
+            zonefile = "/var/lib/unbound/bogus.int.zandoodle.me.uk.zone";
+          }
+          {
+            name = "bogus-exists.int.zandoodle.me.uk";
+            allow-notify = "::1";
+            primary = "::1@54";
+            fallback-enabled = true;
+            for-downstream = false;
+            zonefile = "/var/lib/unbound/bogus-exists.int.zandoodle.me.uk.zone";
+          }
+        ] ++ map (name: {
           inherit name;
+          allow-notify = "::1";
           primary = "::1@54";
           fallback-enabled = true;
           for-downstream = false;
@@ -1194,6 +1212,8 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "_acme-challenge.zandoodle.me.uk"
           "_acme-challenge.workstation.zandoodle.me.uk"
           "_acme-challenge.pc.int.zandoodle.me.uk"
+          "bogus.int.zandoodle.me.uk"
+          "bogus-exists.int.zandoodle.me.uk"
           "compsoc-dev.com"
           "home.arpa"
           "orion.home.arpa"
@@ -1268,6 +1288,8 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           # Enable Extended DNS Errors
           ede = true;
           ede-serve-expired = true;
+
+          extended-statistics = true;
 
           fast-server-permil = 900;
 
