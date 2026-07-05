@@ -62,7 +62,7 @@ in
       enable = true;
       mutable = false;
     };
-    stateVersion = "25.05";
+    stateVersion = "26.05";
   };
   systemd = {
     enableEmergencyMode = false;
