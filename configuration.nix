@@ -258,7 +258,7 @@ in
     etc.overlay.enable = true;
 
     # Set the system state version
-    stateVersion = "25.11";
+    stateVersion = "26.05";
   };
   systemd = {
     network = {
