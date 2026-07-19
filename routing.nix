@@ -16,6 +16,7 @@
       package = pkgs-unstable.${config.nixpkgs.system}.bird3;
       config = ''
         router id 192.168.1.201;
+        evpn table evpntab;
         roa4 table r4;
         roa6 table r6;
         aspa table at;
@@ -136,6 +137,10 @@
           interface "mpls";
           local fe80::1;
           neighbor fe80::5 as 65002;
+          evpn {
+            export all;
+            import all;
+          };
           ipv4 mpls {
             export filter peer_out;
             extended next hop on;
@@ -170,6 +175,10 @@
           enforce first as on;
           neighbor fe80::2 as 65000;
           interface "mpls";
+          evpn {
+            export all;
+            import all;
+          };
           ipv4 mpls {
             export filter customer_out;
             extended next hop on;
@@ -202,6 +211,10 @@
           local fe80::1 as 65001;
           local role provider;
           enforce first as on;
+          evpn {
+            export all;
+            import all;
+          };
           ipv4 mpls {
             export filter customer_out;
             extended next hop on;
