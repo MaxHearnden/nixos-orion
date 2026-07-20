@@ -294,12 +294,12 @@
         }
         protocol static {
           ipv4;
-          route 192.168.11.1/32 unreachable;
+          route 192.168.11.1/32 via "lo";
           route 192.168.0.0/16 unreachable;
         }
         protocol static {
           ipv6;
-          route fd09:a389:7c1e:6::1/128 unreachable;
+          route fd09:a389:7c1e:6::1/128 via "lo";
           route fd09:a389:7c1e::/48 unreachable;
         }
       '';
