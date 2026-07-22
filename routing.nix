@@ -24,6 +24,7 @@
         mpls table mtab;
         vpn4 table vtab4;
         vpn6 table vtab6;
+        ipv6 table mesh_igp;
         function verify_in(bool upstream) {
           case net.type {
             NET_IP4: {
@@ -241,6 +242,59 @@
             import table on;
           };
         }
+        template bgp mpls_unencap_tunnel {
+          local fd7a:115c:a1e0::1a01:5208%tailscale0 as 65001;
+          neighbor as 65001;
+          default bgp_local_pref 95;
+          onlink on;
+          rr client on;
+          passive on;
+          direct;
+          evpn {
+            igp table mesh_igp;
+            gateway recursive;
+            export all;
+            import all;
+            next hop self ebgp;
+          };
+          ipv4 mpls {
+            export all;
+            extended next hop on;
+            gateway recursive;
+            igp table mesh_igp;
+            import all;
+            import table on;
+            next hop self ebgp;
+            require extended next hop on;
+          };
+          ipv6 mpls {
+            export all;
+            gateway recursive;
+            igp table mesh_igp;
+            import all;
+            import table on;
+            next hop self ebgp;
+          };
+          mpls {label policy aggregate;};
+          vpn4 mpls {
+            export all;
+            extended next hop on;
+            gateway recursive;
+            igp table mesh_igp;
+            import all;
+            import table on;
+            next hop self ebgp;
+            require extended next hop on;
+          };
+          vpn6 mpls {
+            export all;
+            gateway recursive;
+            igp table mesh_igp;
+            import all;
+            import table on;
+            next hop self ebgp;
+          };
+        }
         protocol bgp chromebook from mpls_tunnel {
           neighbor fe80::3 as 65003;
           interface "chromebook-tnl";
@@ -248,6 +302,18 @@
         protocol bgp laptop from mpls_tunnel {
           neighbor fe80::4 as 65004;
           interface "laptop-tnl";
+        }
+        protocol bgp workstation_unencap from mpls_unencap_tunnel {
+          neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016;
+        }
+        protocol bgp chromebook_unencap from mpls_unencap_tunnel {
+          neighbor fd7a:115c:a1e0::d401:5546;
+        }
+        protocol bgp pc_unencap from mpls_unencap_tunnel {
+          neighbor fd7a:115c:a1e0::d2df:ec69;
+        }
+        protocol bgp laptop_unencap from mpls_unencap_tunnel {
+          neighbor fd7a:115c:a1e0::d601:c604;
         }
         protocol device {
 
@@ -301,6 +367,15 @@
           ipv6;
           route fd09:a389:7c1e:6::1/128 via "lo";
           route fd09:a389:7c1e::/48 unreachable;
+        }
+        protocol static mesh_static_igp {
+          ipv6 {
+            table mesh_igp;
+          };
+          route fd7a:115c:a1e0:ab12:4843:cd96:625b:e016/128 via "workstation-tnl";
+          route fd7a:115c:a1e0::d401:5546/128 via "chromebook-tnl";
+          route fd7a:115c:a1e0::d601:c604/128 via "laptop-tnl";
+          route fd7a:115c:a1e0::d2df:ec69/128 via "pc-tnl";
         }
       '';
     };
