@@ -69,8 +69,6 @@ in
         prefix fd09:a389:7c1e:3::/64
 
         map 192.168.8.4 fd7a:115c:a1e0:ab12:4843:cd96:625b:e016
-
-        log drop
       '';
     };
     shellAliases.sda = "systemd-analyze security --no-pager";
