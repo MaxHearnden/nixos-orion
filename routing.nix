@@ -25,6 +25,12 @@
         vpn4 table vtab4;
         vpn6 table vtab6;
         ipv6 table mesh_igp;
+
+        ipv4 table mesh4;
+        ipv6 table mesh6;
+        vpn4 table mesh_vpn4;
+        vpn6 table mesh_vpn6;
+        evpn table mesh_evpn;
         function verify_in(bool upstream) {
           case net.type {
             NET_IP4: {
@@ -42,14 +48,14 @@
             reject "Ignore ASPA invalid ", net, " for ASN ", bgp_path.last;
           }
         }
-        filter provider_in {
+        function provider_in_fun() {
           if !defined(bgp_otc) then {
             bgp_otc = bgp_path.first;
           }
           verify_in(false);
           accept;
         }
-        filter peer_in {
+        function peer_in_fun() {
           if !defined(bgp_otc) then {
             bgp_otc = bgp_path.first;
           }
@@ -57,7 +63,7 @@
           verify_in(true);
           accept;
         }
-        filter customer_in {
+        function customer_in_fun() {
           if defined(bgp_otc) then {
             reject;
           }
@@ -68,24 +74,90 @@
           verify_in(false);
           accept;
         }
-        filter provider_out {
+        function provider_out_fun() {
           if defined(bgp_otc) then {
             reject;
           }
           accept;
         }
-        filter peer_out {
+        function peer_out_fun() {
           if defined(bgp_otc) then {
             reject;
           }
           bgp_otc = 65001;
           accept;
         }
-        filter customer_out {
+        function customer_out_fun() {
           if !defined(bgp_otc) then {
             bgp_otc = 65001;
           }
           accept;
+        }
+
+        filter provider_in {
+          provider_in_fun();
+        }
+
+        filter peer_in {
+          peer_in_fun();
+        }
+
+        filter customer_in {
+          customer_in_fun();
+        }
+
+        filter provider_out {
+          provider_out_fun();
+        }
+
+        filter peer_out {
+          peer_out_fun();
+        }
+
+        filter customer_out {
+          customer_out_fun();
+        }
+
+        template pipe mesh_bgp_pipe {
+          table master4;
+          peer table mesh4;
+          import filter {
+            if source = RTS_BGP then {
+              if bgp_path ~ [ 65001 ] then reject;
+              bgp_path.prepend(65005);
+            }
+            customer_out_fun();
+          };
+          export filter {
+            if source = RTS_BGP then {
+              if bgp_path ~ [ 65005 ] then reject;
+              bgp_path.prepend(65001);
+              bgp_next_hop = fd7a:115c:a1e0::1a01:5208;
+            }
+            customer_in_fun();
+          };
+        }
+
+        protocol pipe from mesh_bgp_pipe { }
+
+        protocol pipe from mesh_bgp_pipe {
+          table master6;
+          peer table mesh6;
+        }
+
+        protocol pipe from mesh_bgp_pipe {
+          table vtab4;
+          peer table mesh_vpn4;
+        }
+
+        protocol pipe from mesh_bgp_pipe {
+          table vtab6;
+          peer table mesh_vpn6;
+        }
+
+        protocol pipe from mesh_bgp_pipe {
+          table evpntab;
+          peer table mesh_evpn;
         }
 
         template bgp pc {
@@ -93,6 +165,7 @@
           local role peer;
           enforce first as on;
         }
+
         template bgp pc_untrusted from pc {
           neighbor fe80::9ab7:85ff:fe22:bd4e as 65002;
           ipv4 {
@@ -177,8 +250,8 @@
           neighbor fe80::2 as 65000;
           interface "mpls";
           evpn {
-            export all;
-            import all;
+            export filter customer_out;
+            import filter customer_in;
           };
           ipv4 mpls {
             export filter customer_out;
@@ -196,6 +269,40 @@
             label policy aggregate;
           };
           vpn4 mpls {
+            export all;
+            extended next hop on;
+            import all;
+            import table on;
+            require extended next hop on;
+          };
+          vpn6 mpls {
+            export all;
+            import all;
+            import table on;
+          };
+        }
+        template bgp mpls_tunnel_encap {
+          local fe80::1 as 65001;
+          local role provider;
+          enforce first as on;
+          evpn {
+            export filter customer_out;
+            import filter customer_in;
+          };
+          ipv4 mpls {
+            export filter customer_out;
+            extended next hop on;
+            import filter customer_in;
+            import table on;
+            require extended next hop on;
+          };
+          ipv6 mpls {
+            export filter customer_out;
+            import filter customer_in;
+            import table on;
+          };
+          mpls {label policy aggregate;};
+          vpn4 mpls {
             export filter customer_out;
             extended next hop on;
             import filter customer_in;
@@ -209,42 +316,8 @@
           };
         }
         template bgp mpls_tunnel {
-          local fe80::1 as 65001;
-          local role provider;
-          enforce first as on;
-          evpn {
-            export all;
-            import all;
-          };
-          ipv4 mpls {
-            export filter customer_out;
-            extended next hop on;
-            import filter customer_in;
-            import table on;
-            require extended next hop on;
-          };
-          ipv6 mpls {
-            export filter customer_out;
-            import filter customer_in;
-            import table on;
-          };
-          mpls {label policy aggregate;};
-          vpn4 mpls {
-            export filter customer_out;
-            extended next hop on;
-            import filter customer_in;
-            import table on;
-            require extended next hop on;
-          };
-          vpn6 mpls {
-            export filter customer_out;
-            import filter customer_in;
-            import table on;
-          };
-        }
-        template bgp mpls_unencap_tunnel {
-          local fd7a:115c:a1e0::1a01:5208%tailscale0 as 65001;
-          neighbor as 65001;
+          local fd7a:115c:a1e0::1a01:5208%tailscale0 as 65005;
+          neighbor internal;
           default bgp_local_pref 95;
           onlink on;
           rr client on;
@@ -255,7 +328,7 @@
             gateway recursive;
             export all;
             import all;
-            next hop self ebgp;
+            table mesh_evpn;
           };
           ipv4 mpls {
             export all;
@@ -264,7 +337,7 @@
             igp table mesh_igp;
             import all;
             import table on;
-            next hop self ebgp;
+            table mesh4;
             require extended next hop on;
           };
           ipv6 mpls {
@@ -273,7 +346,7 @@
             igp table mesh_igp;
             import all;
             import table on;
-            next hop self ebgp;
+            table mesh6;
           };
           mpls {label policy aggregate;};
           vpn4 mpls {
@@ -283,7 +356,7 @@
             igp table mesh_igp;
             import all;
             import table on;
-            next hop self ebgp;
+            table mesh_vpn4;
             require extended next hop on;
           };
           vpn6 mpls {
@@ -292,27 +365,27 @@
             igp table mesh_igp;
             import all;
             import table on;
-            next hop self ebgp;
+            table mesh_vpn6;
           };
         }
-        protocol bgp chromebook from mpls_tunnel {
+        protocol bgp chromebook from mpls_tunnel_encap {
           neighbor fe80::3 as 65003;
           interface "chromebook-tnl";
         }
-        protocol bgp laptop from mpls_tunnel {
+        protocol bgp laptop from mpls_tunnel_encap {
           neighbor fe80::4 as 65004;
           interface "laptop-tnl";
         }
-        protocol bgp workstation_unencap from mpls_unencap_tunnel {
+        protocol bgp workstation_tunnel from mpls_tunnel {
           neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016;
         }
-        protocol bgp chromebook_unencap from mpls_unencap_tunnel {
+        protocol bgp chromebook_tunnel from mpls_tunnel {
           neighbor fd7a:115c:a1e0::d401:5546;
         }
-        protocol bgp pc_unencap from mpls_unencap_tunnel {
+        protocol bgp pc_tunnel from mpls_tunnel {
           neighbor fd7a:115c:a1e0::d2df:ec69;
         }
-        protocol bgp laptop_unencap from mpls_unencap_tunnel {
+        protocol bgp laptop_tunnel from mpls_tunnel {
           neighbor fd7a:115c:a1e0::d601:c604;
         }
         protocol device {
