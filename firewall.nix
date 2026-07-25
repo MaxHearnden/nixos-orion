@@ -8,6 +8,8 @@
         [ 25 53 54 80 88 389 443 464 749 853 3478 5000 5222 5223 5269 5270 5281 ];
       extraForwardRules = ''
         iifname "tailscale0" jump to_routed
+        iifname "tailscale0" ip daddr != @local_ip accept
+        iifname "tailscale0" ip6 daddr != @local_ip6 accept
         iiftype ipip6 jump to_routed
         iifname @routed_interfaces jump to_routed
       '';
