@@ -126,7 +126,7 @@
               if bgp_path ~ [ 65001 ] then reject;
               bgp_path.prepend(65005);
             }
-            customer_out_fun();
+            customer_in_fun();
           };
           export filter {
             if source = RTS_BGP then {
@@ -134,7 +134,7 @@
               bgp_path.prepend(65001);
               bgp_next_hop = fd7a:115c:a1e0::1a01:5208;
             }
-            customer_in_fun();
+            customer_out_fun();
           };
         }
 
