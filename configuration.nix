@@ -42,7 +42,7 @@ in
       "net.mpls.platform_labels" = 1048575;
     };
 
-    kernelModules = [ "mpls_router" "mpls_iptunnel" "mpls_gro" ];
+    kernelModules = [ "mpls_router" "mpls_iptunnel" "mpls_gso" ];
 
     # Use the latest Linux kernel
     kernelPackages = pkgs.linuxPackages_latest;
