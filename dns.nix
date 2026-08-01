@@ -364,10 +364,10 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       _xmpps-client._tcp SRV 0 10 5223 local-tailscale
       _xmpp-server._tcp SRV 10 10 5269 @
       _xmpps-server._tcp SRV 0 10 5270 @
-      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5222._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5223._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5269._tcp.zandoodle.me.uk.
-      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _5270._tcp.zandoodle.me.uk.
+      _5222._tcp CNAME _xmpp-server
+      _5223._tcp CNAME _xmpp-server
+      _5269._tcp CNAME _xmpp-server
+      _5270._tcp CNAME _xmpp-server
       $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _xmpp-server.zandoodle.me.uk.
 
       ; Setup TLSRPT
