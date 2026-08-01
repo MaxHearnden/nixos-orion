@@ -1271,7 +1271,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           define-tag = "\"lan public-dns64 inform no_lan\"";
 
           dns64-prefix = "fd09:a389:7c1e:3::/64";
-          dns64-ignore-aaaa = "vodafone.broadband";
+          dns64-ignore-aaaa = "broadband";
 
           # Allow querying localhost
           do-not-query-localhost = false;
