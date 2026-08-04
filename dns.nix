@@ -256,12 +256,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       };
     "knot/letsencrypt-dane.zone.include".source =
       pkgs.callPackage ./gen-TLSA.nix {
-        names = [
-          "e7-cross.der"
-          "e8-cross.der"
-          "e9-cross.der"
-          "root-x2-by-x1.der"
-        ];
+        names = [ "root-x2-by-x1.der" ];
         bundle = ./intermediates;
         bundle_subdir = ".";
         tlsa_usage = 2;
@@ -270,12 +265,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       };
     "knot/letsencrypt-dane-x2.zone.include".source =
       pkgs.callPackage ./gen-TLSA.nix {
-        names = [
-          "root-ye-by-x2.der"
-          "e7.der"
-          "e8.der"
-          "e9.der"
-        ];
+        names = [ "root-ye-by-x2.der" ];
         bundle = ./intermediates;
         bundle_subdir = ".";
         tlsa_usage = 2;
