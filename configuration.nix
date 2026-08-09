@@ -220,6 +220,17 @@ in
   services = {
     # Use dbus-broker
     dbus.implementation = "broker";
+    hostapd = {
+      enable = true;
+      radios."8021X-test" = {
+        driver = "macsec_linux";
+        networks."8021X-test" = {
+          authentication.mode = "none";
+          settings.ssid = lib.mkForce [];
+          ssid = "8021X-test";
+        };
+      };
+    };
     openssh = {
       enable = true;
       settings = {
@@ -373,6 +384,14 @@ in
           };
           vlanConfig.Id = 20;
         };
+
+        "10-8021X-test" = {
+          netdevConfig = {
+            Kind = "vlan";
+            Name = "8021X-test";
+          };
+          vlanConfig.Id = 3;
+        };
       };
       networks = {
         "10-bridge" = {
@@ -389,11 +408,14 @@ in
             {
               VLAN = 20;
             }
+            {
+              VLAN = 3;
+            }
           ];
           linkConfig.ARP = false;
           name = "bridge";
           # Create VLANs and bind them to this interface
-          vlan = [ "guest" "internet" "mpls" "shadow-lan" ];
+          vlan = [ "guest" "internet" "mpls" "shadow-lan" "8021X-test" ];
         };
         # configure the guest interface
         "10-guest" = {
@@ -518,6 +540,9 @@ in
             }
             {
               VLAN = "20";
+            }
+            {
+              VLAN = "3";
             }
           ];
           name = "enp1s0";
