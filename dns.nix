@@ -758,6 +758,10 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "fc00::/7"
           "fe80::/10"
         ];
+        mod-rrl.custom.whitelist = [
+          "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016"
+          "fd7a:115c:a1e0::d2df:ec69"
+        ];
         policy = {
           subdomain = {
             # Add a policy for acme challenge zones
@@ -974,7 +978,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             catalog-role = "member";
             catalog-zone = "catz";
             # Add DNS cookies and rate limiting
-            global-module = ["mod-cookies" "mod-rrl"];
+            global-module = ["mod-cookies" "mod-rrl/custom"];
             notify = [ "pc" "unbound" "workstation" ];
             semantic-checks = true;
           };
