@@ -2,10 +2,10 @@
   networking = {
     firewall = {
       # Allow DNS, HTTP and HTTPS
-      allowedUDPPorts = [ 53 54 88 443 464 3478 40000 41641 ];
+      allowedUDPPorts = [ 53 54 88 443 464 854 3478 40000 41641 ];
       allowedUDPPortRanges = [ { from = 10000; to = 20000; } ];
       allowedTCPPorts =
-        [ 25 53 54 80 88 389 443 464 749 853 3478 5000 5222 5223 5269 5270 5281 ];
+        [ 25 53 54 80 88 389 443 464 749 853 854 3478 5000 5222 5223 5269 5270 5281 ];
       extraForwardRules = ''
         iifname "tailscale0" jump to_routed
         iifname "tailscale0" ip daddr != @local_ip accept
@@ -206,7 +206,7 @@
 
             # Allow DNS handled by dnsdist, knot, unbound and dnsmasq
             meta l4proto {udp, tcp} th dport 53 socket cgroupv2 level 2 @dnsdist accept
-            meta l4proto {udp, tcp} th dport 54 socket cgroupv2 level 2 @knot accept
+            meta l4proto {udp, tcp} th dport {54, 854} socket cgroupv2 level 2 @knot accept
 
             iifname {tailscale0, lo} meta l4proto {4, 41, 137} accept
 
@@ -233,8 +233,8 @@
             ip6 daddr fe80::/64 udp dport 546 socket cgroupv2 level 2 @systemd_networkd accept
             icmp type echo-request accept comment "allow ping"
 
-            tcp dport {25, 53, 54, 80, 443, 853, 5000, 5222, 5223, 5269, 5270, 5281} reject
-            udp dport {53, 54, 67, 443, 547, 40000, 41641} reject
+            tcp dport {25, 53, 54, 80, 443, 853, 854, 5000, 5222, 5223, 5269, 5270, 5281} reject
+            udp dport {53, 54, 67, 443, 547, 854, 40000, 41641} reject
           }
 
           chain output {

@@ -867,8 +867,10 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             automatic-acl = false;
           };
           workstation = {
-            address = "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016@54";
+            address = "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016@854";
+            cert-key = "LGr5Ymy4Hq+rEYXCnqwsHUe/OofzwBhgtiKHCuQVDW8=";
             key = "workstation";
+            quic = true;
           };
           unbound = {
             address = "::1@55";
@@ -940,6 +942,8 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 
           # Listen on all IPv4 and IPv6 addresses
           listen = ["0.0.0.0@54" "::@54" "/run/knot/global_query"];
+          listen-tls = ["0.0.0.0@854" "::@854" "/run/knot/global_query_tls"];
+          listen-quic = ["0.0.0.0@854" "::@854" "/run/knot/global_query_tls"];
 
           # Set an identity for NSID
           nsid = "dns.zandoodle.me.uk";
