@@ -722,6 +722,18 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             update-owner-name = "_acme-challenge.pc";
             update-type = "DS";
           };
+          pc_quic = {
+            action = [ "transfer" "query" ];
+            address = "fd7a:115c:a1e0::d2df:ec69";
+            key = "pc";
+            protocol = "quic";
+          };
+          pc_quic_notify = {
+            action = [ "notify" ];
+            address = "fd7a:115c:a1e0::d2df:ec69";
+            key = "pc";
+            protocol = "quic";
+          };
           transfer = {
             # Allow a zone transfer from local devices
             address = [
@@ -968,7 +980,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
         };
         template = {
           default = {
-            acl = [ "transfer" ];
+            acl = [ "transfer" "pc_quic" ];
             catalog-role = "member";
             catalog-zone = "catz";
             # Add DNS cookies and rate limiting
@@ -977,12 +989,12 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             semantic-checks = true;
           };
           catalog = {
-            acl = [ "transfer" ];
+            acl = [ "transfer" "pc_quic" ];
             catalog-role = "generate";
             notify = [ "pc" "workstation" ];
           };
           dnsmasq = {
-            acl = [ "transfer" ];
+            acl = [ "transfer" "pc_quic" ];
             catalog-role = "member";
             catalog-zone = "catz";
             ixfr-from-axfr = true;
@@ -992,7 +1004,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             semantic-checks = true;
           };
           icann = {
-            acl = [ "transfer" ];
+            acl = [ "transfer" "pc_quic" ];
             catalog-role = "member";
             catalog-zone = "catz";
             dnssec-validation = true;
@@ -1003,7 +1015,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             semantic-checks = true;
           };
           root-servers = {
-            acl = [ "transfer" ];
+            acl = [ "transfer" "pc_quic" ];
             catalog-role = "member";
             catalog-zone = "catz";
             dnssec-validation = true;
@@ -1014,7 +1026,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             semantic-checks = true;
           };
           rDNS = {
-            acl = [ "transfer" ];
+            acl = [ "transfer" "pc_quic" ];
             catalog-role = "member";
             catalog-zone = "catz";
             file = "/etc/knot/rDNS.zone";
@@ -1057,14 +1069,14 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             zonefile-sync = -1;
           };
           "_acme-challenge.pc.int.zandoodle.me.uk" = {
-            acl = [ "transfer" ];
+            acl = [ "transfer" "pc_quic_notify" ];
             dnssec-validation = true;
             master = "pc";
             notify = ["unbound" "workstation"];
             zonemd-verify = true;
           };
           "_acme-challenge.workstation.zandoodle.me.uk" = {
-            acl = [ "transfer" ];
+            acl = [ "transfer" "pc_quic" ];
             dnssec-validation = true;
             master = "workstation";
             notify = ["pc" "unbound"];
@@ -1090,7 +1102,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           catz.template = "catalog";
           "compsoc-dev.com" = {
-            acl = [ "transfer" ];
+            acl = [ "transfer" "pc_quic" ];
             catalog-group = "global";
             dnssec-policy = "com";
             dnssec-signing = true;
@@ -1114,7 +1126,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           "in-addr.arpa".template = "icann";
           "int.zandoodle.me.uk" = {
-            acl = [ "pc" "transfer" ];
+            acl = [ "pc" "pc_quic" "transfer" ];
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/int.zandoodle.me.uk.zone";
@@ -1149,7 +1161,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             notify = ["pc" "unbound"];
           };
           "zandoodle.me.uk" = {
-            acl = [ "knot-ds" "transfer" "workstation" ];
+            acl = [ "knot-ds" "transfer" "pc_quic" "workstation" ];
             catalog-group = "global";
             dnssec-policy = "uk";
             dnssec-signing = true;
