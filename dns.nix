@@ -846,7 +846,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "nsc.nic.uk".address = [ "2610:a1:1009::3" "156.154.102.3" ];
           "nsd.nic.uk".address = [ "2610:a1:1010::3" "156.154.103.3" ];
           pc = {
-            address = "fd7a:115c:a1e0::d2df:ec69@54";
+            address = "fd7a:115c:a1e0::d2df:ec69@854";
             cert-key = "860gpVRTvbEKrajFpFnUQkpBpaITd2jZtm9Z47Absg0=";
             key = "pc";
             quic = true;
