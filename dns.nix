@@ -716,7 +716,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           pc = {
             action = [ "query" "update" ];
-            remote = "pc";
+            address = "fd7a:115c:a1e0::d2df:ec69";
+            key = "pc";
+            protocol = [ "udp" "tcp" "quic" ];
             update-owner = "name";
             update-owner-match = "equal";
             update-owner-name = "_acme-challenge.pc";
@@ -1126,7 +1128,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           "in-addr.arpa".template = "icann";
           "int.zandoodle.me.uk" = {
-            acl = [ "pc" "pc_quic" "transfer" ];
+            acl = [ "pc" "transfer" ];
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/int.zandoodle.me.uk.zone";
