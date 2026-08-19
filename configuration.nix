@@ -237,8 +237,8 @@ in
         # Disable password based authentication
         KbdInteractiveAuthentication = false;
         PasswordAuthentication = false;
-        GssAuthentication = true;
-        GssStrictAcceptor = false;
+        GSSAPIAuthentication = true;
+        GSSAPIStrictAcceptorCheck = false;
         X11Forwarding = true;
       };
     };
