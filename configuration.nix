@@ -149,6 +149,7 @@ in
     git = {
       enable = true;
       config = {
+        core.sshCommand = lib.getExe config.programs.ssh.package;
         init.defaultBranch = "main";
 
         # Allow pulling from /etc/nixos as any user without any warnings
