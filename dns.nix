@@ -185,6 +185,8 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       @ ns dns.zandoodle.me.uk.
       @ txt "This is meant to be public, this is just for stuff where I don't care about being able to resolve it over IPv4"
 
+      _nfsv4idmapdomain txt workstation.zandoodle.me.uk
+
       bird-lg cname local-tailscale.zandoodle.me.uk.
       _acme-challenge.bird-lg cname _acme-challenge.zandoodle.me.uk.
 
