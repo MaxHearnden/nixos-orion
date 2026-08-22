@@ -235,6 +235,7 @@ in
         };
       };
     };
+    nfs.idmapd.settings.General.Domain = lib.mkForce "workstation.zandoodle.me.uk";
     openssh = {
       enable = true;
       settings = {
