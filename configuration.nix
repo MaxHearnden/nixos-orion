@@ -51,7 +51,7 @@ in
     loader.systemd-boot.enable = true;
 
     # Enable NFS
-    supportedFilesystems = [ "nfs4" ];
+    supportedFilesystems = [ "nfs" ];
   };
   # Save several minutes per rebuild
   documentation.man.cache.enable = false;
