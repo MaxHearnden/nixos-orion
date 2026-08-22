@@ -18,6 +18,9 @@
         objectClass: olcGlobal
         cn: config
         olcSaslHost: local.zandoodle.me.uk
+        olcTLSCertificateFile: /var/lib/caddy/certs/ldap.zandoodle.me.uk.crt
+        olcTLSCertificateKeyFile: /var/lib/caddy/certs/ldap.zandoodle.me.uk.key
+        olcTLSCipherSuite: ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305
 
         dn: cn=schema,cn=config
         objectClass: olcSchemaConfig
@@ -49,13 +52,23 @@
     };
     systemPackages = [pkgs.openldap];
   };
+  services.caddy.virtualHosts."ldap.zandoodle.me.uk".extraConfig = ''
+    tls {
+      issuer acme {
+        dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+        profile shortlived
+      }
+    }
+
+    abort
+  '';
   systemd = {
     services = {
       slapd = {
         confinement.enable = true;
         environment.SASL_CONF_PATH = "%E/sasl2";
         preStart = ''
-          ${lib.getExe' pkgs.coreutils "rm"} -r /etc/slapd.d/*
+          ${lib.getExe' pkgs.coreutils "rm"} -r /etc/slapd.d/* || true
           ${lib.getExe' pkgs.openldap "slapadd"} -n 0 -l ${
               config.environment.etc."slapd.ldif".source
             } -F /etc/slapd.d
@@ -65,6 +78,7 @@
           BindReadOnlyPaths = [
             "${config.environment.etc."sasl2/slapd.conf".source}:/etc/sasl2/slapd.conf"
             "${config.environment.etc."krb5.conf".source}:/etc/krb5.conf"
+            "/var/lib/caddy/certs"
           ];
           CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
           ConfigurationDirectory = "slapd.d";
@@ -76,7 +90,7 @@
             "-F"
             "/etc/slapd.d"
             "-h"
-            "ldap:/// ldapi://%2frun%2fldap%2fldap.sock"
+            "ldap:/// ldaps:/// ldapi://%2frun%2fldap%2fldap.sock"
           ];
           Group = "slapd";
           NoNewPrivileges = true;
@@ -94,6 +108,7 @@
   users = {
     groups.slapd = {};
     users.slapd = {
+      extraGroups = [ "caddy" ];
       group = "slapd";
       isSystemUser = true;
     };

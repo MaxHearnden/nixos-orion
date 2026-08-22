@@ -5,7 +5,7 @@
       allowedUDPPorts = [ 53 54 88 443 464 854 3478 40000 41641 ];
       allowedUDPPortRanges = [ { from = 10000; to = 20000; } ];
       allowedTCPPorts =
-        [ 25 53 54 80 88 389 443 464 749 853 854 3478 5000 5222 5223 5269 5270 5281 ];
+        [ 25 53 54 80 88 389 443 464 636 749 853 854 3478 5000 5222 5223 5269 5270 5281 ];
       extraForwardRules = ''
         iifname "tailscale0" jump to_routed
         iifname "tailscale0" ip daddr != @local_ip accept
@@ -174,7 +174,7 @@
             meta l4proto {udp, tcp} th dport {464, 749} socket cgroupv2 level 4 @kadmin accept
 
             # Allow LDAP
-            meta l4proto tcp th dport 389 socket cgroupv2 level 2 @slapd accept
+            tcp dport {389, 636} socket cgroupv2 level 2 @slapd accept
 
             iifname { "internet", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
 
@@ -194,7 +194,7 @@
             iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
             iifname lo tcp dport {59, 323, 3000, 5280} reject
 
-            tcp dport { 22, 55, 56, 88, 179, 389, 464, 465, 587, 749, 873, 993, 8000 } reject
+            tcp dport { 22, 55, 56, 88, 179, 389, 464, 465, 587, 636, 749, 873, 993, 8000 } reject
             udp dport { 55, 56, 88, 464, 749 } reject
           }
 

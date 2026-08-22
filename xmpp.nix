@@ -9,6 +9,12 @@ let cert_obtained = pkgs.writeShellApplication {
         "/var/lib/caddy/.local/share/caddy/$2/$1.key"
       touch /var/lib/caddy/certs/prosody-reload
     fi
+    if [ "$1" = ldap.zandoodle.me.uk ]; then
+      install -Dm0440 -t /var/lib/caddy/certs \
+        "/var/lib/caddy/.local/share/caddy/$2/$1.crt" \
+        "/var/lib/caddy/.local/share/caddy/$2/$1.key"
+      touch /var/lib/caddy/certs/ldap-reload
+    fi
   '';
 }; in
 
