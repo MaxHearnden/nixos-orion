@@ -195,6 +195,7 @@ in
       extraConfig = ''
         # Verify host keys using DNS
         VerifyHostKeyDNS yes
+        UpdateHostKeys yes
 
         Host zandoodle.me.uk *.zandoodle.me.uk
         GSSAPIAuthentication yes
