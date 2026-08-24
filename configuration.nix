@@ -246,6 +246,21 @@ in
         GSSAPIStrictAcceptorCheck = false;
         X11Forwarding = true;
       };
+      hostKeys = [
+        {
+          bits = 4096;
+          path = "/etc/ssh/ssh_host_rsa_key";
+          type = "rsa";
+        }
+        {
+          path = "/etc/ssh/ssh_host_ed25519_key";
+          type = "ed25519";
+        }
+        {
+          path = "/etc/ssh/ssh_host_mldsa44_ed25519_key";
+          type = "mldsa44-ed25519";
+        }
+      ];
     };
     # Disable systemd-resolved
     resolved.enable = false;
