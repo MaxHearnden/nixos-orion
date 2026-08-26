@@ -230,6 +230,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       _acme-challenge.pc ns dns.zandoodle.me.uk.
       _kerberos.pc txt WORKSTATION.ZANDOODLE.ME.UK
 
+      $INCLUDE /etc/knot/no-email.zone.include pc-routed.int.zandoodle.me.uk.
+      pc-or-workstation aaaa fd09:a389:7c1e:6::6
+
       pc-routed a 192.168.11.5
       $INCLUDE /etc/knot/no-email.zone.include pc-routed.int.zandoodle.me.uk.
       pc-routed aaaa fd09:a389:7c1e:6::5
