@@ -678,8 +678,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
         "/run/credentials/knot.service/caddy"
         "/run/credentials/knot.service/knot-ds"
         "/run/credentials/knot.service/maddy"
-        "/etc/knot/pc.tsig"
-        "/etc/knot/workstation.tsig"
       ];
       settings = {
         acl = {
@@ -857,7 +855,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           pc = {
             address = "fd7a:115c:a1e0::d2df:ec69@854";
             cert-key = "860gpVRTvbEKrajFpFnUQkpBpaITd2jZtm9Z47Absg0=";
-            key = "pc";
             quic = true;
           };
           "robotns2.second-ns.de".address = "2a01:4f8:0:1::5ddc:2";
@@ -880,7 +877,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           workstation = {
             address = "fd7a:115c:a1e0:ab12:4843:cd96:625b:e016@854";
             cert-key = "LGr5Ymy4Hq+rEYXCnqwsHUe/OofzwBhgtiKHCuQVDW8=";
-            key = "workstation";
             quic = true;
           };
           unbound = {
