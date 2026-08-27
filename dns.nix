@@ -480,7 +480,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       workstation caa 0 issuemail ";"
       workstation caa 0 issuevmc ";"
       *.workstation cname workstation
-      _acme-challenge.workstation ns dns
+      _acme-challenge.workstation cname workstation._acme-challenge
       _kerberos.workstation txt WORKSTATION.ZANDOODLE.ME.UK
       _kerberos.workstation uri 5 1 krb5srv:m:kkdcp:https://kkdcp.workstation.zandoodle.me.uk/
       _kerberos.workstation uri 10 1 krb5srv:m:tcp:workstation.zandoodle.me.uk
@@ -745,8 +745,8 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             remote = "workstation";
             update-owner = "name";
             update-owner-match = "equal";
-            update-owner-name = "_acme-challenge.workstation";
-            update-type = "DS";
+            update-owner-name = "workstation";
+            update-type = "TXT";
           };
         };
         log.syslog.any = "notice";
@@ -1052,7 +1052,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "168.192.in-addr.arpa".template = "rDNS";
           "_acme-challenge.zandoodle.me.uk" = {
             # Add a zone for ACME challenges
-            acl = [ "caddy-acme" "maddy-acme" "transfer" ];
+            acl = [ "caddy-acme" "maddy-acme" "transfer" "workstation" ];
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
@@ -1068,13 +1068,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             dnssec-validation = true;
             master = "pc";
             notify = ["unbound" "workstation"];
-            zonemd-verify = true;
-          };
-          "_acme-challenge.workstation.zandoodle.me.uk" = {
-            acl = [ "transfer" ];
-            dnssec-validation = true;
-            master = "workstation";
-            notify = ["pc" "unbound"];
             zonemd-verify = true;
           };
           arpa.template = "root-servers"; # Serve a copy of the root zone
@@ -1156,7 +1149,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             notify = ["pc" "unbound"];
           };
           "zandoodle.me.uk" = {
-            acl = [ "knot-ds" "transfer" "workstation" ];
+            acl = [ "knot-ds" "transfer" ];
             catalog-group = "global";
             dnssec-policy = "uk";
             dnssec-signing = true;
