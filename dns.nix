@@ -227,7 +227,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       pc aaaa fd7a:115c:a1e0::d2df:ec69
       pc sshfp 1 2 ea259e9d2d355d9506919e56ed0c35fbb0476501524f6349cf9f6ef6dbe19c50
       pc sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
-      _acme-challenge.pc ns dns.zandoodle.me.uk.
+      _acme-challenge.pc cname pc._acme-challenge.zandoodle.me.uk.
       _kerberos.pc txt WORKSTATION.ZANDOODLE.ME.UK
 
       pc-routed a 192.168.11.5
@@ -718,12 +718,12 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             update-type = "TXT";
           };
           pc = {
-            action = [ "query" "update" ];
+            action = "update";
             remote = "pc";
             update-owner = "name";
             update-owner-match = "equal";
-            update-owner-name = "_acme-challenge.pc";
-            update-type = "DS";
+            update-owner-name = "pc";
+            update-type = "TXT";
           };
           transfer = {
             # Allow a zone transfer from local devices
@@ -741,7 +741,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             action = "transfer";
           };
           workstation = {
-            action = [ "query" "update" ];
+            action = "update";
             remote = "workstation";
             update-owner = "name";
             update-owner-match = "equal";
@@ -1052,7 +1052,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "168.192.in-addr.arpa".template = "rDNS";
           "_acme-challenge.zandoodle.me.uk" = {
             # Add a zone for ACME challenges
-            acl = [ "caddy-acme" "maddy-acme" "transfer" "workstation" ];
+            acl = [ "caddy-acme" "maddy-acme" "pc" "transfer" "workstation" ];
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
@@ -1062,13 +1062,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             zonefile-skip = "TXT";
             zonemd-generate = "zonemd-sha512";
             zonefile-sync = -1;
-          };
-          "_acme-challenge.pc.int.zandoodle.me.uk" = {
-            acl = [ "transfer" ];
-            dnssec-validation = true;
-            master = "pc";
-            notify = ["unbound" "workstation"];
-            zonemd-verify = true;
           };
           arpa.template = "root-servers"; # Serve a copy of the root zone
           "bogus.int.zandoodle.me.uk" = {
@@ -1204,8 +1197,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "zandoodle.me.uk"
           "int.zandoodle.me.uk"
           "_acme-challenge.zandoodle.me.uk"
-          "_acme-challenge.workstation.zandoodle.me.uk"
-          "_acme-challenge.pc.int.zandoodle.me.uk"
           "bogus.int.zandoodle.me.uk"
           "bogus-exists.int.zandoodle.me.uk"
           "compsoc-dev.com"
@@ -1398,14 +1389,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           }
           {
             name = "_acme-challenge.zandoodle.me.uk";
-            stub-addr = "::1@54";
-          }
-          {
-            name = "_acme-challenge.workstation.zandoodle.me.uk";
-            stub-addr = "::1@54";
-          }
-          {
-            name = "_acme-challenge.pc.int.zandoodle.me.uk";
             stub-addr = "::1@54";
           }
           {
