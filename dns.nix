@@ -225,6 +225,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       pc a 100.95.236.105
       $INCLUDE /etc/knot/no-email.zone.include pc.int.zandoodle.me.uk.
       pc aaaa fd7a:115c:a1e0::d2df:ec69
+      pc caa 128 issue "letsencrypt.org;validationmethods=dns-01"
+      pc caa 0 issuemail ";"
+      pc caa 0 issuevmc ";"
       pc sshfp 1 2 ea259e9d2d355d9506919e56ed0c35fbb0476501524f6349cf9f6ef6dbe19c50
       pc sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
       _acme-challenge.pc cname pc._acme-challenge.zandoodle.me.uk.
