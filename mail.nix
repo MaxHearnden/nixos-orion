@@ -1,237 +1,272 @@
 { lib, pkgs, ... }: {
-  services.maddy = {
-    config = ''
-      tls {
-        loader acme {
+  services = {
+    caddy.virtualHosts = {
+      "imap.int.zandoodle.me.uk".extraConfig = ''
+        tls {
+          issuer acme {
+            dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+          }
+        }
+
+        abort
+      '';
+    };
+    cyrus-imap = {
+      enable = true;
+      imapdSettings = {
+        allowstarttls = true;
+        autocreate_quota = 0;
+        defaultdomain = "workstation.zandoodle.me.uk";
+        defaultpartition = "default";
+        partition-default = "/var/lib/cyrus/storage";
+        loginrealms = "workstation.zandoodle.me.uk";
+        sasl_keytab = "/var/lib/cyrus/krb5.keytab";
+        sasl_mech_list = "GSSAPI";
+        sasl_service_principal = "*";
+        tls_required = true;
+        tls_eccurve = "auto";
+        tls_versions = "tls1_2 tls1_3";
+        tls_prefer_server_ciphers = true;
+        tls_ciphers = "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305";
+        tls_server_cert = "/var/lib/caddy/certs/imap.int.zandoodle.me.uk.crt";
+        tls_server_key = "/var/lib/caddy/certs/imap.int.zandoodle.me.uk.key";
+        virtdomains = "userid";
+      };
+    };
+    maddy = {
+      config = ''
+        tls {
+          loader acme {
+            agreed
+            challenge dns-01
+            dns rfc2136 {
+              import /run/credentials/maddy.service/tsig.conf
+              server "[::1]:54"
+            }
+            hostname mail.zandoodle.me.uk
+            override_domain mail._acme-challenge.zandoodle.me.uk
+          }
+          protocols tls1.2 tls1.3
+        }
+        tls.loader.acme imap {
           agreed
           challenge dns-01
           dns rfc2136 {
             import /run/credentials/maddy.service/tsig.conf
             server "[::1]:54"
           }
-          hostname mail.zandoodle.me.uk
+          hostname imap.zandoodle.me.uk
           override_domain mail._acme-challenge.zandoodle.me.uk
         }
-        protocols tls1.2 tls1.3
-      }
-      tls.loader.acme imap {
-        agreed
-        challenge dns-01
-        dns rfc2136 {
-          import /run/credentials/maddy.service/tsig.conf
-          server "[::1]:54"
+        tls.loader.acme smtp {
+          agreed
+          challenge dns-01
+          dns rfc2136 {
+            import /run/credentials/maddy.service/tsig.conf
+            server "[::1]:54"
+          }
+          hostname smtp.zandoodle.me.uk
+          override_domain mail._acme-challenge.zandoodle.me.uk
         }
-        hostname imap.zandoodle.me.uk
-        override_domain mail._acme-challenge.zandoodle.me.uk
-      }
-      tls.loader.acme smtp {
-        agreed
-        challenge dns-01
-        dns rfc2136 {
-          import /run/credentials/maddy.service/tsig.conf
-          server "[::1]:54"
+        auth.pass_table local_authdb {
+          table sql_table {
+            driver sqlite3
+            dsn credentials.db
+            table_name passwords
+          }
         }
-        hostname smtp.zandoodle.me.uk
-        override_domain mail._acme-challenge.zandoodle.me.uk
-      }
-      auth.pass_table local_authdb {
-        table sql_table {
+
+        storage.imapsql local_mailboxes {
           driver sqlite3
-          dsn credentials.db
-          table_name passwords
-        }
-      }
-
-      storage.imapsql local_mailboxes {
-        driver sqlite3
-        delivery_map regexp ".*" max@zandoodle.me.uk
-        dsn imapsql.db
-      }
-
-      table.chain local_rewrites {
-        optional_step regexp "(.+)\+(.+)@(.+)" "$1@$3"
-        optional_step static {
-          entry postmaster postmaster@zandoodle.me.uk
-        }
-      }
-
-      table.chain super_auth {
-        optional_step static {
-          entry max@zandoodle.me.uk *
-        }
-      }
-
-      table.chain sender_rewriting {
-        optional_step regexp "(.+)@mail.(.+)" "$1@$2"
-        step regexp "(.+)@(.+)" "$1@mail.$2"
-      }
-
-      msgpipeline local_routing {
-        modify {
-          replace_rcpt &local_rewrites
-        }
-        deliver_to &local_mailboxes
-      }
-
-      smtp tcp://0.0.0.0:25 {
-        limits {
-          all rate 20 1s
-          all concurrency 10
+          delivery_map regexp ".*" max@zandoodle.me.uk
+          dsn imapsql.db
         }
 
-        dmarc yes
-        check {
-          require_mx_record
-          dkim
-          spf
-        }
-
-        source $(local_domains) {
-          reject 501 5.1.8 "Use Submission for outgoing SMTP"
-        }
-
-        default_source {
-          destination $(local_domains) {
-            deliver_to &local_routing
-          }
-
-          default_destination {
-            reject
-          }
-        }
-      }
-
-      submission tls://0.0.0.0:465 tcp://0.0.0.0:587 {
-        limits {
-          all rate 50 1s
-        }
-
-        tls {
-          loader &smtp
-          protocols tls1.2 tls1.3
-        }
-
-        auth &local_authdb
-
-        # Allow tp-link@zandoodle.me.uk to send mail to tp-link-logs@zandoodle.me.uk
-        source tp-link@zandoodle.me.uk {
-          check {
-            authorize_sender {
-              prepare_email &local_rewrites
-              user_to_email &super_auth
-            }
-          }
-          destination tp-link-logs@zandoodle.me.uk {
-            deliver_to &local_routing
-          }
-          default_destination {
-            reject
+        table.chain local_rewrites {
+          optional_step regexp "(.+)\+(.+)@(.+)" "$1@$3"
+          optional_step static {
+            entry postmaster postmaster@zandoodle.me.uk
           }
         }
 
-        source dkim-test@compsoc-dev.com dkim-test@zandoodle.me.uk {
-          check {
-            authorize_sender {
-              prepare_email &local_rewrites
-              user_to_email &super_auth
-            }
+        table.chain super_auth {
+          optional_step static {
+            entry max@zandoodle.me.uk *
           }
+        }
 
+        table.chain sender_rewriting {
+          optional_step regexp "(.+)@mail.(.+)" "$1@$2"
+          step regexp "(.+)@(.+)" "$1@mail.$2"
+        }
+
+        msgpipeline local_routing {
           modify {
-            dkim $(local_domains) default {
-              oversign_fields Subject To From Date MIME-Version Content-Type Content-Tranfer-Encoding Reply-To Message-Id References Autocrypt Openpgp Return-Path
-            }
-            replace_sender &sender_rewriting
+            replace_rcpt &local_rewrites
           }
-
-          destination postmaster $(local_domains) {
-            deliver_to &local_routing
-          }
-          default_destination {
-            deliver_to &remote_queue
-          }
+          deliver_to &local_mailboxes
         }
 
-        source $(local_domains) {
+        smtp tcp://0.0.0.0:25 {
+          limits {
+            all rate 20 1s
+            all concurrency 10
+          }
+
+          dmarc yes
           check {
-            authorize_sender {
-              prepare_email &local_rewrites
-              user_to_email &super_auth
+            require_mx_record
+            dkim
+            spf
+          }
+
+          source $(local_domains) {
+            reject 501 5.1.8 "Use Submission for outgoing SMTP"
+          }
+
+          default_source {
+            destination $(local_domains) {
+              deliver_to &local_routing
+            }
+
+            default_destination {
+              reject
+            }
+          }
+        }
+
+        submission tls://0.0.0.0:465 tcp://0.0.0.0:587 {
+          limits {
+            all rate 50 1s
+          }
+
+          tls {
+            loader &smtp
+            protocols tls1.2 tls1.3
+          }
+
+          auth &local_authdb
+
+          # Allow tp-link@zandoodle.me.uk to send mail to tp-link-logs@zandoodle.me.uk
+          source tp-link@zandoodle.me.uk {
+            check {
+              authorize_sender {
+                prepare_email &local_rewrites
+                user_to_email &super_auth
+              }
+            }
+            destination tp-link-logs@zandoodle.me.uk {
+              deliver_to &local_routing
+            }
+            default_destination {
+              reject
             }
           }
 
-          modify {
-            dkim $(local_domains) default
-            replace_sender &sender_rewriting
+          source dkim-test@compsoc-dev.com dkim-test@zandoodle.me.uk {
+            check {
+              authorize_sender {
+                prepare_email &local_rewrites
+                user_to_email &super_auth
+              }
+            }
+
+            modify {
+              dkim $(local_domains) default {
+                oversign_fields Subject To From Date MIME-Version Content-Type Content-Tranfer-Encoding Reply-To Message-Id References Autocrypt Openpgp Return-Path
+              }
+              replace_sender &sender_rewriting
+            }
+
+            destination postmaster $(local_domains) {
+              deliver_to &local_routing
+            }
+            default_destination {
+              deliver_to &remote_queue
+            }
           }
 
-          destination postmaster $(local_domains) {
-            deliver_to &local_routing
-          }
-          default_destination {
-            deliver_to &remote_queue
-          }
-        }
-        default_source {
-          reject 501 5.1.8 "Non-local sender domain"
-        }
-      }
+          source $(local_domains) {
+            check {
+              authorize_sender {
+                prepare_email &local_rewrites
+                user_to_email &super_auth
+              }
+            }
 
-      target.remote outbound_delivery {
-        limits {
-          destination rate 20 1s
-          destination concurrency 10
-        }
-        mx_auth {
-          dane
-          mtasts {
-            cache fs
-            fs_dir mtasts_cache/
-          }
-          local_policy {
-            min_tls_level encrypted
-            min_mx_level none
-          }
-        }
-      }
+            modify {
+              dkim $(local_domains) default
+              replace_sender &sender_rewriting
+            }
 
-      target.queue remote_queue {
-        target &outbound_delivery
-
-        autogenerated_msg_domain $(primary_domain)
-        bounce {
-          destination postmaster $(local_domains) {
-            deliver_to &local_routing
+            destination postmaster $(local_domains) {
+              deliver_to &local_routing
+            }
+            default_destination {
+              deliver_to &remote_queue
+            }
           }
-          default_destination {
-            reject 550 5.0.0 "Refusing to send DSNs to non-local addresses"
+          default_source {
+            reject 501 5.1.8 "Non-local sender domain"
           }
         }
-      }
 
-      imap tls://0.0.0.0:993 {
-        auth &local_authdb
-        storage &local_mailboxes
-        tls {
-          loader &imap
-          protocols tls1.2 tls1.3
+        target.remote outbound_delivery {
+          limits {
+            destination rate 20 1s
+            destination concurrency 10
+          }
+          mx_auth {
+            dane
+            mtasts {
+              cache fs
+              fs_dir mtasts_cache/
+            }
+            local_policy {
+              min_tls_level encrypted
+              min_mx_level none
+            }
+          }
         }
-      }
-    '';
-    enable = true;
-    hostname = "mail.zandoodle.me.uk";
-    localDomains = [
-      "$(primary_domain)"
-      "compsoc-dev.com"
-      "mail.compsoc-dev.com"
-      "mail.zandoodle.me.uk"
-    ];
-    package = pkgs.maddy.overrideAttrs (
-      { tags ? [], ... }: {
-        tags = tags ++ [ "libdns_rfc2136" ];
-      });
-    primaryDomain = "zandoodle.me.uk";
-    tls.loader = null;
+
+        target.queue remote_queue {
+          target &outbound_delivery
+
+          autogenerated_msg_domain $(primary_domain)
+          bounce {
+            destination postmaster $(local_domains) {
+              deliver_to &local_routing
+            }
+            default_destination {
+              reject 550 5.0.0 "Refusing to send DSNs to non-local addresses"
+            }
+          }
+        }
+
+        imap tls://0.0.0.0:993 {
+          auth &local_authdb
+          storage &local_mailboxes
+          tls {
+            loader &imap
+            protocols tls1.2 tls1.3
+          }
+        }
+      '';
+      enable = true;
+      hostname = "mail.zandoodle.me.uk";
+      localDomains = [
+        "$(primary_domain)"
+        "compsoc-dev.com"
+        "mail.compsoc-dev.com"
+        "mail.zandoodle.me.uk"
+      ];
+      package = pkgs.maddy.overrideAttrs (
+        { tags ? [], ... }: {
+          tags = tags ++ [ "libdns_rfc2136" ];
+        });
+      primaryDomain = "zandoodle.me.uk";
+      tls.loader = null;
+    };
   };
   systemd = {
     packages = [
@@ -298,4 +333,5 @@
       };
     };
   };
+  users.users.cyrus.extraGroups = [ "caddy" ];
 }

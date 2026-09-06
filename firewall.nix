@@ -36,7 +36,7 @@
         mpls.allowedTCPPorts = [ 179 ];
 
         # Allow submissions and imaps from tailscale
-        tailscale0.allowedTCPPorts = [ 179 465 587 873 993 ];
+        tailscale0.allowedTCPPorts = [ 143 179 465 587 873 993 ];
       };
     };
     nftables = {
@@ -75,6 +75,10 @@
           }
 
           set dnsmasq {
+            type cgroupsv2
+          }
+
+          set imap {
             type cgroupsv2
           }
 
@@ -189,12 +193,14 @@
 
             tcp dport 8000 socket cgroupv2 level 2 @bird_lg_proxy accept
 
+            tcp dport 143 socket cgroupv2 level 2 @imap accept
+
             iifname lo tcp dport 323 socket cgroupv2 level 2 @routinator accept
 
             iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
             iifname lo tcp dport {59, 323, 3000, 5280} reject
 
-            tcp dport { 22, 55, 56, 88, 179, 389, 464, 465, 587, 636, 749, 873, 993, 8000 } reject
+            tcp dport { 22, 55, 56, 88, 143, 179, 389, 464, 465, 587, 636, 749, 873, 993, 8000 } reject
             udp dport { 55, 56, 88, 464, 749 } reject
           }
 
@@ -356,6 +362,11 @@
       caddy = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:caddy";
+        wants = [ "nftables.service" ];
+      };
+      cyrus-imap = {
+        after = [ "nftables.service" ];
+        serviceConfig.NFTSet = "cgroup:inet:services:imap";
         wants = [ "nftables.service" ];
       };
       coturn = {

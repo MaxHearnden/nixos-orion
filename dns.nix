@@ -207,6 +207,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       dell sshfp 4 2 75c4d82ea3be8b5385f5a2a89b97f1677dfc77c2830b71ee39de7944d3d6ed9f
       _kerberos.dell txt WORKSTATION.ZANDOODLE.ME.UK
 
+      imap cname local-tailscale.zandoodle.me.uk.
+      _acme-challenge.imap cname _acme-challenge.zandoodle.me.uk.
+
       laptop a 100.68.198.4
       $INCLUDE /etc/knot/no-email.zone.include laptop.int.zandoodle.me.uk.
       laptop aaaa fd7a:115c:a1e0::d601:c604
