@@ -243,6 +243,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       pc-routed sshfp 4 2 7191d7ac7c0eaa18df828f22b4b948e2efc6281c3ca7aab5a78a5beef4b30d5b
       _kerberos.pc-routed txt WORKSTATION.ZANDOODLE.ME.UK
 
+      smtp cname local-tailscale.zandoodle.me.uk.
+      _acme-challenge.smtp cname _acme-challenge.zandoodle.me.uk.
+
       tcp-fallback txt "${lib.strings.replicate 4096 "a"}"
 
       workstation a 100.91.224.22
@@ -327,6 +330,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 
       ; Setup DKIM for this domain
       default._domainkey TXT "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwCuGmFxA7aupe8x7tmSolntpa5qBxyQnGkgsfjyjD57doP55a57KXTxEo6t7buBpua/W6dktcw2zpLp9338yg1wA/9RJwhZclzrH5Kv4gNbMHHvhBbygnoJqbrwFH8+VDNG4NKUl5WKFRiITJXd8Y0xqpPhFwfmd2nITjc8wleGv4eQXmB5ytP8Nj2fE6pd4fGpF7sydnOo5BTBSeb0QtmgbQcReQ05CqwMGEAyKOQFnKMzEAOEtvyXUFyG7hFt4ZsngpRGDM/1d4rI/Kh7oCFfzuhR+ENhZkLqYz9xZ0QZ3GWVon7mXfiVvJL5GBfb9cwLjAGp5QhgN2El2yc/3/QIDAQAB"
+
+      dkim._domainkey IN TXT ( "v=DKIM1; k=rsa;"
+        "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5rMETiYOn53gKGsZ7Nf7pELcvL77PCWi+UCRT4F/ebuCKbwGF5ewQduwuvLLu44kojF1nQPZr/TO44pGeDc7awKS/yYXIWTtSMXI4jhxinglkIazfYJJN0jyn9m22Wkss6hv1ABMdBL9aKn1V3OApJKWu6tdMdLwh2eT5GE7CrQIDAQAB" ) ;
 
       _kerberos uri 5 1 krb5srv:m:kkdcp:https://zandoodle.me.uk/KdcProxy
       _kerberos uri 10 1 krb5srv:m:udp:local.zandoodle.me.uk
@@ -692,8 +698,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             address = "::1";
             action = "update";
             key = "caddy";
-            update-owner = "zone";
+            update-owner = "name";
             update-owner-match = "equal";
+            update-owner-name = [ "_acme-challenge.zandoodle.me.uk." "mail" ];
             update-type = "TXT";
           };
           knot-ds = {
