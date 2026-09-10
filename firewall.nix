@@ -36,7 +36,7 @@
         mpls.allowedTCPPorts = [ 179 ];
 
         # Allow submissions and imaps from tailscale
-        tailscale0.allowedTCPPorts = [ 143 179 465 587 873 993 ];
+        tailscale0.allowedTCPPorts = [ 143 179 465 587 873 993 8025 8465 ];
       };
     };
     nftables = {
@@ -103,6 +103,10 @@
           }
 
           set ollama_socket {
+            type cgroupsv2
+          }
+
+          set postfix {
             type cgroupsv2
           }
 
@@ -182,6 +186,8 @@
 
             iifname { "internet", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
 
+            iifname { lo, tailscale0 } tcp dport { 8025, 8465 } socket cgroupv2 level 2 @postfix accept
+
             iifname {lo, tailscale0, "internet", mpls, guest, "shadow-lan"} tcp dport 179 socket cgroupv2 level 2 @bird accept
             iiftype ipip6 tcp dport 179 socket cgroupv2 level 2 @bird accept
 
@@ -200,7 +206,7 @@
             iifname lo meta l4proto {udp, tcp} th dport {57, 58} reject
             iifname lo tcp dport {59, 323, 3000, 5280} reject
 
-            tcp dport { 22, 55, 56, 88, 143, 179, 389, 464, 465, 587, 636, 749, 873, 993, 8000 } reject
+            tcp dport { 22, 55, 56, 88, 143, 179, 389, 464, 465, 587, 636, 749, 873, 993, 8000, 8025, 8465 } reject
             udp dport { 55, 56, 88, 464, 749 } reject
           }
 
@@ -427,6 +433,11 @@
           UMask = "077";
           Group = "nft";
         };
+      };
+      postfix = {
+        after = [ "nftables.service" ];
+        serviceConfig.NFTSet = "cgroup:inet:services:postfix";
+        wants = [ "nftables.service" ];
       };
       prosody = {
         after = [ "nftables.service" ];
