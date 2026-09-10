@@ -25,7 +25,6 @@ let cert_obtained = pkgs.writeShellApplication {
       install -Dm0440 -t /var/lib/caddy/certs \
         "/var/lib/caddy/.local/share/caddy/$2/$1.crt" \
         "/var/lib/caddy/.local/share/caddy/$2/$1.key"
-      touch /var/lib/caddy/certs/imap-reload
     fi
   '';
 }; in
