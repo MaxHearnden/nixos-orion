@@ -317,6 +317,7 @@
             "inline:{@zandoodle.me.uk=@mail.zandoodle.me.uk,@compsoc-dev.com=@mail.compsoc-dev.com}";
           cyrus_sasl_config_path = "/etc/sasl2";
           myhostname = "mail.zandoodle.me.uk";
+          mynetworks = [""];
           smtp_tls_ciphers = "high";
           smtp_tls_mandatory_ciphers = "high";
           smtp_tls_mandatory_protocols = ">=TLSv1.2";
