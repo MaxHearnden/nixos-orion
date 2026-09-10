@@ -316,6 +316,7 @@
           canonical_maps =
             "inline:{@zandoodle.me.uk=@mail.zandoodle.me.uk,@compsoc-dev.com=@mail.compsoc-dev.com}";
           cyrus_sasl_config_path = "/etc/sasl2";
+          local_login_sender_maps = "inline:{ mail-notification=failure-notification@zandoodle.me.uk }";
           myhostname = "mail.zandoodle.me.uk";
           mynetworks = [""];
           smtp_tls_ciphers = "high";
@@ -399,35 +400,20 @@
         SystemCallArchitectures = "native";
       };
       "mail-notification@" = {
-        confinement.enable = true;
         serviceConfig = {
-          BindReadOnlyPaths =
-            "/var/run/nscd /etc/ssl/certs/ca-certificates.crt /run/wrappers/bin ${config.services.postfix.package}";
+          BindPaths = "/var/lib/postfix";
           CapabilityBoundingSet = "";
-          ExecStart = lib.join " " [
-            "${lib.getExe pkgs.msmtp}"
-            "--auth=on"
-            "--host=::1"
-            "--passwordeval=cat\\x20%d/mail_password"
-            "--port=465"
-            "--read-envelope-from"
-            "--tls-host-override=smtp.zandoodle.me.uk"
-            "--tls-starttls=off"
-            "--tls=on"
-            "--user=failure-notification@zandoodle.me.uk"
-            "-t"
-          ];
+          ExecStart = "/run/wrappers/bin/sendmail -t -f failure-notification@zandoodle.me.uk";
           Group = "mail-notification";
-          LoadCredential = "mail_password:/etc/mail-notification/mail_password";
           LockPersonality = true;
           MemoryDenyWriteExecute = true;
-          PrivateUsers = lib.mkForce false;
           ProcSubset = "pid";
           ProtectClock = true;
           ProtectHome = true;
           ProtectHostname = true;
           ProtectKernelLogs = true;
           ProtectProc = "invisible";
+          ProtectSystem = "strict";
           RestrictAddressFamilies = "AF_INET AF_INET6 AF_NETLINK AF_UNIX";
           RestrictNamespaces = true;
           RestrictRealtime = true;
@@ -437,7 +423,6 @@
             "Subject: Service %i failed"
           ];
           SystemCallArchitectures = "native";
-          SystemCallFilter = [ "@system-service" "~@resources @privileged" ];
           UMask = "077";
           User = "mail-notification";
         };
