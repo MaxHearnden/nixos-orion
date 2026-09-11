@@ -1821,15 +1821,15 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           # Record differences in the public IP address
           if ! ${lib.getExe' pkgs.diffutils "diff"} /run/ddns/zonefile /var/lib/ddns/zonefile; then
             cp --backup=numbered /run/ddns/zonefile "/var/lib/ddns/zonefile-$(date --iso-8601=seconds)"
-            ${lib.getExe' pkgs.dos2unix "unix2dos"} <<EOF | ${lib.getExe' pkgs.msmtp "sendmail"} --user=ddns@zandoodle.me.uk --read-envelope-from --passwordeval="cat /run/credentials/get-IP-address.service/mail_password" --tls=on --tls-starttls=off --host=smtp.zandoodle.me.uk --port=465 --auth=on -t
-          From: ddns@zandoodle.me.uk
-          To: ddns-mail@zandoodle.me.uk
-          Subject: DDNS update to $(</run/ddns/IPv6-address)
+          #   ${lib.getExe' pkgs.dos2unix "unix2dos"} <<EOF | ${lib.getExe' pkgs.msmtp "sendmail"} --user=ddns@zandoodle.me.uk --read-envelope-from --passwordeval="cat /run/credentials/get-IP-address.service/mail_password" --tls=on --tls-starttls=off --host=smtp.zandoodle.me.uk --port=465 --auth=on -t
+          # From: ddns@zandoodle.me.uk
+          # To: ddns-mail@zandoodle.me.uk
+          # Subject: DDNS update to $(</run/ddns/IPv6-address)
 
-          Your public zonefile has been updated to:
-          $(</run/ddns/zonefile)
+          # Your public zonefile has been updated to:
+          # $(</run/ddns/zonefile)
 
-          EOF
+          # EOF
             ${lib.getExe pkgs.hcloud} --config /var/lib/ddns/hcloud.toml zone change-primary-nameservers zandoodle.me.uk --primary-nameservers-file - <<EOF
             [
               {
