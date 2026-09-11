@@ -449,7 +449,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
 
       _mta-sts.mail cname _mta-sts
 
-      $INCLUDE /etc/knot/letsencrypt-dane.zone.include _25._tcp.mail.zandoodle.me.uk.
+      $INCLUDE /etc/knot/letsencrypt-dane-x2.zone.include _25._tcp.mail.zandoodle.me.uk.
 
       _tls.mail dname _tls
 
