@@ -10,7 +10,7 @@
       system_default = baseline_postfix_settings
 
       [baseline_postfix_settings]
-      SignatureAlgorithms = ECDSA+SHA256:ECDSA+SHA384:ECDSA+SHA512
+      SignatureAlgorithms = ECDSA+SHA256:ECDSA+SHA384:ECDSA+SHA512:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA+SHA512:RSA+SHA256:RSA+SHA384
     '';
     "sasl2/smtpd.conf".text = ''
       keytab: /var/lib/postfix/krb5.keytab
