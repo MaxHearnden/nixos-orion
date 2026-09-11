@@ -318,8 +318,14 @@
       settings = {
         main = {
           canonical_classes = "envelope_sender";
-          canonical_maps =
-            "inline:{@zandoodle.me.uk=@mail.zandoodle.me.uk,@compsoc-dev.com=@mail.compsoc-dev.com}";
+          canonical_maps = ''
+            inline:{
+              @compsoc-dev.com=@mail.compsoc-dev.com,
+              @maxhearnden.me.uk=@mail.maxhearnden.me.uk,
+              @maxhearnden.uk=@mail.maxhearnden.uk,
+              @zandoodle.me.uk=@mail.zandoodle.me.uk
+              }
+          '';
           cyrus_sasl_config_path = "/etc/sasl2";
           local_login_sender_maps = "inline:{ mail-notification=failure-notification@zandoodle.me.uk }";
           myhostname = "mail.zandoodle.me.uk";
@@ -353,10 +359,12 @@
             "/var/lib/caddy/certs/mail.zandoodle.me.uk.key"
             "/var/lib/caddy/certs/mail.zandoodle.me.uk.crt"
           ];
-          virtual_alias_domains = "zandoodle.me.uk, compsoc-dev.com";
+          virtual_alias_domains = "zandoodle.me.uk, maxhearnden.uk, maxhearnden.me.uk, compsoc-dev.com";
           virtual_alias_maps = ''
             inline:{
               @compsoc-dev.com=max@workstation.zandoodle.me.uk,
+              @maxhearnden.me.uk=max@workstation.zandoodle.me.uk,
+              @maxhearnden.uk=max@workstation.zandoodle.me.uk,
               @zandoodle.me.uk=max@workstation.zandoodle.me.uk
               }
           '';
