@@ -683,6 +683,106 @@ in
               EOF
           '';
         };
+        "mta-sts.mail.maxhearnden.me.uk" = {
+          extraConfig = ''
+            tls {
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile shortlived
+              }
+            }
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            }
+            respond /.well-known/mta-sts.txt <<EOF
+              version: STSv1
+              mode: enforce
+              max_age: 31557600
+              mx: mail.zandoodle.me.uk
+
+              EOF
+          '';
+        };
+        "mta-sts.mail.maxhearnden.uk" = {
+          extraConfig = ''
+            tls {
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile shortlived
+              }
+            }
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            }
+            respond /.well-known/mta-sts.txt <<EOF
+              version: STSv1
+              mode: enforce
+              max_age: 31557600
+              mx: mail.zandoodle.me.uk
+
+              EOF
+          '';
+        };
+        "mta-sts.maxhearnden.me.uk" = {
+          extraConfig = ''
+            tls {
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile shortlived
+              }
+            }
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            }
+            respond /.well-known/mta-sts.txt <<EOF
+              version: STSv1
+              mode: enforce
+              max_age: 31557600
+              mx: mail.zandoodle.me.uk
+
+              EOF
+          '';
+        };
+        "mta-sts.maxhearnden.uk" = {
+          extraConfig = ''
+            tls {
+              issuer acme {
+                dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+                profile shortlived
+              }
+            }
+            header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+              X-Content-Type-Options nosniff
+              Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+              Cross-Origin-Resource-Policy same-origin
+              X-Frame-Options DENY
+              Referrer-Policy no-referrer
+            }
+            respond /.well-known/mta-sts.txt <<EOF
+              version: STSv1
+              mode: enforce
+              max_age: 31557600
+              mx: mail.zandoodle.me.uk
+
+              EOF
+          '';
+        };
         "mta-sts.mail.zandoodle.me.uk" = {
           extraConfig = ''
             tls {
