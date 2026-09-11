@@ -283,6 +283,27 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
         tlsa_selector = 0;
         tlsa_matching = 1;
       };
+    "knot/maxhearnden.uk.zone".text = ''
+      @ soa dns.zandoodle.me.uk. hostmaster.zandoodle.me.uk. 0 14400 3600 604800 86400
+      $INCLUDE /var/lib/ddns/zonefile
+
+      @ ns ns1.first-ns.de.
+      @ ns robotns2.second-ns.de.
+      @ ns robotns3.second-ns.com.
+
+      @ mx 10 mail.zandoodle.me.uk.
+
+      @ txt "v=spf1 redirect=_spf.zandoodle.me.uk"
+
+      @ https 1 . alpn=h3,h2
+
+      @ caa 0 issuemail ";"
+      @ caa 0 issuevmc ";"
+      @ caa 128 issue "letsencrypt.org;validationmethods=dns-01"
+      @ caa 128 issuewild ";"
+
+      @ dname zandoodle.me.uk.
+    '';
     "knot/no-email.zone.include".text = ''
       ; Deny sending or receiving emails
       @ TXT "v=spf1 -all"
@@ -1154,6 +1175,34 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             module = "mod-queryacl/local";
             notify = ["pc" "unbound"];
           };
+          "maxhearnden.uk" = {
+            acl = [ "transfer" ];
+            catalog-group = "global";
+            dnssec-policy = "uk";
+            dnssec-signing = true;
+            file = "/etc/knot/maxhearnden.uk.zone";
+            notify = [ "hetzner" "pc" "workstation" ];
+            semantic-checks = true;
+            journal-content = "all";
+            zonefile-load = "difference-no-serial";
+            zonefile-skip = "DS";
+            zonemd-generate = "zonemd-sha512";
+            zonefile-sync = -1;
+          };
+          "maxhearnden.me.uk" = {
+            acl = [ "transfer" ];
+            catalog-group = "global";
+            dnssec-policy = "uk";
+            dnssec-signing = true;
+            file = "/etc/knot/maxhearnden.uk.zone";
+            notify = [ "hetzner" "pc" "workstation" ];
+            semantic-checks = true;
+            journal-content = "all";
+            zonefile-load = "difference-no-serial";
+            zonefile-skip = "DS";
+            zonemd-generate = "zonemd-sha512";
+            zonefile-sync = -1;
+          };
           "zandoodle.me.uk" = {
             acl = [ "knot-ds" "transfer" ];
             catalog-group = "global";
@@ -1207,6 +1256,8 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
         }) ([
           "."
           "arpa"
+          "maxhearnden.uk"
+          "maxhearnden.me.uk"
           "zandoodle.me.uk"
           "int.zandoodle.me.uk"
           "_acme-challenge.zandoodle.me.uk"
@@ -1830,22 +1881,16 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           # $(</run/ddns/zonefile)
 
           # EOF
-            ${lib.getExe pkgs.hcloud} --config /var/lib/ddns/hcloud.toml zone change-primary-nameservers zandoodle.me.uk --primary-nameservers-file - <<EOF
-            [
-              {
-                "address": "$(</run/ddns/IPv6-address)",
-                "port": 53
-              }
-            ]
+            for domain in zandoodle.me.uk compsoc-dev.com maxhearnden.me.uk maxhearnden.uk; do
+              ${lib.getExe pkgs.hcloud} --config /var/lib/ddns/hcloud.toml zone change-primary-nameservers "$domain" --primary-nameservers-file - <<EOF
+              [
+                {
+                  "address": "$(</run/ddns/IPv6-address)",
+                  "port": 53
+                }
+              ]
           EOF
-            ${lib.getExe pkgs.hcloud} --config /var/lib/ddns/hcloud.toml zone change-primary-nameservers compsoc-dev.com --primary-nameservers-file - <<EOF
-            [
-              {
-                "address": "$(</run/ddns/IPv6-address)",
-                "port": 53
-              }
-            ]
-          EOF
+            done
           fi
 
           for file in zonefile local-zonefile local-guest-zonefile local-tailscale-zonefile; do
@@ -1896,6 +1941,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "letsencrypt.zone.include"
           "letsencrypt-dane.zone.include"
           "letsencrypt-dane-x2.zone.include"
+          "maxhearnden.uk.zone"
           "no-email.zone.include"
           "rDNS.zone"
           "zandoodle.me.uk.zone"
@@ -1912,6 +1958,8 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             "compsoc-dev.com"
             "home.arpa"
             "int.zandoodle.me.uk"
+            "maxhearnden.me.uk"
+            "maxhearnden.uk"
             "zandoodle.me.uk"
           ];
           Group = "knot";
