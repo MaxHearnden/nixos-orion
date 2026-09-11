@@ -24,7 +24,7 @@
       filterForward = true;
       interfaces = {
         # Allow the TP-link WAP to send logs
-        "\"internet\"".allowedTCPPorts = [ 179 465 ];
+        "\"internet\"".allowedTCPPorts = [ 179 465 8465 ];
         "\"internet\"".allowedUDPPorts = [ 547 ];
 
         # Allow DHCP from managed networks
@@ -186,7 +186,7 @@
 
             iifname { "internet", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
 
-            iifname { lo, tailscale0 } tcp dport { 8025, 8465 } socket cgroupv2 level 2 @postfix accept
+            iifname { "internet", lo, tailscale0 } tcp dport { 25, 465, 8025, 8465 } socket cgroupv2 level 2 @postfix accept
 
             iifname {lo, tailscale0, "internet", mpls, guest, "shadow-lan"} tcp dport 179 socket cgroupv2 level 2 @bird accept
             iiftype ipip6 tcp dport 179 socket cgroupv2 level 2 @bird accept

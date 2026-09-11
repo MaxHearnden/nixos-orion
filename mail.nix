@@ -14,7 +14,9 @@
     '';
     "sasl2/smtpd.conf".text = ''
       keytab: /var/lib/postfix/krb5.keytab
-      mech_list: GSSAPI
+      mech_list: GSSAPI PLAIN LOGIN
+      pwcheck_method: auxprop
+      auxprop_plugin: sasldb
       service_principal: *
     '';
   };
@@ -175,7 +177,7 @@
           }
         }
 
-        submission tls://0.0.0.0:465 tcp://0.0.0.0:587 {
+        submission tcp://0.0.0.0:587 {
           limits {
             all rate 50 1s
           }
@@ -323,8 +325,12 @@
           smtp_tls_mandatory_ciphers = "high";
           smtp_tls_mandatory_protocols = ">=TLSv1.2";
           smtp_tls_protocols = ">=TLSv1.2";
-          smtpd_sender_login_maps = "inline:{@zandoodle.me.uk=max@WORKSTATION.ZANDOODLE.ME.UK}";
-          smtpd_sasl_auth_enable = true;
+          smtpd_sender_login_maps = ''
+            inline:{
+              @zandoodle.me.uk=max@WORKSTATION.ZANDOODLE.ME.UK,
+              tp-link@zandoodle.me.uk=tp-link@zandoodle.me.uk
+              }
+          '';
           smtpd_sender_restrictions = "reject_sender_login_mismatch";
           smtpd_tls_ciphers = "high";
           smtpd_tls_mandatory_ciphers = "high";
@@ -334,10 +340,12 @@
           tls_config_name = "postfix";
           tls_high_cipherlist = "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256";
           tls_preempt_cipherlist = true;
-          tls_server_sni_maps = "inline:{
-            { mail.zandoodle.me.uk = /var/lib/caddy/certs/mail.zandoodle.me.uk.key /var/lib/caddy/certs/mail.zandoodle.me.uk.crt }
-            { smtp.int.zandoodle.me.uk = /var/lib/caddy/certs/smtp.int.zandoodle.me.uk.key /var/lib/caddy/certs/smtp.int.zandoodle.me.uk.crt }
-          }";
+          tls_server_sni_maps = ''
+            inline:{
+              { mail.zandoodle.me.uk = /var/lib/caddy/certs/mail.zandoodle.me.uk.key /var/lib/caddy/certs/mail.zandoodle.me.uk.crt }
+              { smtp.int.zandoodle.me.uk = /var/lib/caddy/certs/smtp.int.zandoodle.me.uk.key /var/lib/caddy/certs/smtp.int.zandoodle.me.uk.crt }
+              }
+          '';
           smtpd_tls_chain_files = [
             "/var/lib/caddy/certs/mail.zandoodle.me.uk.key"
             "/var/lib/caddy/certs/mail.zandoodle.me.uk.crt"
@@ -347,10 +355,7 @@
           virtual_mailbox_domains = "workstation.zandoodle.me.uk";
           virtual_transport = "lmtp:unix:/run/cyrus/lmtp";
         };
-        master = {
-          "smtp_inet".name = lib.mkForce "8025";
-          "submissions".name = lib.mkForce "8465";
-        };
+        master."smtp_inet".name = lib.mkForce "8025";
       };
     };
     postfix-tlspol = {
