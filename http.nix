@@ -165,6 +165,66 @@ in
             file_server
           '';
         };
+        "maxhearnden.me.uk".extraConfig = ''
+          tls {
+            issuer acme {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile shortlived
+            }
+          }
+
+          header {
+            # Add a Cross Origin Resource Policy
+            Cross-Origin-Resource-Policy same-origin
+
+            # Force HTTPS use on this domain and all subdomains
+            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+            # Disable content sniffing (detecion of javascript)
+            X-Content-Type-Options nosniff
+
+            # Disable this content being inside a frame
+            X-Frame-Options DENY
+
+            # Make browsers not send a referrer header when following links
+            Referrer-Policy no-referrer
+
+            # Add a restrictive Content Security Policy
+            Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+          }
+
+          respond "Placeholder page"
+        '';
+        "maxhearnden.uk".extraConfig = ''
+          tls {
+            issuer acme {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile shortlived
+            }
+          }
+
+          header {
+            # Add a Cross Origin Resource Policy
+            Cross-Origin-Resource-Policy same-origin
+
+            # Force HTTPS use on this domain and all subdomains
+            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+            # Disable content sniffing (detecion of javascript)
+            X-Content-Type-Options nosniff
+
+            # Disable this content being inside a frame
+            X-Frame-Options DENY
+
+            # Make browsers not send a referrer header when following links
+            Referrer-Policy no-referrer
+
+            # Add a restrictive Content Security Policy
+            Content-Security-Policy "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+          }
+
+          respond "Placeholder page"
+        '';
         "zandoodle.me.uk" = {
           extraConfig = ''
             tls {
