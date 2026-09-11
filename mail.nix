@@ -26,6 +26,7 @@
         tls {
           issuer acme {
             dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            profile shortlived
           }
         }
 
@@ -35,6 +36,7 @@
         tls {
           issuer acme {
             dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+            profile shortlived
           }
         }
 
@@ -44,6 +46,7 @@
         tls {
           issuer acme {
             dns_challenge_override_domain mail._acme-challenge.zandoodle.me.uk
+            profile shortlived
           }
         }
 
