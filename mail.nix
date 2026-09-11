@@ -336,6 +336,9 @@
           smtp_tls_protocols = ">=TLSv1.2";
           smtpd_sender_login_maps = ''
             inline:{
+              @compsoc-dev.com=max@WORKSTATION.ZANDOODLE.ME.UK,
+              @maxhearnden.me.uk=max@WORKSTATION.ZANDOODLE.ME.UK,
+              @maxhearnden.uk=max@WORKSTATION.ZANDOODLE.ME.UK,
               @zandoodle.me.uk=max@WORKSTATION.ZANDOODLE.ME.UK,
               tp-link@zandoodle.me.uk=tp-link@zandoodle.me.uk
               }
@@ -388,6 +391,7 @@
           }
         '';
         "dkim_signing.conf".text = ''
+          allow_username_mismatch = true;
           path = "/var/lib/rspamd/dkim/$domain.$selector.key";
         '';
         "milter_headers.conf".text = ''
