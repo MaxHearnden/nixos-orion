@@ -350,8 +350,13 @@
             "/var/lib/caddy/certs/mail.zandoodle.me.uk.key"
             "/var/lib/caddy/certs/mail.zandoodle.me.uk.crt"
           ];
-          virtual_alias_domains = "zandoodle.me.uk";
-          virtual_alias_maps = "inline:{@zandoodle.me.uk=max@workstation.zandoodle.me.uk}";
+          virtual_alias_domains = "zandoodle.me.uk, compsoc-dev.com";
+          virtual_alias_maps = ''
+            inline:{
+              @compsoc-dev.com=max@workstation.zandoodle.me.uk,
+              @zandoodle.me.uk=max@workstation.zandoodle.me.uk
+              }
+          '';
           virtual_mailbox_domains = "workstation.zandoodle.me.uk";
           virtual_transport = "lmtp:unix:/run/cyrus/lmtp";
         };
