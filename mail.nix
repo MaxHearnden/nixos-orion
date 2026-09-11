@@ -149,33 +149,33 @@
           deliver_to &local_mailboxes
         }
 
-        smtp tcp://0.0.0.0:25 {
-          limits {
-            all rate 20 1s
-            all concurrency 10
-          }
+        # smtp tcp://0.0.0.0:25 {
+        #   limits {
+        #     all rate 20 1s
+        #     all concurrency 10
+        #   }
 
-          dmarc yes
-          check {
-            require_mx_record
-            dkim
-            spf
-          }
+        #   dmarc yes
+        #   check {
+        #     require_mx_record
+        #     dkim
+        #     spf
+        #   }
 
-          source $(local_domains) {
-            reject 501 5.1.8 "Use Submission for outgoing SMTP"
-          }
+        #   source $(local_domains) {
+        #     reject 501 5.1.8 "Use Submission for outgoing SMTP"
+        #   }
 
-          default_source {
-            destination $(local_domains) {
-              deliver_to &local_routing
-            }
+        #   default_source {
+        #     destination $(local_domains) {
+        #       deliver_to &local_routing
+        #     }
 
-            default_destination {
-              reject
-            }
-          }
-        }
+        #     default_destination {
+        #       reject
+        #     }
+        #   }
+        # }
 
         submission tcp://0.0.0.0:587 {
           limits {
@@ -360,7 +360,6 @@
           virtual_mailbox_domains = "workstation.zandoodle.me.uk";
           virtual_transport = "lmtp:unix:/run/cyrus/lmtp";
         };
-        master."smtp_inet".name = lib.mkForce "8025";
       };
     };
     postfix-tlspol = {
