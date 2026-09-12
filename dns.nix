@@ -695,8 +695,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "orion-shadow.orion.home.arpa,shadow-lan"
         ];
 
-        log-dhcp = true;
-
         no-hosts = true;
 
         # Operate on port 56
