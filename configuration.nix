@@ -58,6 +58,9 @@ in
   environment = {
     sessionVariables.SYSTEMD_EDITOR = "nvim";
     etc = {
+      "iproute2/group".text = ''
+        1 guest
+      '';
       "tayga/plat.conf".text = ''
         # NAT64
 
@@ -313,9 +316,12 @@ in
     network = {
       # Enable systemd-networkd
       enable = true;
-      config.networkConfig = {
-        ManageForeignRoutingPolicyRules = false;
-        ManageForeignRoutes = false;
+      config = {
+        routeTables.guest = 1;
+        networkConfig = {
+          ManageForeignRoutingPolicyRules = false;
+          ManageForeignRoutes = false;
+        };
       };
       netdevs = {
         # Configure a bridge
@@ -491,6 +497,7 @@ in
           linkConfig = {
             ARP = true;
             # Don't wait for this interface to be configured
+            Group = 1;
             RequiredForOnline = false;
           };
           name = "guest";
@@ -498,6 +505,34 @@ in
             IPv6AcceptRA = true;
             IPv6SendRA = true;
           };
+          routes = [
+            {
+              # Add a static route to the router
+              Gateway = "192.168.5.1";
+              PreferredSource = "192.168.5.201";
+              Metric = 1536;
+              Table = "guest";
+            }
+            {
+              Destination = "192.168.5.0/24";
+              PreferredSource = "192.168.5.201";
+              Metric = 1536;
+              Table = "guest";
+            }
+            {
+              Destination = "192.168.0.0/16";
+              Metric = 1536;
+              Table = "guest";
+              Type = "throw";
+            }
+          ];
+          routingPolicyRules = [
+            {
+              From = "192.168.5.0/24";
+              Priority = 16384;
+              Table = "guest";
+            }
+          ];
         };
         "10-internet" = {
           address = [ "192.168.1.201/24" ];
