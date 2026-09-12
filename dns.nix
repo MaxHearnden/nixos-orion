@@ -1568,7 +1568,10 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
         wantedBy = [ "multi-user.target" ];
       };
       dnsmasq = {
-        confinement.enable = true;
+        confinement = {
+          enable = true;
+          packages = [ config.i18n.glibcLocales ];
+        };
         serviceConfig = {
           AmbientCapabilities = "CAP_NET_ADMIN CAP_NET_RAW CAP_NET_BIND_SERVICE";
           BindReadOnlyPaths = [
