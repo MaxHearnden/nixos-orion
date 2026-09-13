@@ -16,8 +16,8 @@
       flake = false;
       url = "github:MaxHearnden/nixos-kexec";
     };
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05-small";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "https://channels.nixos.org/nixos-26.05/nixexprs.tar.zst";
+    nixpkgs-unstable.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.zst";
   };
 
   outputs = { nixpkgs, nixpkgs-unstable, self, ... }@inputs:

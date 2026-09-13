@@ -32,6 +32,7 @@ in
     resolvconf.enable = false;
   };
   nix.enable = false;
+  programs.command-not-found.enable = false;
   security = {
     doas = {
       enable = true;
