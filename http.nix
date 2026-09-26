@@ -269,6 +269,16 @@ in
             }
           '';
         };
+        "test.zandoodle.me.uk".extraConfig = ''
+          tls {
+            issuer acme {
+              dns_challenge_override_domain _acme-challenge.zandoodle.me.uk
+              profile shortlived
+            }
+          }
+          encode
+          reverse_proxy https://test.workstation.zandoodle.me.uk
+        '';
         "wss.cardgames.zandoodle.me.uk" = {
           extraConfig = ''
             tls {

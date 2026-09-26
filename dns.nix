@@ -494,6 +494,9 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       smtp cname local-tailscale
       _acme-challenge.smtp cname mail._acme-challenge
 
+      test cname @
+      _acme-challenge.test cname _acme-challenge
+
       ; Add a zero ttl record for testing DNS resolvers
       ttl-check 0 txt ttl\ check
       ttl-check 0 txt "v=spf1 -all"
