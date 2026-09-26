@@ -277,7 +277,14 @@ in
             }
           }
           encode
-          reverse_proxy https://test.workstation.zandoodle.me.uk
+          reverse_proxy {
+            header_up Host test.workstation.zandoodle.me.uk
+            dynamic a workstation-routed.int.zandoodle.me.uk 443
+            transport http {
+              tls_server_name test.workstation.zandoodle.me.uk
+              versions 3
+            }
+          }
         '';
         "wss.cardgames.zandoodle.me.uk" = {
           extraConfig = ''
