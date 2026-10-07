@@ -279,7 +279,9 @@ in
           encode
           reverse_proxy {
             header_up Host test.workstation.zandoodle.me.uk
-            dynamic a workstation-routed.int.zandoodle.me.uk 443
+            dynamic a workstation-routed.int.zandoodle.me.uk 443 {
+              versions ipv6
+            }
             transport http {
               tls_server_name test.workstation.zandoodle.me.uk
               versions 3
