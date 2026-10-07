@@ -98,10 +98,6 @@
             type cgroupsv2
           }
 
-          set maddy {
-            type cgroupsv2
-          }
-
           set ollama_socket {
             type cgroupsv2
           }
@@ -184,8 +180,6 @@
             # Allow LDAP
             tcp dport {389, 636} socket cgroupv2 level 2 @slapd accept
 
-            iifname { "internet", lo, tailscale0 } tcp dport { 465, 587, 993 } socket cgroupv2 level 2 @maddy accept
-
             iifname { "internet", lo, tailscale0 } tcp dport { 465, 8025, 8465 } socket cgroupv2 level 2 @postfix accept
 
             iifname {lo, tailscale0, "internet", mpls, guest, "shadow-lan"} tcp dport 179 socket cgroupv2 level 2 @bird accept
@@ -234,7 +228,6 @@
 
             udp dport {40000, 41641} socket cgroupv2 level 2 @tailscaled accept
 
-            tcp dport 25 socket cgroupv2 level 2 @maddy accept
             tcp dport 25 socket cgroupv2 level 2 @postfix accept
 
             tcp dport {5000, 5222, 5223, 5269, 5270, 5281} socket cgroupv2 level 2 @prosody accept
@@ -399,11 +392,6 @@
       krill = {
         after = [ "nftables.service" ];
         serviceConfig.NFTSet = "cgroup:inet:services:krill";
-        wants = [ "nftables.service" ];
-      };
-      maddy = {
-        after = [ "nftables.service" ];
-        serviceConfig.NFTSet = "cgroup:inet:services:maddy";
         wants = [ "nftables.service" ];
       };
       nftables = {

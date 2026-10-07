@@ -416,9 +416,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       dot-check\. txt dot\ check
       dot-check\. txt "v=spf1 -all"
 
-      imap cname local-tailscale
-      _acme-challenge.imap cname mail._acme-challenge
-
       int ns dns
 
       krill cname local-tailscale
@@ -464,7 +461,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       mail mx 10 mail
       mail txt "v=spf1 a -all"
 
-      _acme-challenge.mail cname mail._acme-challenge
+      _acme-challenge.mail cname _acme-challenge
 
       default._domainkey.mail txt "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1VJx8wBBOAQWOk+6i7MuJel5lV7glADvBG3g+UcW5wn/mbGJdsyGpoI33694ZSBth4y3OHeVP11ydIznHY0fuBviAKVyLQZN94j5Nw4rH4xZXGhHXxUqBcMuHKHrj5jp2cd/rgtCX18W8YkSYEU6yZpbjle8NoMFRK5OFuLNeni7jOtPGE3P7JyfzY0umkiLemVn5w/HREf0i6un7DJ/iq3OG3Pd3MWxbcIYwRf3+zpRybjOTwgBhfHXNysJ8QZiz5fg3wCYzEYy2AyXbhF2PZNqZrId3oaFiGGhX13ffUSVGdR7VS9zwmIQoEG+jrOitMocywf8X1HIeB5m8zfHWwIDAQAB"
 
@@ -490,9 +487,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       null-domain-check\000 TXT "null domain check"
 
       proxy dname @
-
-      smtp cname local-tailscale
-      _acme-challenge.smtp cname mail._acme-challenge
 
       test cname @
       _acme-challenge.test cname _acme-challenge
@@ -711,7 +705,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
       keyFiles = [
         "/run/credentials/knot.service/caddy"
         "/run/credentials/knot.service/knot-ds"
-        "/run/credentials/knot.service/maddy"
       ];
       settings = {
         acl = {
@@ -720,9 +713,8 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             address = "::1";
             action = "update";
             key = "caddy";
-            update-owner = "name";
+            update-owner = "zone";
             update-owner-match = "equal";
-            update-owner-name = [ "_acme-challenge.zandoodle.me.uk." "mail" ];
             update-type = "TXT";
           };
           knot-ds = {
@@ -739,18 +731,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
               "int"
             ];
             update-type = "DS";
-          };
-          maddy-acme = {
-            # Allow maddy to modify TXT records in _acme-challenge domains
-            address = "::1";
-            action = "update";
-            key = "maddy";
-            update-owner = "name";
-            update-owner-match = "equal";
-            update-owner-name = [
-              "mail"
-            ];
-            update-type = "TXT";
           };
           pc = {
             action = "update";
@@ -1087,7 +1067,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "168.192.in-addr.arpa".template = "rDNS";
           "_acme-challenge.zandoodle.me.uk" = {
             # Add a zone for ACME challenges
-            acl = [ "caddy-acme" "maddy-acme" "pc" "transfer" "workstation" ];
+            acl = [ "caddy-acme" "pc" "transfer" "workstation" ];
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
@@ -1612,11 +1592,11 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           dnsmasq --test -C ${config.services.dnsmasq.configFile}
         '';
       };
-      # Generate a TSIG key for caddy and maddy
+      # Generate a TSIG key for caddy
       gen-tsig = {
-        # Generate the TSIG key before knot, caddy or maddy starts
-        before = [ "knot.service" "caddy.service" "maddy.service" ];
-        requiredBy = [ "knot.service" "caddy.service" "maddy.service" ];
+        # Generate the TSIG key before knot or caddy starts
+        before = [ "knot.service" "caddy.service" ];
+        requiredBy = [ "knot.service" "caddy.service" ];
         # Create a mininal sandbox for gen-tsig
         confinement.enable = true;
         serviceConfig = {
@@ -1699,7 +1679,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           User = "keymgr";
         };
         script = ''
-          for key in caddy knot-ds maddy; do
+          for key in caddy knot-ds; do
             # Generate a TSIG key
             ${lib.getExe' pkgs.knot-dns "keymgr"} -t $key >"/run/keymgr/$key"
           done
@@ -1707,10 +1687,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             # Split the elements of the key into seperate files for caddy
             ${lib.getExe pkgs.yq} -r .key.[]."$attr" </run/keymgr/caddy >/run/keymgr/caddy-"$attr"
           done
-
-          ${lib.getExe pkgs.yq} -r '"key_name " + .key.[].id' </run/keymgr/maddy >/run/keymgr/maddy-config
-          ${lib.getExe pkgs.yq} -r '"key " + .key.[].secret' </run/keymgr/maddy >>/run/keymgr/maddy-config
-          ${lib.getExe pkgs.yq} -r '"key_alg " + .key.[].algorithm' </run/keymgr/maddy >>/run/keymgr/maddy-config
         '';
         unitConfig.StopWhenUnneeded = true;
       };
@@ -1923,7 +1899,6 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
         # Get the TSIG credentials for caddy
         LoadCredential = [
           "caddy:/run/keymgr/caddy"
-          "maddy:/run/keymgr/maddy"
           "knot-ds:/run/keymgr/knot-ds"
         ];
 
