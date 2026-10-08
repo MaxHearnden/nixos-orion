@@ -106,7 +106,7 @@ in
         }
       '';
       package = pkgs.caddy.withPlugins {
-        hash = "sha256-WXi3+lRXAvECnT0lYUdlRiGcOenYbsBtfal+t3WmfMY=";
+        hash = "sha256-TrznhXi8OGWTYNNw4eQWtOr95SXTOqM7bgKEVloq16I=";
         plugins = [
           "github.com/caddy-dns/rfc2136@v1.0.0"
           "github.com/mholt/caddy-l4@v0.0.0-20260127203130-040d25cc886a"
