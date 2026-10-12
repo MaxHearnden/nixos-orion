@@ -106,10 +106,10 @@ in
         }
       '';
       package = pkgs.caddy.withPlugins {
-        hash = "sha256-TrznhXi8OGWTYNNw4eQWtOr95SXTOqM7bgKEVloq16I=";
+        hash = "sha256-BJix/njl3cHGIOO7+LlRxz0dS5cQ22qDJwWKPMFO38w=";
         plugins = [
           "github.com/caddy-dns/rfc2136@v1.0.0"
-          "github.com/mholt/caddy-l4@v0.0.0-20260127203130-040d25cc886a"
+          "github.com/mholt/caddy-l4@v0.1.2"
           "github.com/mholt/caddy-events-exec@v0.1.0"
         ];
       };
