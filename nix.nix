@@ -18,6 +18,7 @@ in
       automatic = true;
       options = "--delete-older-than 7d";
     };
+    registry = lib.mapAttrs (name: input: { flake = input; }) inputs;
     settings = {
       # Allow only max and nix-gc to use nix
       allowed-users = [ "max" "nix-gc" ];
