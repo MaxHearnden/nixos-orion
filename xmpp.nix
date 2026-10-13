@@ -152,8 +152,8 @@ let cert_obtained = pkgs.writeShellApplication {
         }
       ];
       package =
-        pkgs-unstable.${config.nixpkgs.system}.prosody.override ({lua, ...}: {
-          lua = lua.override {
+        pkgs-unstable.${config.nixpkgs.system}.prosody.override ({lua5_2_compat, ...}: {
+          lua5_2_compat = lua5_2_compat.override {
             packageOverrides = self: super: {
               luasec = super.luasec.overrideAttrs (
                 { patches ? [], ... }: {
