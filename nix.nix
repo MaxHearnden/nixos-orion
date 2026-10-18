@@ -151,16 +151,22 @@ in
             git = lib.getExe pkgs.git;
             nix = lib.getExe config.nix.package;
             nixos-rebuild = lib.getExe config.system.build.nixos-rebuild;
+            readlink = lib.getExe' pkgs.coreutils "readlink";
           in ''
             ${git} clone -b main --single-branch /etc/nixos /run/nixos-upgrade-fallback/nixos-config
             cd /run/nixos-upgrade-fallback/nixos-config
             ${nixos-rebuild} boot --flake .
 
-            booted=$(${lib.getExe' pkgs.coreutils "readlink"} /run/booted-system/{kernel,kernel-modules})
-            built=$(${lib.getExe' pkgs.coreutils "readlink"} /nix/var/nix/profiles/system/{kernel,kernel-modules})
+            booted=$(${readlink} /run/booted-system/{kernel,kernel-modules})
+            built=$(${readlink} /nix/var/nix/profiles/system/{kernel,kernel-modules})
 
             if [ "$booted" = "$built" ]; then
-              ${nixos-rebuild} test --flake .
+              # Only switch if the system has changed
+              current=$(${readlink} /run/current-system)
+              next=$(${readlink} -f /nix/var/nix/profiles/system)
+              if [ "$current" != "$next" ]; then
+                ${nixos-rebuild} test --flake .
+              fi
             else
               ${lib.getExe nixos-kexec} --when "1 hour left"
             fi
