@@ -321,7 +321,6 @@
         template bgp mpls_tunnel {
           local fd7a:115c:a1e0::1a01:5208%tailscale0 as 65005;
           neighbor internal;
-          default bgp_local_pref 95;
           onlink on;
           rr client on;
           passive on;
