@@ -93,6 +93,7 @@
               }
           '';
           cyrus_sasl_config_path = "/etc/sasl2";
+          disable_vrfy_command = true;
           local_login_sender_maps = "inline:{ mail-notification=failure-notification@zandoodle.me.uk }";
           myhostname = "mail.zandoodle.me.uk";
           mynetworks = [""];
