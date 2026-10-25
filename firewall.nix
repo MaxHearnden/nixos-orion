@@ -286,9 +286,14 @@
             }
 
             chain pre {
-              type nat hook prerouting priority dstnat;
+              type nat hook prerouting priority dstnat; policy accept;
 
-              ip6 daddr {fd3c:32f8:5a30:2:93d6:ccd3:6c42:125c, fd3c:32f8:5a30:1:246c:f9c6:85bb:ebaf} redirect
+              ip6 daddr {fd3c:32f8:5a30:2:93d6:ccd3:6c42:125c, fd3c:32f8:5a30:1:246c:f9c6:85bb:ebaf, fd09:a389:7c1e:7::/64} redirect
+              ip6 daddr fd09:a389:7c1e:7::/64 fib daddr . mark oif lo redirect
+            }
+            chain output {
+              type nat hook output priority dstnat; policy accept;
+              ip6 daddr fd09:a389:7c1e:7::/64 oif lo redirect
             }
           '';
         };
