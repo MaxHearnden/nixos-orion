@@ -736,7 +736,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             action = "notify";
             address = "fd09:a389:7c1e:6::1";
             cert-key = "YmDvM4b69qAXy/h4gLV4lTTdQQO3/yvj3c3PeoMrihE=";
-            quic = true;
+            protocol = "quic";
           };
           pc = {
             action = "update";
