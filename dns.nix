@@ -734,7 +734,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           pc = {
             action = "update";
-            remote = "pc";
+            remote = "pc-only";
             update-owner = "name";
             update-owner-match = "equal";
             update-owner-name = "pc";
@@ -867,9 +867,17 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "nsb.nic.uk".address = [ "2001:502:2eda::3" "156.154.101.3" ];
           "nsc.nic.uk".address = [ "2610:a1:1009::3" "156.154.102.3" ];
           "nsd.nic.uk".address = [ "2610:a1:1010::3" "156.154.103.3" ];
-          pc = {
+          pc-only = {
             address = "fd7a:115c:a1e0::d2df:ec69@854";
             cert-key = "860gpVRTvbEKrajFpFnUQkpBpaITd2jZtm9Z47Absg0=";
+            quic = true;
+          };
+          pc = {
+            address = "fd09:a389:7c1e:7::5@854";
+            cert-key = [
+              "860gpVRTvbEKrajFpFnUQkpBpaITd2jZtm9Z47Absg0="
+              "YmDvM4b69qAXy/h4gLV4lTTdQQO3/yvj3c3PeoMrihE="
+            ];
             quic = true;
           };
           "robotns2.second-ns.de".address = "2a01:4f8:0:1::5ddc:2";
@@ -1122,7 +1130,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           "in-addr.arpa".template = "icann";
           "int.zandoodle.me.uk" = {
-            acl = [ "pc" "transfer" ];
+            acl = [ "transfer" ];
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/int.zandoodle.me.uk.zone";
