@@ -732,6 +732,12 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             ];
             update-type = "DS";
           };
+          orion-notify = {
+            action = "notify";
+            address = "fd09:a389:7c1e:6::1";
+            cert-key = "YmDvM4b69qAXy/h4gLV4lTTdQQO3/yvj3c3PeoMrihE=";
+            quic = true;
+          };
           pc = {
             action = "update";
             remote = "pc-only";
@@ -998,7 +1004,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
         };
         template = {
           default = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             catalog-role = "member";
             catalog-zone = "catz";
             # Add DNS cookies and rate limiting
@@ -1007,12 +1013,12 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             semantic-checks = true;
           };
           catalog = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             catalog-role = "generate";
             notify = [ "pc" "workstation" ];
           };
           dnsmasq = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             catalog-role = "member";
             catalog-zone = "catz";
             ixfr-from-axfr = true;
@@ -1022,7 +1028,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             semantic-checks = true;
           };
           icann = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             catalog-role = "member";
             catalog-zone = "catz";
             dnssec-validation = true;
@@ -1033,7 +1039,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             semantic-checks = true;
           };
           root-servers = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             catalog-role = "member";
             catalog-zone = "catz";
             dnssec-validation = true;
@@ -1044,7 +1050,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             semantic-checks = true;
           };
           rDNS = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             catalog-role = "member";
             catalog-zone = "catz";
             file = "/etc/knot/rDNS.zone";
@@ -1075,7 +1081,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           "168.192.in-addr.arpa".template = "rDNS";
           "_acme-challenge.zandoodle.me.uk" = {
             # Add a zone for ACME challenges
-            acl = [ "caddy-acme" "pc" "transfer" "workstation" ];
+            acl = [ "caddy-acme" "pc" "orion-notify" "transfer" "workstation" ];
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/acme-challenge.zandoodle.me.uk.zone";
@@ -1089,7 +1095,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           arpa.template = "root-servers"; # Serve a copy of the root zone
           "bogus.int.zandoodle.me.uk" = {
             # Add a domain for DNSSEC testing
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             file = "/etc/knot/bogus.zandoodle.me.uk.zone";
             journal-content = "all";
             zonefile-load = "difference-no-serial";
@@ -1097,7 +1103,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           "bogus-exists.int.zandoodle.me.uk" = {
             # Add a domain for DNSSEC testing
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             file = "/etc/knot/bogus.zandoodle.me.uk.zone";
             journal-content = "all";
             # Don't modify the zonefile
@@ -1106,7 +1112,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           catz.template = "catalog";
           "compsoc-dev.com" = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             catalog-group = "global";
             dnssec-policy = "com";
             dnssec-signing = true;
@@ -1120,7 +1126,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           "d.f.ip6.arpa".template = "rDNS";
           "home.arpa" = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             file = "/etc/knot/home.arpa.zone";
             module = "mod-queryacl/local";
             semantic-checks = true;
@@ -1130,7 +1136,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           "in-addr.arpa".template = "icann";
           "int.zandoodle.me.uk" = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             dnssec-policy = "subdomain";
             dnssec-signing = true;
             file = "/etc/knot/int.zandoodle.me.uk.zone";
@@ -1165,7 +1171,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             notify = ["pc" "unbound"];
           };
           "maxhearnden.uk" = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             catalog-group = "global";
             dnssec-policy = "uk";
             dnssec-signing = true;
@@ -1179,7 +1185,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             zonefile-sync = -1;
           };
           "maxhearnden.me.uk" = {
-            acl = [ "transfer" ];
+            acl = [ "orion-notify" "transfer" ];
             catalog-group = "global";
             dnssec-policy = "uk";
             dnssec-signing = true;
@@ -1193,7 +1199,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
             zonefile-sync = -1;
           };
           "zandoodle.me.uk" = {
-            acl = [ "knot-ds" "transfer" ];
+            acl = [ "knot-ds" "orion-notify" "transfer" ];
             catalog-group = "global";
             dnssec-policy = "uk";
             dnssec-signing = true;
