@@ -734,7 +734,7 @@ let dnsdist = pkgs-unstable.${config.nixpkgs.system}.dnsdist; in
           };
           orion-notify = {
             action = "notify";
-            address = "fd09:a389:7c1e:6::1";
+            address = "fd09:a389:7c1e:7::1";
             cert-key = "YmDvM4b69qAXy/h4gLV4lTTdQQO3/yvj3c3PeoMrihE=";
             protocol = "quic";
           };
