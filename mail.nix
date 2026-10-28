@@ -101,6 +101,8 @@
           smtp_tls_mandatory_ciphers = "high";
           smtp_tls_mandatory_protocols = ">=TLSv1.2";
           smtp_tls_protocols = ">=TLSv1.2";
+          smtpd_relay_restrictions =
+            "check_sasl_access inline:{max@WORKSTATION.ZANDOODLE.ME.UK=OK},reject_unauth_destination";
           smtpd_sender_login_maps = ''
             inline:{
               @compsoc-dev.com=max@WORKSTATION.ZANDOODLE.ME.UK,
