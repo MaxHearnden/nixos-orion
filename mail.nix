@@ -101,8 +101,6 @@
           smtp_tls_mandatory_ciphers = "high";
           smtp_tls_mandatory_protocols = ">=TLSv1.2";
           smtp_tls_protocols = ">=TLSv1.2";
-          smtpd_relay_restrictions =
-            "check_sasl_access inline:{max@WORKSTATION.ZANDOODLE.ME.UK=OK},reject_unauth_destination";
           smtpd_sender_login_maps = ''
             inline:{
               @compsoc-dev.com=max@WORKSTATION.ZANDOODLE.ME.UK,
@@ -112,7 +110,6 @@
               tp-link@zandoodle.me.uk=tp-link@zandoodle.me.uk
               }
           '';
-          smtpd_sender_restrictions = "reject_sender_login_mismatch";
           smtpd_tls_ciphers = "high";
           smtpd_tls_mandatory_ciphers = "high";
           smtpd_tls_mandatory_protocols = ">=TLSv1.2";
@@ -143,6 +140,16 @@
           virtual_mailbox_domains = "workstation.zandoodle.me.uk";
           virtual_transport = "lmtp:unix:/run/cyrus/lmtp";
         };
+      };
+      submissionsOptions = {
+        smtpd_tls_security_level = "encrypt";
+        smtpd_sasl_auth_enable = "yes";
+        smtpd_client_restrictions = "permit_sasl_authenticated,reject";
+        smtpd_sender_restrictions = "reject_sender_login_mismatch";
+        smtpd_hide_client_session = "yes";
+        "{ smtpd_relay_restrictions" =
+          "check_sasl_access inline:{max@WORKSTATION.ZANDOODLE.ME.UK=OK},reject_unauth_destination }";
+        milter_macro_daemon_name = "ORIGINATING";
       };
     };
     postfix-tlspol = {
