@@ -83,8 +83,22 @@
       enableSubmissions = true;
       settings = {
         main = {
-          canonical_classes = "envelope_sender";
-          canonical_maps = ''
+          cyrus_sasl_config_path = "/etc/sasl2";
+          disable_vrfy_command = true;
+          local_login_sender_maps = "inline:{ mail-notification=failure-notification@zandoodle.me.uk }";
+          myhostname = "mail.zandoodle.me.uk";
+          mynetworks = [""];
+          recipient_canonical_classes = "envelope_recipient";
+          recipient_canonical_maps = ''
+            inline:{
+              @mail.compsoc-dev.com=@compsoc-dev.com,
+              @mail.maxhearnden.me.uk=@maxhearnden.me.uk,
+              @mail.maxhearnden.uk=@maxhearnden.uk,
+              @mail.zandoodle.me.uk=@zandoodle.me.uk
+              }
+          '';
+          sender_canonical_classes = "envelope_sender";
+          sender_canonical_maps = ''
             inline:{
               @compsoc-dev.com=@mail.compsoc-dev.com,
               @maxhearnden.me.uk=@mail.maxhearnden.me.uk,
@@ -92,11 +106,6 @@
               @zandoodle.me.uk=@mail.zandoodle.me.uk
               }
           '';
-          cyrus_sasl_config_path = "/etc/sasl2";
-          disable_vrfy_command = true;
-          local_login_sender_maps = "inline:{ mail-notification=failure-notification@zandoodle.me.uk }";
-          myhostname = "mail.zandoodle.me.uk";
-          mynetworks = [""];
           smtp_tls_ciphers = "high";
           smtp_tls_mandatory_ciphers = "high";
           smtp_tls_mandatory_protocols = ">=TLSv1.2";
