@@ -284,40 +284,6 @@
             import table on;
           };
         }
-        template bgp mpls_tunnel_encap {
-          local fe80::1 as 65001;
-          local role provider;
-          enforce first as on;
-          evpn {
-            export filter customer_out;
-            import filter customer_in;
-          };
-          ipv4 mpls {
-            export filter customer_out;
-            extended next hop on;
-            import filter customer_in;
-            import table on;
-            require extended next hop on;
-          };
-          ipv6 mpls {
-            export filter customer_out;
-            import filter customer_in;
-            import table on;
-          };
-          mpls {label policy aggregate;};
-          vpn4 mpls {
-            export filter customer_out;
-            extended next hop on;
-            import filter customer_in;
-            import table on;
-            require extended next hop on;
-          };
-          vpn6 mpls {
-            export filter customer_out;
-            import filter customer_in;
-            import table on;
-          };
-        }
         template bgp mpls_tunnel {
           local fd7a:115c:a1e0::1a01:5208%tailscale0 as 65005;
           neighbor internal;
@@ -369,14 +335,6 @@
             import table on;
             table mesh_vpn6;
           };
-        }
-        protocol bgp chromebook from mpls_tunnel_encap {
-          neighbor fe80::3 as 65003;
-          interface "chromebook-tnl";
-        }
-        protocol bgp laptop from mpls_tunnel_encap {
-          neighbor fe80::4 as 65004;
-          interface "laptop-tnl";
         }
         protocol bgp workstation_tunnel from mpls_tunnel {
           neighbor fd7a:115c:a1e0:ab12:4843:cd96:625b:e016;
