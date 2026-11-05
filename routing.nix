@@ -133,8 +133,8 @@
           export filter {
             if source = RTS_BGP then {
               if bgp_path ~ [ 65005 ] then reject;
-              bgp_path.prepend(65001);
             }
+            bgp_path.prepend(65001);
             customer_out_fun();
             unset(bgp_next_hop);
             accept;
